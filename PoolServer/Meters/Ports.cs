@@ -68,7 +68,7 @@ namespace Prizmer.Ports
                     {
                         if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(10), false))
                         {
-                            throw new TimeoutException();
+							throw new TimeoutException();
                         }
                         else
                         {

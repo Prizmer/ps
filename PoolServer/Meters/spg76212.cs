@@ -461,7 +461,6 @@ namespace Prizmer.Meters
 
         }
 
-
         public bool ReadHourArchives()
         {
             /*
@@ -475,8 +474,6 @@ namespace Prizmer.Meters
 
             return false;
         }
-
-
 
         public List<byte> GetTypesForCategory(CommonCategory common_category)
         {

@@ -12,6 +12,8 @@ using Prizmer.PoolServer.DataBase;
 using Prizmer.Meters;
 using Prizmer.Meters.iMeters;
 
+using System.Windows.Forms;
+
 namespace Prizmer.PoolServer
 {
     
@@ -32,6 +34,7 @@ namespace Prizmer.PoolServer
         
         public void StartServer()
         {
+
             PgStorage ServerStorage = new PgStorage();
 
             //подключение к БД
@@ -174,7 +177,8 @@ namespace Prizmer.PoolServer
                     case "m230": meter = new m230(); break;
                     case "pulsar10": meter = new pulsar10(); break;
                     case "pulsar16": meter = new pulsar16(); break;
-                    case "tem104": meter = new tem104(); break;
+                    case "tem4": meter = new tem104(); break;
+                    case "tem106": meter = new tem106(); break;
                     case "set4tm_03": meter = new set4tm_03(); break;
                     case "elf108": meter = new elf108(); break;
                     case "PulsarM": meter = new PulsarM(); break;
@@ -1011,19 +1015,31 @@ namespace Prizmer.PoolServer
                         {
                             if (bStopServer) goto CloseThreadPoint;
 
-                            //определим дату последней записи TODO: добавить соответствующий метод в интерфейс базы данных
+                            //получим все записи в интервале от даты установки (если нет, от начала НЭ) до текущего момента
                             Value[] valueArr = ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], dt_install, cur_date);
-                            DateTime lastValDt;
-                            if (valueArr.Length > 0)
-                                lastValDt = valueArr[valueArr.Length - 1].dt.Date;
+
+                            bool dailyValuesExist = false;
+                            if (valueArr.Length > 0) dailyValuesExist = true;
+
+                            //если значения dt_install нет, то считаем что счетчик установлен сегодня
+                            if (dt_install.Date == new DateTime(0).Date)
+                                dt_install = DateTime.Now.Date;
+
+                            DateTime fromDate = DateTime.Now.Date;
+
+                            if (dailyValuesExist)
+                            {
+                                DateTime lastValDt = valueArr[valueArr.Length - 1].dt.Date;
+                                //если последнее значение записано сегодня, рассматриваем следующий параметр
+                                if (lastValDt.Date == cur_date.Date) continue;
+                                fromDate = lastValDt.Date;
+                            }
                             else
-                                lastValDt = dt_install.AddDays(-1);
+                            {
+                                fromDate = dt_install;
+                            }
 
-                            //если последнее значение записано сегодня, рассматриваем следующий параметр
-                            if (lastValDt.Date == cur_date.Date) continue;
-
-                            DateTime fromDate = lastValDt.AddDays(1);
-                            TimeSpan diff = cur_date - fromDate;
+                            TimeSpan diff = cur_date.Date - fromDate.Date;
 
                             //читать данные только если прибор ответил
                             if (meter.OpenLinkCanal())
@@ -1033,7 +1049,7 @@ namespace Prizmer.PoolServer
                                 Param param = ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
                                 if (param.guid == Guid.Empty) continue;
 
-                                for (int i = 0; i < diff.TotalDays; i++)
+                                for (int i = 0; i <= diff.TotalDays; i++)
                                 {
                                     meter.WriteToLog("Арх: читаю параметр (" + tpindex.ToString() + "): " + param.name);
                                     //чтение суточных параметров

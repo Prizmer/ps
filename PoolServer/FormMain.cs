@@ -16,8 +16,6 @@ namespace Prizmer.PoolServer
         public FormMain()
         {
             InitializeComponent();
-            
-            
         }
         
 

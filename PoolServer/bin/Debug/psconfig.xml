@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<ServerParams xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <typeNames>
+    <string>Текущие</string>
+    <string>На начало суток</string>
+    <string>На начало месяца</string>
+    <string>Часовые</string>
+    <string>Получасовые</string>
+    <string>Архивные</string>
+  </typeNames>
+  <typeEnabled>
+    <boolean>true</boolean>
+    <boolean>true</boolean>
+    <boolean>true</boolean>
+    <boolean>true</boolean>
+    <boolean>true</boolean>
+    <boolean>true</boolean>
+  </typeEnabled>
+  <period>00:35:00</period>
+</ServerParams>

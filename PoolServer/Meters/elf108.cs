@@ -342,15 +342,23 @@ namespace Prizmer.Meters
             byte[] data = null;
             if (SendREQ_UD2(ref data))
             {
-                byte[] serialNumbBytes = new byte[FACTORY_NUMBER_SIZE];
-                Array.Copy(data, FACTORY_NUMBER_INDEX, serialNumbBytes, 0, serialNumbBytes.Length);
-                Array.Reverse(serialNumbBytes, FACTORY_NUMBER_CMD, serialNumbBytes.Length - FACTORY_NUMBER_CMD);
-                serial_number = BitConverter.ToString(serialNumbBytes, FACTORY_NUMBER_CMD).Replace("-", string.Empty);
+                try
+                {
+                    byte[] serialNumbBytes = new byte[FACTORY_NUMBER_SIZE];
+                    Array.Copy(data, FACTORY_NUMBER_INDEX, serialNumbBytes, 0, serialNumbBytes.Length);
+                    Array.Reverse(serialNumbBytes, FACTORY_NUMBER_CMD, serialNumbBytes.Length - FACTORY_NUMBER_CMD);
+                    serial_number = BitConverter.ToString(serialNumbBytes, FACTORY_NUMBER_CMD).Replace("-", string.Empty);
 
-                string outp_str = "Factory number: " + serial_number;
-                WriteToLog(outp_str);
+                    string outp_str = "Factory number: " + serial_number;
+                    WriteToLog(outp_str);
 
-                return true;
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    WriteToLog("ReadSerialNumber: err: " + ex.Message);
+                    return false;
+                }
             }
             else
             {
@@ -378,19 +386,27 @@ namespace Prizmer.Meters
         /// <returns></returns>
         public bool ReadCurrentValues(ushort param, ushort tarif, ref float recordValue)
         {
-            switch (param)
+            try
             {
-                case 1: return ReadCurrentEnergy(tarif, ref recordValue);
-                case 2: return ReadCurrentVolume(tarif, ref recordValue);
-                case 3: return ReadTimeOn(tarif, ref recordValue);
-                case 4: return ReadErrorCode(ref recordValue);
-                case 5: return ReadCurrentTemperature(tarif, ref recordValue);
+                switch (param)
+                {
+                    case 1: return ReadCurrentEnergy(tarif, ref recordValue);
+                    case 2: return ReadCurrentVolume(tarif, ref recordValue);
+                    case 3: return ReadTimeOn(tarif, ref recordValue);
+                    case 4: return ReadErrorCode(ref recordValue);
+                    case 5: return ReadCurrentTemperature(tarif, ref recordValue);
 
-                default:
-                    {
-                        WriteToLog("ReadCurrentValues: для параметра " + param.ToString() + " нет обработчика");
-                        return false;
-                    }
+                    default:
+                        {
+                            WriteToLog("ReadCurrentValues: для параметра " + param.ToString() + " нет обработчика");
+                            return false;
+                        }
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteToLog("ReadCurrentValues: exception: " + ex.Message, true);
+                return false;
             }
         }
 
@@ -457,7 +473,7 @@ namespace Prizmer.Meters
                 Array.Reverse(energyBytes, ENERGY_CMD, energyBytes.Length - ENERGY_CMD);
 
                 string hex_str = BitConverter.ToString(energyBytes, ENERGY_CMD).Replace("-", string.Empty);
-                const int ENERGY_COEFFICIENT = 10000000;
+                const int ENERGY_COEFFICIENT = 10000;
                 float temp_val = (float)Convert.ToDouble(hex_str) / ENERGY_COEFFICIENT;
 
                 /*TODO: проверить ковертацию float в double*/
@@ -643,8 +659,7 @@ namespace Prizmer.Meters
             try
             {
                 ArchiveValueParser avp = new ArchiveValueParser(data_arr);
-                avp.GetArchiveValue(ref archVal);
-                return true;
+                return avp.GetArchiveValue(ref archVal);
             }
             catch(Exception ex)
             {
@@ -745,12 +760,29 @@ namespace Prizmer.Meters
         public bool ReadDailyValues(DateTime dt, ushort param, ushort tarif, ref float recordValue)
         {
             ArchiveValue resArchVal = new ArchiveValue();
-
             int records = 0, lastid = 0;
-            if (!ReadArchiveValCountId(ref records, ref lastid)) return false;
+
+            try
+            {
+                if (!ReadArchiveValCountId(ref records, ref lastid)) return false;
+            }
+            catch (Exception ex)
+            {
+                //WriteToLog("ReadDailyValues->Records count/last id: " + records + "; " + lastid + "; ex");
+                WriteToLog("ReadDailyValues->ReadArchiveValCountId ex: " + ex.Message);
+            }
 
             ArchiveValue lastArchiveVal = new ArchiveValue();
-            if (!ReadArchiveLastVal(ref lastArchiveVal)) return false;
+
+            try
+            {
+                if (!ReadArchiveLastVal(ref lastArchiveVal)) return false;
+            }
+            catch (Exception ex)
+            {
+                WriteToLog("ReadDailyValues->ReadArchiveLastVal ex: " + ex.Message);
+            }
+
 
             DateTime lastRecDt = lastArchiveVal.dt;
 
@@ -759,6 +791,10 @@ namespace Prizmer.Meters
                 WriteToLog("ReadDailyValues: на указанную дату записей не обнаружено: " + dt.ToShortDateString());
                 return false;
             }
+
+            WriteToLog("ReadDailyValues: lastRecDt: " + lastRecDt.ToShortDateString());
+            WriteToLog("ReadDailyValues: lastId: " + lastid.ToString());
+            WriteToLog("ReadDailyValues: requiredDt: " + dt.ToShortDateString());
 
             //преобразуем dt в id
             TimeSpan ts = lastRecDt - dt;
@@ -769,12 +805,20 @@ namespace Prizmer.Meters
             else
             {
                 uint resRecId = (uint)(lastid - ts.TotalDays);
-                if (!ReadArchiveValById(resRecId, ref resArchVal))
+                WriteToLog("ReadDailyValues: requiredId: " + resRecId.ToString());
+                try
                 {
-                    string str = String.Format("ReadDailyValues: запись от числа {0} c id {1} не найдена",
-                        dt.ToShortDateString(), resRecId.ToString());
-                    WriteToLog(str);
-                    return false;
+                    if (!ReadArchiveValById(resRecId, ref resArchVal))
+                    {
+                        string str = String.Format("ReadDailyValues: запись от числа {0} c id {1} не найдена",
+                            dt.ToShortDateString(), resRecId.ToString());
+                        WriteToLog(str);
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WriteToLog("ReadDailyValues: ReadArchiveValById ex: " + ex.Message);
                 }
             }
 
@@ -957,6 +1001,7 @@ namespace Prizmer.Meters
                     }
                     catch (Exception ex)
                     {
+                        isOk = false;
                         WriteToLog("ArchiveValueReader: Ошибка разбора значений");
                     }
                 }
