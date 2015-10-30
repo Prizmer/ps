@@ -14,6 +14,8 @@ using Prizmer.Meters.iMeters;
 
 using System.Windows.Forms;
 using System.Configuration;
+using System.IO;
+
 
 namespace Prizmer.PoolServer
 
@@ -21,6 +23,33 @@ namespace Prizmer.PoolServer
     
     class MainService
     {
+        public void WriteToLog(string str, bool doWrite = true)
+        {
+            if (doWrite)
+            {
+                StreamWriter sw = null;
+
+                try
+                {
+                    //str += "\n";
+                    sw = new StreamWriter("mainservice.log", true, Encoding.Default);
+                    sw.WriteLine(DateTime.Now.ToString() + ": " + str);
+
+                    sw.Close();
+                }
+                catch
+                {
+                }
+                finally
+                {
+                    if (sw != null)
+                    {
+                        sw.Close();
+                        sw = null;
+                    }
+                }
+            }
+        }
        // public event 
         //список потоков для опроса приборов - один поток на каждый порт
         List<Thread> PortsThreads = new List<Thread>();
@@ -244,7 +273,7 @@ namespace Prizmer.PoolServer
                                 SLICE_TYPE);
                             if (takenparams.Length == 0) break;
 
-                            meter.WriteToLog("RSL: ---/ начало чтения срезов /---", LOG_SLICES);
+                            WriteToLog("RSL: ---/ начало чтения срезов /---", LOG_SLICES);
                             meter.WriteToLog("RSL: К считыванию подлежит " + takenparams.Length.ToString() + " параметров", LOG_SLICES);
 
                             #region Выбор дат, с которых необходимо читать каждый параметр, создание словаря вида 'Дата-Список параметров с этой датой'
@@ -892,17 +921,19 @@ namespace Prizmer.PoolServer
                             Value[] lastvalue = ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], PrevTime, CurTime);
                             //если значение в БД уже есть, то не читать его из прибора
                             if (lastvalue.Length > 0) continue;
-
+                            WriteToLog("Ready for reading " + takenparams.Length.ToString() + "daily params");
                             //читать данные только если прибор ответил
                            if (meter.OpenLinkCanal())
-                            {
+                            {                            
+                                WriteToLog("Chanel opened for: meter " + metersbyport[MetersCounter].name + " at port " + m_vport.ToString() + " with address " + metersbyport[MetersCounter].address.ToString());
+
                                 Param param = ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
                                 if (param.guid == Guid.Empty) continue;
 
                                 //RecordValueEnergy rve = new RecordValueEnergy();
 
                                 float curvalue = 0;
-                                meter.WriteToLog("СУТ: читаю параметр (" + tpindex.ToString()+"): " + param.name);
+                               WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; СУТ: читаю параметр (" + tpindex.ToString()+"): " + param.name);
 
                                 //чтение суточных параметров
                                 if (meter.ReadDailyValues(DateTime.Now, param.param_address, param.channel, ref curvalue))
@@ -915,11 +946,11 @@ namespace Prizmer.PoolServer
                                     ServerStorage.AddDailyValues(value);
                                     ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
 
-                                    meter.WriteToLog("СУТ: записал в базу " + value.value.ToString());
+                                    WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" + tpindex.ToString() +  ") записан в базу");
                                 }
                                 else
                                 {
-                                    //meter.WriteToLog("текущий параметр не прочитан:" + param.param_address.ToString());
+                                    WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" + tpindex.ToString() + ") не записан");
                                 }
                             }
                             else
