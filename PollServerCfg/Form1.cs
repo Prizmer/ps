@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -10,6 +11,8 @@ using System.Windows.Forms;
 using System.IO;
 using System.Xml.Serialization;
 using System.Collections;
+using System.Collections.Specialized;
+using System.Configuration;
 
 
 namespace PollServerCfg
@@ -22,15 +25,18 @@ namespace PollServerCfg
         }
 
         ServerParams sp = new ServerParams();
-        string defaultPath = Directory.GetCurrentDirectory() + "\\psconfig.exe";
+        string defaultPath = Directory.GetCurrentDirectory() + "\\PoolServer.exe";
         // передаем в конструктор тип класса
         XmlSerializer formatter = new XmlSerializer(typeof(ServerParams));
 
+
+        System.Configuration.Configuration config;
         private void Form1_Load(object sender, EventArgs e)
         {
             OpenFileDialog fd = new OpenFileDialog();
             if (!File.Exists(defaultPath)){
                 fd.FileName = defaultPath;
+
                 if (fd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     defaultPath = fd.FileName;
@@ -41,6 +47,28 @@ namespace PollServerCfg
                 }
             }
 
+
+            // получим конфигурационный файл СО
+            config = ConfigurationManager.OpenExeConfiguration(fd.FileName) as Configuration;
+            
+            //настройки подключения
+            ConnectionStringsSection conStrSection = config.ConnectionStrings as ConnectionStringsSection;
+            ConnectionStringSettings connection = conStrSection.ConnectionStrings[0];
+            richTextBox1.Text = connection.ConnectionString;
+
+            ConfigurationSectionGroup pollSettingsGroup = config.GetSectionGroup("pollSettingsGroup");
+
+            // Display each KeyValueConfigurationElement.
+            //NameValueCollection sectionSettings = config.GetSection("doPollSection") as NameValueCollection;
+
+
+            string gr = "";
+            /*
+            foreach ( ConfigurationSection c in config.AppSettings.ToString)
+            {
+                gr += "Group Name: " + c.SectionInformation.SectionName + "; ";
+            }*/
+            MessageBox.Show(config.AppSettings.SectionInformation.SectionName.ToString());
 
             // десериализация
             using (FileStream fs = new FileStream(defaultPath, FileMode.Open))
@@ -83,6 +111,11 @@ namespace PollServerCfg
             {
                 formatter.Serialize(fs, sp);
             }
+        }
+
+        private void button2_Click_1(object sender, EventArgs e)
+        {
+
         }
     }
 

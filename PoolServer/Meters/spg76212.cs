@@ -542,7 +542,15 @@ namespace Prizmer.Meters
                 }
             }
 
-            recordValue = arch.Params[param].val;
+            try
+            {
+                recordValue = arch.Params[param].val;
+            }
+            catch (Exception ex)
+            {
+                WriteToLog("ReadDailyValues: параметр " + param.ToString() + " отсутствует в массиве значений");
+            }
+
 
             return true;
         }

@@ -404,7 +404,6 @@ D:\PI_Projects\PollServer\PoolServer\bin\Debug\fi\Npgsql.resources.dll
 D:\PI_Projects\PollServer\PoolServer\bin\Debug\fr\Npgsql.resources.dll
 D:\PI_Projects\PollServer\PoolServer\bin\Debug\ja\Npgsql.resources.dll
 D:\PI_Projects\PollServer\PoolServer\bin\Debug\zh-CN\Npgsql.resources.dll
-D:\PI_Projects\PollServer\PoolServer\obj\x86\Debug\PoolServer.csprojResolveAssemblyReference.cache
 D:\PI_Projects\PollServer\PoolServer\obj\x86\Debug\Prizmer.PoolServer.FormMain.resources
 D:\PI_Projects\PollServer\PoolServer\obj\x86\Debug\PoolServer.Properties.Resources.resources
 D:\PI_Projects\PollServer\PoolServer\obj\x86\Debug\PoolServer.csproj.GenerateResource.Cache

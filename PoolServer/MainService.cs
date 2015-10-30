@@ -13,8 +13,10 @@ using Prizmer.Meters;
 using Prizmer.Meters.iMeters;
 
 using System.Windows.Forms;
+using System.Configuration;
 
 namespace Prizmer.PoolServer
+
 {
     
     class MainService
@@ -29,7 +31,8 @@ namespace Prizmer.PoolServer
 
         public MainService()
         {
-            ConnectionString = global::PoolServer.Properties.Settings.Default.ConnectionString;
+            //ConnectionString = global::PoolServer.Properties.Settings.Default.ConnectionString;
+            ConnectionString = ConfigurationManager.ConnectionStrings["generalConnection"].ConnectionString;
         }
         
         public void StartServer()
