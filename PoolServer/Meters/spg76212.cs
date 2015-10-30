@@ -13,19 +13,22 @@ namespace Prizmer.Meters
     {
         public void Init(uint address, string pass, VirtualPort vp)
         {
-            this.m_address = (byte)address;
+            this.m_address = address;
+            this.m_vport = vp;
             this.vp = vp;
+
 
             //для однозачного парсинга float значений
             System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
             customCulture.NumberFormat.NumberDecimalSeparator = ".";
             System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
+  
         }
 
         //адрес счетчика
-        private byte m_address;
+        //private byte m_address;
         private byte host_address = 0x08;
-
+        
         VirtualPort vp;
 
         byte DLE = 0x10;
@@ -77,7 +80,7 @@ namespace Prizmer.Meters
             List<byte> messageList = new List<byte>();
 
             //заголовок запроса 
-            messageList.Add(m_address);
+            messageList.Add((byte)m_address);
             messageList.Add(host_address);
             messageList.Add(DLE);
             messageList.Add(ISI);

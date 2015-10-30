@@ -23,7 +23,7 @@ namespace Prizmer.PoolServer
     
     class MainService
     {
-        public void WriteToLog(string str, bool doWrite = true)
+        public void WriteToLog(string str, string port = "", string addr = "",bool doWrite = true)
         {
             if (doWrite)
             {
@@ -32,7 +32,7 @@ namespace Prizmer.PoolServer
                 try
                 {
                     //str += "\n";
-                    sw = new StreamWriter("mainservice.log", true, Encoding.Default);
+                    sw = new StreamWriter("mainservice" + port + addr +".log", true, Encoding.Default);
                     sw.WriteLine(DateTime.Now.ToString() + ": " + str);
 
                     sw.Close();
@@ -273,8 +273,8 @@ namespace Prizmer.PoolServer
                                 SLICE_TYPE);
                             if (takenparams.Length == 0) break;
 
-                            WriteToLog("RSL: ---/ начало чтения срезов /---", LOG_SLICES);
-                            meter.WriteToLog("RSL: К считыванию подлежит " + takenparams.Length.ToString() + " параметров", LOG_SLICES);
+                            WriteToLog("RSL: ---/ начало чтения срезов /---", "","",LOG_SLICES);
+                            WriteToLog("RSL: К считыванию подлежит " + takenparams.Length.ToString() + " параметров", "","", LOG_SLICES);
 
                             #region Выбор дат, с которых необходимо читать каждый параметр, создание словаря вида 'Дата-Список параметров с этой датой'
 
@@ -913,6 +913,8 @@ namespace Prizmer.PoolServer
                     TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid, 1);
                     if (takenparams.Length > 0)
                     {
+                        string portStr = m_vport.ToString();
+                        string mAddr = metersbyport[MetersCounter].address.ToString();
 
                         for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                         {
@@ -921,11 +923,12 @@ namespace Prizmer.PoolServer
                             Value[] lastvalue = ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], PrevTime, CurTime);
                             //если значение в БД уже есть, то не читать его из прибора
                             if (lastvalue.Length > 0) continue;
-                            WriteToLog("Ready for reading " + takenparams.Length.ToString() + "daily params");
+                            WriteToLog("Ready for reading " + takenparams.Length.ToString() + "daily params", portStr, mAddr);
                             //читать данные только если прибор ответил
                            if (meter.OpenLinkCanal())
                             {                            
-                                WriteToLog("Chanel opened for: meter " + metersbyport[MetersCounter].name + " at port " + m_vport.ToString() + " with address " + metersbyport[MetersCounter].address.ToString());
+                                WriteToLog("Chanel opened for: meter " + metersbyport[MetersCounter].name + " at port " +
+                                    m_vport.ToString() + " with address " + metersbyport[MetersCounter].address.ToString(), portStr, mAddr);
 
                                 Param param = ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
                                 if (param.guid == Guid.Empty) continue;
@@ -933,7 +936,8 @@ namespace Prizmer.PoolServer
                                 //RecordValueEnergy rve = new RecordValueEnergy();
 
                                 float curvalue = 0;
-                               WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; СУТ: читаю параметр (" + tpindex.ToString()+"): " + param.name);
+                               WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; СУТ: читаю параметр (" +
+                                   tpindex.ToString() + "): " + param.name, portStr, mAddr);
 
                                 //чтение суточных параметров
                                 if (meter.ReadDailyValues(DateTime.Now, param.param_address, param.channel, ref curvalue))
@@ -946,11 +950,12 @@ namespace Prizmer.PoolServer
                                     ServerStorage.AddDailyValues(value);
                                     ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
 
-                                    WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" + tpindex.ToString() +  ") записан в базу");
+                                    WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" +
+                                        tpindex.ToString() + ") записан в базу", portStr, mAddr);
                                 }
                                 else
                                 {
-                                    WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" + tpindex.ToString() + ") не записан");
+                                    WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" + tpindex.ToString() + ") не записан", portStr, mAddr);
                                 }
                             }
                             else
