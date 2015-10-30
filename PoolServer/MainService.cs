@@ -127,7 +127,6 @@ namespace Prizmer.PoolServer
             }
         }
 
-
         private void pollingPortThread(object data)
         {
             Prizmer.Ports.VirtualPort m_vport = null;
@@ -169,40 +168,6 @@ namespace Prizmer.PoolServer
                 //здесь надо выбрать - какой драйвер будет использоваться
                 TypeMeter typemeter = ServerStorage.GetMetersTypeByGUID(metersbyport[MetersCounter].guid_types_meters);
                 IMeter meter = null;
-                Assembly DriverAssembly = null;
-                Type DriverType = null;
-
-                ////////////динамическая подгрузка драйвера из dll////////////
-                /*try
-                {
-                    string DriverNameDLL = typemeter.driver_name + ".dll";
-                    if (System.IO.File.Exists(DriverNameDLL))
-                    {
-                        if (MetersDriver.ContainsKey(typemeter.driver_name))
-                        {
-                            DriverAssembly = (Assembly)MetersDriver[typemeter.driver_name];
-                        }
-                        else
-                        {
-                            DriverAssembly = Assembly.LoadFrom(DriverNameDLL);
-                            MetersDriver.Add(typemeter.driver_name, DriverAssembly);
-                        }
-
-                        Type[] alltypes = DriverAssembly.GetTypes();
-
-                        foreach (Type t in alltypes)
-                        {
-                            if (t.Name.CompareTo(typemeter.driver_name) == 0)
-                            {
-                                DriverType = t;
-                                break;
-                            }
-                        }
-
-                        if (DriverType!=null) meter = new DriverInterface(DriverType);
-                    }
-                }
-                catch { }*/
 
                 switch (typemeter.driver_name)
                 {
@@ -256,7 +221,7 @@ namespace Prizmer.PoolServer
                 {
                     #region ЧАСОВЫЕ СРЕЗЫ
 
-                    const bool LOG_SLICES = true;
+                    const bool LOG_SLICES = false; 
                     const bool SEL_DATE_REGION_LOGGING = false;
 
                     const byte SLICE_TYPE = 5;                         //тип значения в БД (получасовой/часовой)
@@ -913,7 +878,7 @@ namespace Prizmer.PoolServer
                     TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid, 1);
                     if (takenparams.Length > 0)
                     {
-                        string portStr = m_vport.ToString();
+                        string portStr = m_vport.GetName();
                         string mAddr = metersbyport[MetersCounter].address.ToString();
 
                         for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)

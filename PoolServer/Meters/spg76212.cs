@@ -179,7 +179,11 @@ namespace Prizmer.Meters
             }
 
             List<byte[]> blocks = new List<byte[]>();
-            splitInfoBlocks(answDataList.ToArray(), ref blocks);
+            if (!splitInfoBlocks(answDataList.ToArray(), ref blocks))
+            {
+                WriteToLog("readArchivesStructure: splitInfoBlocks fail"); 
+                return false;
+            }
 
             List<ParamInfo> pil = new List<ParamInfo>();
             bool exceptionFlag = false;
@@ -187,7 +191,11 @@ namespace Prizmer.Meters
             for (int i = 0; i < blocks.Count; i++)
             {
                 List<byte>[] values = new List<byte>[paramNumb];
-                getValueBytesFromInfoBlock(blocks[i], paramNumb, ref values);
+                if (!getValueBytesFromInfoBlock(blocks[i], paramNumb, ref values))
+                {
+                    WriteToLog("readArchivesStructure: getValueBytesFromInfoBlock fail");
+                    return false;
+                }
 
                 ParamInfo pi = new ParamInfo();
                 try
@@ -279,7 +287,13 @@ namespace Prizmer.Meters
                 }
                 else
                 {
+                  
                     if (i != 0) valInBlockCnt++;
+                    if (valInBlockCnt == valListsArr.Length)
+                    {
+                        WriteToLog("getValueBytesFromInfoBlock: не удается разобрать данные приходящие со счетчика");
+                        return false;
+                    }
                     continue;
                 }
             }
@@ -293,7 +307,8 @@ namespace Prizmer.Meters
         private string bytesToString(byte[] arr)
         {
             Encoding enc = Encoding.GetEncoding(866);
-            return enc.GetString(arr);
+            string res = enc.GetString(arr);
+            return res;
         }
 
         private byte[] stringToBytes(string str)
@@ -426,11 +441,22 @@ namespace Prizmer.Meters
             {
                 try
                 {
+                    if (i == 18)
+                    {
+
+                    }
+
                     byte[] curBlock = blocks[i];
+                    ParamInfo pi = archStructure[paramCnt];
                     List<byte>[] values = new List<byte>[paramNumbInVal];
                     getValueBytesFromInfoBlock(curBlock, values.Length, ref values);
-                    float val = float.Parse(bytesToString(values[0].ToArray()));
-                    ParamInfo pi = archStructure[paramCnt];
+                    string replyInCP866 = bytesToString(values[0].ToArray());
+                    float val = -1;
+                    if (replyInCP866 != "Нет данных?"){
+                        val = float.Parse(replyInCP866);
+                    }
+
+
                     pi.val = val;
                     archStructure[paramCnt] = pi;
 
@@ -485,7 +511,16 @@ namespace Prizmer.Meters
 
         public bool OpenLinkCanal()
         {
+            ushort paramNumber = 65532;
+            //определим структуру архива
+            List<ParamInfo> archStructure = null;
+            if (!readArchivesStructure(paramNumber, ref archStructure))
+            {
+                WriteToLog("Невозможно прочитать структуру суточных архивов, проверьте связь с прибором родной утилитой.");
+                return false;
+            }
             return true;
+
         }
 
         public bool ReadCurrentValues(ushort param, ushort tarif, ref float recordValue)
