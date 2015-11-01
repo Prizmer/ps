@@ -15,7 +15,16 @@ namespace Prizmer.PoolServer.DataBase
         {
             m_connection_string = ConnectionString;
             m_pg_con = new Npgsql.NpgsqlConnection(ConnectionString);
-            m_pg_con.Open();
+
+            try
+            {
+                m_pg_con.Open();
+            }
+            catch (Exception ex)
+            {
+                return ConnectionState.Broken;
+            }
+
             return m_pg_con.State;
         }
 

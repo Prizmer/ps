@@ -68,7 +68,14 @@ namespace Prizmer.PoolServer
             PgStorage ServerStorage = new PgStorage();
 
             //подключение к БД
-            ServerStorage.Open(ConnectionString);
+            System.Data.ConnectionState conState = ServerStorage.Open(ConnectionString);
+
+            if (conState == System.Data.ConnectionState.Broken)
+            {
+                MessageBox.Show("Невозможно подключиться к БД, проверьте строку подключения: " + ConnectionString, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.OpenForms[0].Close();
+                return;
+            }
 
             //чтение всех COM-портов
             ComPortSettings[] cps = ServerStorage.GetComportSettings();
@@ -134,7 +141,8 @@ namespace Prizmer.PoolServer
 
             //подключение к БД
             PgStorage ServerStorage = new PgStorage();
-            ServerStorage.Open(ConnectionString);
+
+            System.Data.ConnectionState conState = ServerStorage.Open(ConnectionString);
 
             if (data.GetType().Name == "ComPortSettings")
             {
