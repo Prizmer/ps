@@ -4,3 +4,6 @@ ComPorts.txt
 /PoolServer/bin/Debug/ComPorts.log
 /PoolServer/bin/Debug/TcpPorts.log
 *.log
+/PoolServer/bin/Debug/PoolServer.exe.config
+obj
+/PollServerCfg/obj

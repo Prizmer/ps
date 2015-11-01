@@ -1,8 +1,0 @@
-D:\PI_Projects\PollServer\PollServerCfg\bin\Debug\PollServerCfg.exe
-D:\PI_Projects\PollServer\PollServerCfg\bin\Debug\PollServerCfg.pdb
-D:\PI_Projects\PollServer\PollServerCfg\obj\x86\Debug\PollServerCfg.Properties.Resources.resources
-D:\PI_Projects\PollServer\PollServerCfg\obj\x86\Debug\PollServerCfg.csproj.GenerateResource.Cache
-D:\PI_Projects\PollServer\PollServerCfg\obj\x86\Debug\PollServerCfg.exe
-D:\PI_Projects\PollServer\PollServerCfg\obj\x86\Debug\PollServerCfg.pdb
-D:\PI_Projects\PollServer\PollServerCfg\obj\x86\Debug\PollServerCfg.Form1.resources
-D:\PI_Projects\PollServer\PollServerCfg\obj\x86\Debug\PollServerCfg.csprojResolveAssemblyReference.cache

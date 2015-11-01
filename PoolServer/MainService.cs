@@ -18,12 +18,10 @@ using System.IO;
 
 
 namespace Prizmer.PoolServer
-
 {
-    
     class MainService
     {
-        public void WriteToLog(string str, string port = "", string addr = "",bool doWrite = true)
+        public void WriteToLog(string str, string port = "", string addr = "", bool doWrite = true)
         {
             if (doWrite)
             {
@@ -50,7 +48,7 @@ namespace Prizmer.PoolServer
                 }
             }
         }
-       // public event 
+
         //список потоков для опроса приборов - один поток на каждый порт
         List<Thread> PortsThreads = new List<Thread>();
 
@@ -127,7 +125,6 @@ namespace Prizmer.PoolServer
             }
         }
 
-
         private void pollingPortThread(object data)
         {
             Prizmer.Ports.VirtualPort m_vport = null;
@@ -169,40 +166,6 @@ namespace Prizmer.PoolServer
                 //здесь надо выбрать - какой драйвер будет использоваться
                 TypeMeter typemeter = ServerStorage.GetMetersTypeByGUID(metersbyport[MetersCounter].guid_types_meters);
                 IMeter meter = null;
-                Assembly DriverAssembly = null;
-                Type DriverType = null;
-
-                ////////////динамическая подгрузка драйвера из dll////////////
-                /*try
-                {
-                    string DriverNameDLL = typemeter.driver_name + ".dll";
-                    if (System.IO.File.Exists(DriverNameDLL))
-                    {
-                        if (MetersDriver.ContainsKey(typemeter.driver_name))
-                        {
-                            DriverAssembly = (Assembly)MetersDriver[typemeter.driver_name];
-                        }
-                        else
-                        {
-                            DriverAssembly = Assembly.LoadFrom(DriverNameDLL);
-                            MetersDriver.Add(typemeter.driver_name, DriverAssembly);
-                        }
-
-                        Type[] alltypes = DriverAssembly.GetTypes();
-
-                        foreach (Type t in alltypes)
-                        {
-                            if (t.Name.CompareTo(typemeter.driver_name) == 0)
-                            {
-                                DriverType = t;
-                                break;
-                            }
-                        }
-
-                        if (DriverType!=null) meter = new DriverInterface(DriverType);
-                    }
-                }
-                catch { }*/
 
                 switch (typemeter.driver_name)
                 {
@@ -256,7 +219,8 @@ namespace Prizmer.PoolServer
                 {
                     #region ЧАСОВЫЕ СРЕЗЫ
 
-                    const bool LOG_SLICES = true;
+                    const bool LOG_SLICES = false;
+                    const bool LOG_HOURSLICES_ERRORS = true;
                     const bool SEL_DATE_REGION_LOGGING = false;
 
                     const byte SLICE_TYPE = 5;                         //тип значения в БД (получасовой/часовой)
@@ -264,6 +228,9 @@ namespace Prizmer.PoolServer
 
                     if (meter.OpenLinkCanal())
                     {
+                        string portStr = m_vport.GetName();
+                        string mAddr = metersbyport[MetersCounter].address.ToString();
+                        string mName = metersbyport[MetersCounter].name;
                         /* Цикл организуется для возможности немедленного прекращения выполнения 
                          * блока чтения срезов в случае ошибки*/
                         while (true)
@@ -287,8 +254,8 @@ namespace Prizmer.PoolServer
 
                             if (dt_install > dt_cur)
                             {
-                                meter.WriteToLog("RSL: Err1: Дата установки не может быть больше текущей: " +
-                                    dt_install.ToString(), SEL_DATE_REGION_LOGGING);
+                                WriteToLog("RSL: Err1: Дата установки не может быть больше текущей: " +
+                                    dt_install.ToString(), portStr, mAddr, LOG_HOURSLICES_ERRORS);
                                 break;
                             }
 
@@ -314,7 +281,7 @@ namespace Prizmer.PoolServer
                                 Param p = ServerStorage.GetParamByGUID(takenparams[i].guid_params);
                                 if (p.guid == Guid.Empty)
                                 {
-                                    meter.WriteToLog("RSL: Err2: ошибка считывания GUIDa параметра на итерации " + i, SEL_DATE_REGION_LOGGING);
+                                    WriteToLog("RSL: Err2: ошибка считывания GUIDa параметра на итерации " + i, portStr, mAddr, LOG_HOURSLICES_ERRORS);
                                     continue;
                                 }
                                 else
@@ -357,10 +324,16 @@ namespace Prizmer.PoolServer
 
                                 if (date_from.Ticks == 0)
                                 {
-                                    meter.WriteToLog("RSL: Err3: Начальная дата НЕКОРРЕКТНА, срезы параметра прочитаны НЕ будут: " +
-                                    date_from.ToString(), SEL_DATE_REGION_LOGGING);
-                                    continue;
+                                    if (dt_install.Ticks > 0)
+                                        date_from = dt_install.Date;
+                                    else
+                                        date_from = dt_cur.Date.AddDays(-1);
 
+                                    /*
+                                    WriteToLog("RSL: Err3: Начальная дата НЕКОРРЕКТНА, срезы параметра прочитаны НЕ будут: " +
+                                    date_from.ToString(), portStr, mAddr, LOG_HOURSLICES_ERRORS);
+                                    continue;
+                                    */
                                 }
                                 else
                                 {
@@ -390,7 +363,7 @@ namespace Prizmer.PoolServer
 
                             if (dt_param_dict.Count == 0)
                             {
-                                meter.WriteToLog("RSL: Err4: Словарь 'Дата-Дескриптор параметра' пуст. Срезы считаны не будут.", LOG_SLICES);
+                                WriteToLog("RSL: Err4: Словарь 'Дата-Дескриптор параметра' пуст. Срезы считаны не будут.", portStr, mAddr, LOG_HOURSLICES_ERRORS);
                                 break;
                             }
 
@@ -413,8 +386,8 @@ namespace Prizmer.PoolServer
                                     Param p = ServerStorage.GetParamByGUID(tp.guid_params);
                                     if (p.guid == Guid.Empty)
                                     {
-                                        meter.WriteToLog("RSL: Err: ошибка чтения GUIDa одного из параметров",
-                                        LOG_SLICES);
+                                        WriteToLog("RSL: Err: ошибка чтения GUIDa одного из параметров", portStr, mAddr,
+                                        LOG_HOURSLICES_ERRORS);
                                         continue;
                                     }
 
@@ -451,8 +424,8 @@ namespace Prizmer.PoolServer
                                         }
                                         catch (Exception ex)
                                         {
-                                            meter.WriteToLog("RSL: Err6: Ошибка перегрупировки параметров 1: " + ex.Message + " срез " + i + " считан не будет.",
-                                                 LOG_SLICES);
+                                            WriteToLog("RSL: Err6: Ошибка перегрупировки параметров 1: " + ex.Message + " срез " + i + " считан не будет.",
+                                                 portStr, mAddr, LOG_HOURSLICES_ERRORS);
                                             continue;
                                         }
                                     }
@@ -462,7 +435,7 @@ namespace Prizmer.PoolServer
                             }
                             else
                             {
-                                meter.WriteToLog("RSL: Err7: драйвер не может прочитать срезы", LOG_SLICES);
+                                WriteToLog("RSL: Err7: драйвер не может прочитать срезы", portStr, mAddr, LOG_HOURSLICES_ERRORS);
                                 meter.WriteToLog("RSL: ---/ конец чтения срезов /---", LOG_SLICES);
                             }
 
@@ -482,7 +455,7 @@ namespace Prizmer.PoolServer
                 {
                     #region ПОЛУЧАСОВЫЕ СРЕЗЫ
                     
-                    const bool LOG_SLICES = true;
+                    const bool LOG_SLICES = false;
                     const bool SEL_DATE_REGION_LOGGING = false;
 
                     const byte SLICE_TYPE = 4;                         //тип значения в БД (получасовой/часовой)
@@ -909,12 +882,16 @@ namespace Prizmer.PoolServer
                     DateTime CurTime = DateTime.Now; CurTime.AddHours(-1);
                     DateTime PrevTime = CurTime;
 
+                    const bool LOG_DAILY = false;
+                    const bool LOG_DAILY_ERRORS = true;
+
                     //чтение текущих параметров, подлежащих чтению, относящихся к конкретному прибору
                     TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid, 1);
                     if (takenparams.Length > 0)
                     {
-                        string portStr = m_vport.ToString();
+                        string portStr = m_vport.GetName();
                         string mAddr = metersbyport[MetersCounter].address.ToString();
+                        string mName = metersbyport[MetersCounter].name;
 
                         for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                         {
@@ -923,12 +900,12 @@ namespace Prizmer.PoolServer
                             Value[] lastvalue = ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], PrevTime, CurTime);
                             //если значение в БД уже есть, то не читать его из прибора
                             if (lastvalue.Length > 0) continue;
-                            WriteToLog("Ready for reading " + takenparams.Length.ToString() + "daily params", portStr, mAddr);
+                            WriteToLog(mName + " - готов прочитать " + takenparams.Length.ToString() + " СУТОЧНЫХ параметров", portStr, mAddr, LOG_DAILY);
                             //читать данные только если прибор ответил
                            if (meter.OpenLinkCanal())
-                            {                            
-                                WriteToLog("Chanel opened for: meter " + metersbyport[MetersCounter].name + " at port " +
-                                    m_vport.ToString() + " with address " + metersbyport[MetersCounter].address.ToString(), portStr, mAddr);
+                            {
+                                WriteToLog("Канал для " + mName + " порт " +
+                                    m_vport.ToString() + " адрес " + metersbyport[MetersCounter].address.ToString() + " открыт", portStr, mAddr, LOG_DAILY);
 
                                 Param param = ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
                                 if (param.guid == Guid.Empty) continue;
@@ -936,8 +913,8 @@ namespace Prizmer.PoolServer
                                 //RecordValueEnergy rve = new RecordValueEnergy();
 
                                 float curvalue = 0;
-                               WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; СУТ: читаю параметр (" +
-                                   tpindex.ToString() + "): " + param.name, portStr, mAddr);
+                               WriteToLog(mName + " - СУТОЧНЫЕ: читаю параметр (" +
+                                   tpindex.ToString() + "): " + param.name, portStr, mAddr, LOG_DAILY);
 
                                 //чтение суточных параметров
                                 if (meter.ReadDailyValues(DateTime.Now, param.param_address, param.channel, ref curvalue))
@@ -951,18 +928,17 @@ namespace Prizmer.PoolServer
                                     ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
 
                                     WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" +
-                                        tpindex.ToString() + ") записан в базу", portStr, mAddr);
+                                        tpindex.ToString() + ") записан в базу", portStr, mAddr, LOG_DAILY);
                                 }
                                 else
                                 {
-                                    WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" + tpindex.ToString() + ") не записан", portStr, mAddr);
+                                    WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" + tpindex.ToString() + ") не записан", portStr, mAddr, LOG_DAILY_ERRORS);
                                 }
                             }
                             else
                             {
-                                //meter.WriteToLog("ошибка cвязи с прибором");
+                                WriteToLog(mName + " порт " + m_vport.ToString() + " адрес " + metersbyport[MetersCounter].address.ToString() + " невозможно открыть канал связи", portStr, mAddr, LOG_DAILY_ERRORS);
                             }
-
                         }
 
                     }
