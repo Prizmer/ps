@@ -525,7 +525,38 @@ namespace Prizmer.Meters
 
         public bool ReadCurrentValues(ushort param, ushort tarif, ref float recordValue)
         {
+            if (param >= 160)
+            {
+                byte[] param866Bytes = this.stringToBytes(param.ToString());
+                byte[] system866Bytes = this.stringToBytes(tarif.ToString());
+                List<byte> requestBodyList = new List<byte>();
+                List<byte> requestAnswerList = new List<byte>();
+
+                requestBodyList.Add(HT);
+                requestBodyList.AddRange(system866Bytes);
+                requestBodyList.Add(HT);
+                requestBodyList.AddRange(param866Bytes);
+                requestBodyList.Add(FF);
+
+                if (!sendMessage(requestBodyList.ToArray(), 0x1d, ref requestAnswerList))
+                {
+                    WriteToLog("Ошибка при чтении тотального параметра, sendMessage == false");
+                    return false;
+                }
+
+                List<byte[]> infoBlocks = new List<byte[]>();
+                splitInfoBlocks(requestAnswerList.ToArray(), ref infoBlocks);
+                List<byte>[] values = new List<byte>[2];
+                getValueBytesFromInfoBlock(infoBlocks[0], values.Length, ref values);
+                string res = bytesToString(values[0].ToArray());
+
+                bool success = float.TryParse(res, out recordValue);
+
+                return success;
+
+            }
             return false;
+
         }
 
         public bool ReadMonthlyValues(DateTime dt, ushort param, ushort tarif, ref float recordValue)
@@ -535,6 +566,33 @@ namespace Prizmer.Meters
 
         public bool ReadDailyValues(DateTime dt, ushort param, ushort tarif, ref float recordValue)
         {
+
+            if (param >= 160)
+            {
+                byte[] param866Bytes = this.stringToBytes(param.ToString());
+                byte[] system866Bytes = this.stringToBytes(tarif.ToString());
+                List<byte> requestBodyList = new List<byte>();
+                List<byte> requestAnswerList = new List<byte>();
+
+                requestBodyList.Add(HT);
+                requestBodyList.AddRange(system866Bytes);
+                requestBodyList.Add(HT);
+                requestBodyList.AddRange(param866Bytes);
+                requestBodyList.Add(FF);
+
+                if (!sendMessage(requestBodyList.ToArray(), 0x1d, ref requestAnswerList))
+                {
+                    WriteToLog("Ошибка при чтении тотального параметра, sendMessage == false");
+                    return false;                   
+                }
+
+                List<byte[]> infoBlocks = new List<byte[]>();
+                splitInfoBlocks(requestAnswerList.ToArray(), ref infoBlocks);
+
+
+            }
+
+
             ushort paramNumber = 65532;
             //определим структуру архива
             List<ParamInfo> archStructure = null;
