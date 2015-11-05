@@ -261,8 +261,8 @@ namespace Prizmer.Meters
 
                 blockList.Add(curBlockArr);
             }
-
-            return true;
+            if (blockList.Count > 0) return true;
+            else return false;
         }
 
         /// <summary>
@@ -300,7 +300,8 @@ namespace Prizmer.Meters
 
             values = valListsArr;
 
-            return true;
+            if (values.Length > 0) return true;
+            else return false;
         }
 
 
@@ -583,12 +584,19 @@ namespace Prizmer.Meters
                 if (!sendMessage(requestBodyList.ToArray(), 0x1d, ref requestAnswerList))
                 {
                     WriteToLog("Ошибка при чтении тотального параметра, sendMessage == false");
-                    return false;                   
+                    return false;
                 }
 
                 List<byte[]> infoBlocks = new List<byte[]>();
-                splitInfoBlocks(requestAnswerList.ToArray(), ref infoBlocks);
+                if (!splitInfoBlocks(requestAnswerList.ToArray(), ref infoBlocks)) return false;
+                
+                List<byte>[] values = new List<byte>[2];
+                if (!getValueBytesFromInfoBlock(infoBlocks[0], values.Length, ref values)) return false;
+                string res = bytesToString(values[0].ToArray());
 
+                bool success = float.TryParse(res, out recordValue);
+
+                return success;
 
             }
 
