@@ -54,12 +54,65 @@ namespace Prizmer.PoolServer
 
         string ConnectionString = "Server=localhost;Port=5432;User Id=postgres;Password=1;Database=prizmer;";
 
+        struct PollingParams
+        {
+            public bool b_poll_current;
+            public bool b_poll_day;
+            public bool b_poll_month;
+            public bool b_poll_hour;
+            public bool b_poll_halfanhour;
+            public bool b_poll_archive;
+
+            public TimeSpan ts_current_period;
+        }
+
+        PollingParams pollingParams;
+
         bool bStopServer = true;
 
         public MainService()
         {
             //ConnectionString = global::PoolServer.Properties.Settings.Default.ConnectionString;
             ConnectionString = ConfigurationManager.ConnectionStrings["generalConnection"].ConnectionString;
+
+            List<string> rowValues = new List<string>();
+
+            pollingParams.b_poll_current = true;
+
+            pollingParams.b_poll_day = true;
+            pollingParams.b_poll_month = true;
+            pollingParams.b_poll_hour = true;
+            pollingParams.b_poll_halfanhour = true;
+            pollingParams.b_poll_archive = true;
+            pollingParams.ts_current_period = new TimeSpan(DateTime.Now.Ticks);
+
+            try
+            {
+                string strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_current")[0];
+                bool.TryParse(strTmpVal, out pollingParams.b_poll_current);
+
+                strTmpVal = ConfigurationManager.AppSettings.GetValues("ts_current_period")[0];
+                TimeSpan.TryParse(strTmpVal, out pollingParams.ts_current_period);
+
+                strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_day")[0];
+                bool.TryParse(strTmpVal, out pollingParams.b_poll_day);
+
+                strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_month")[0];
+                bool.TryParse(strTmpVal, out pollingParams.b_poll_month);
+
+                strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_hour")[0];
+                bool.TryParse(strTmpVal, out pollingParams.b_poll_hour);
+
+                strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_halfanhour")[0];
+                bool.TryParse(strTmpVal, out pollingParams.b_poll_halfanhour);
+
+                strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_archive")[0];
+                bool.TryParse(strTmpVal, out pollingParams.b_poll_archive);
+            }
+            catch (Exception ex)
+            {
+                WriteToLog("Проблеммы с применением файла конфигурации: " + ex.Message);
+            }
         }
         
         public void StartServer()
@@ -197,6 +250,7 @@ namespace Prizmer.PoolServer
                 meter.Init(metersbyport[MetersCounter].address, metersbyport[MetersCounter].password, m_vport);
 
                 ////////////////////Блок чтения серийника///////////////////
+                if (bStopServer) goto CloseThreadPoint;
                 if (true)
                 {
                     string serial_number = String.Empty;
@@ -222,11 +276,10 @@ namespace Prizmer.PoolServer
                 }
 
                 if (bStopServer) goto CloseThreadPoint;
-
-                if (true)
+                if (true && pollingParams.b_poll_hour)
                 {
                     #region ЧАСОВЫЕ СРЕЗЫ
-
+                    //WriteToLog("Часовые");
                     const bool LOG_SLICES = false;
                     const bool LOG_HOURSLICES_ERRORS = true;
                     const bool SEL_DATE_REGION_LOGGING = false;
@@ -459,7 +512,8 @@ namespace Prizmer.PoolServer
                     #endregion
                 }
 
-                if (typemeter.driver_name != "set4tm_03")
+                if (bStopServer) goto CloseThreadPoint;
+                if (typemeter.driver_name != "set4tm_03" && pollingParams.b_poll_halfanhour)
                 {
                     #region ПОЛУЧАСОВЫЕ СРЕЗЫ
                     
@@ -685,7 +739,8 @@ namespace Prizmer.PoolServer
                     #endregion
                 }
 
-                if (typemeter.driver_name == "set4tm_03")
+                if (bStopServer) goto CloseThreadPoint;
+                if (typemeter.driver_name == "set4tm_03" && pollingParams.b_poll_halfanhour)
                 {
                     #region ПОЛУЧАСОВЫЕ СРЕЗЫ (СТАРАЯ ВЕРСИЯ)
 
@@ -832,8 +887,7 @@ namespace Prizmer.PoolServer
                 
                 ////////////////////ТЕКУЩИЕ///////////////////
                 if (bStopServer) goto CloseThreadPoint;
-
-                if (true)
+                if (true && pollingParams.b_poll_current)
                 {
                     #region ТЕКУЩИЕ ЗНАЧЕНИЯ
                     //чтение текущих параметров, подлежащих чтению, относящихся к конкретному прибору
@@ -883,8 +937,7 @@ namespace Prizmer.PoolServer
                 
                 ////////////////////на начало СУТОК///////////////////
                 if (bStopServer) goto CloseThreadPoint;
-
-                if (true)
+                if (true && pollingParams.b_poll_day)
                 {
                     #region НА НАЧАЛО СУТОК
                     DateTime CurTime = DateTime.Now; CurTime.AddHours(-1);
@@ -955,8 +1008,7 @@ namespace Prizmer.PoolServer
 
                 ////////////////////на начало МЕСЯЦА///////////////////
                 if (bStopServer) goto CloseThreadPoint;
-
-                if (true)
+                if (true && pollingParams.b_poll_month)
                 {
                     #region НА НАЧАЛО МЕСЯЦА
                     DateTime CurTime = DateTime.Now; 
@@ -1021,8 +1073,7 @@ namespace Prizmer.PoolServer
 
                 ////////////////////АРХИВЫ///////////////////
                 if (bStopServer) goto CloseThreadPoint;
-
-                if (true)
+                if (true && pollingParams.b_poll_archive)
                 {
                     #region АРХИВНЫЕ ДАННЫЕ
 

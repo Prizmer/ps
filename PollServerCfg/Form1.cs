@@ -9,7 +9,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using System.IO;
-using System.Xml.Serialization;
+
 using System.Collections;
 using System.Collections.Specialized;
 using System.Configuration;
@@ -24,13 +24,14 @@ namespace PollServerCfg
             InitializeComponent();
         }
 
-        ServerParams sp = new ServerParams();
-        string defaultPath = Directory.GetCurrentDirectory() + "\\PoolServer.exe";
-        // передаем в конструктор тип класса
-        XmlSerializer formatter = new XmlSerializer(typeof(ServerParams));
 
+        string defaultPath = Directory.GetCurrentDirectory() + "\\PoolServer.exe";
 
         System.Configuration.Configuration config;
+        AppSettingsSection appSettingsSection;
+        ConnectionStringsSection conStrSection;
+        ConnectionStringSettings connection;
+
         private void Form1_Load(object sender, EventArgs e)
         {
             OpenFileDialog fd = new OpenFileDialog();
@@ -49,81 +50,70 @@ namespace PollServerCfg
 
 
             // получим конфигурационный файл СО
-            config = ConfigurationManager.OpenExeConfiguration(fd.FileName) as Configuration;
-            
+            ExeConfigurationFileMap exfm = new ExeConfigurationFileMap();
+            exfm.ExeConfigFilename = fd.FileName;
+            config = ConfigurationManager.OpenMappedExeConfiguration(exfm, ConfigurationUserLevel.None);
+
             //настройки подключения
-            ConnectionStringsSection conStrSection = config.ConnectionStrings as ConnectionStringsSection;
-            ConnectionStringSettings connection = conStrSection.ConnectionStrings[0];
+            conStrSection = config.ConnectionStrings as ConnectionStringsSection;
+            connection = conStrSection.ConnectionStrings[0];
             richTextBox1.Text = connection.ConnectionString;
 
-            ConfigurationSectionGroup pollSettingsGroup = config.GetSectionGroup("pollSettingsGroup");
+            //настройки приложения
+            appSettingsSection = (config.GetSection("appSettings") as AppSettingsSection);
 
-            // Display each KeyValueConfigurationElement.
-            //NameValueCollection sectionSettings = config.GetSection("doPollSection") as NameValueCollection;
-
-
-            string gr = "";
-            /*
-            foreach ( ConfigurationSection c in config.AppSettings.ToString)
+            //инициализация графических элементов значениями
+            foreach (string setting in appSettingsSection.Settings.AllKeys)
             {
-                gr += "Group Name: " + c.SectionInformation.SectionName + "; ";
-            }*/
-            MessageBox.Show(config.AppSettings.SectionInformation.SectionName.ToString());
+                if (setting.IndexOf("b_poll") != -1)
+                {
+                    string b_poll_param_type = appSettingsSection.Settings[setting].Value;
+                    bool val = false;                        
+                    if (!bool.TryParse(b_poll_param_type, out val)) continue;
 
-            // десериализация
-            using (FileStream fs = new FileStream(defaultPath, FileMode.Open))
-            {
-                sp = (ServerParams)formatter.Deserialize(fs);
+                    checkedListBox1.Items.Add(setting, val);
+                }
+                else if (setting.IndexOf("ts") != -1)
+                {
+                    string ts_period = appSettingsSection.Settings[setting].Value;
+
+                    TimeSpan val = new TimeSpan(DateTime.Now.Ticks);                        
+                    if (!TimeSpan.TryParse(ts_period, out val)) continue;
+
+                    dateTimePicker1.Value = DateTime.Now.Date + val;
+                }
             }
-
-            TimeSpan parsedTime = TimeSpan.Parse(sp.period);
-            dateTimePicker1.Value = DateTime.Now.Date + parsedTime;
-
-            for (int i = 0; i < sp.typeNames.Count; i++)
-                checkedListBox1.Items.Add(sp.typeNames[i], sp.typeEnabled[i]);
-
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void checkedListBox1_ItemCheck(object sender, ItemCheckEventArgs e)
-        {
-            //MessageBox.Show(e.NewValue.ToString());
-            if (e.NewValue.ToString() == "Checked")
-            {
-                sp.typeEnabled[e.Index] = true;
-            }
-            else
-            {
-                sp.typeEnabled[e.Index] = false;
-            }
-
-            sp.period = dateTimePicker1.Value.TimeOfDay.ToString();
-        }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            // получаем поток, куда будем записывать сериализованный объект
-            using (FileStream fs = new FileStream(defaultPath, FileMode.Create))
+            int b_poll_items_cnt = 0;
+            foreach (string setting in appSettingsSection.Settings.AllKeys)
             {
-                formatter.Serialize(fs, sp);
+                if (setting.IndexOf("b_poll") != -1)
+                {
+                    bool cb_value = checkedListBox1.GetItemChecked(b_poll_items_cnt);
+
+                    appSettingsSection.Settings[setting].Value = cb_value.ToString();
+                    b_poll_items_cnt++;
+                }
+                else if (setting.IndexOf("ts") != -1)
+                {
+                    TimeSpan val = new TimeSpan(dateTimePicker1.Value.Ticks);
+                    appSettingsSection.Settings[setting].Value = val.ToString(@"hh\:mm\:ss");
+                }
+
             }
+
+            connection.ConnectionString = richTextBox1.Text;
+            config.Save(ConfigurationSaveMode.Modified);
+
+            //Force a reload of the changed section. This makes the new values available for reading.
+            //ConfigurationManager.RefreshSection(sectionName);
         }
 
-        private void button2_Click_1(object sender, EventArgs e)
-        {
-
-        }
     }
 
-    [Serializable]
-    public class ServerParams
-    {
-        public List<string> typeNames = new List<string>();
-        public List<bool> typeEnabled = new List<bool>();
-        public string period;
-    }
+
 }
