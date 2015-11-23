@@ -73,8 +73,10 @@ namespace Prizmer.PoolServer
             {
                 try
                 {
-                    string logFileName = String.Format("{0}_a{1}_{2}_ms.log", senderInfo.port.Trim(), senderInfo.addr.Trim(), senderInfo.driverName.Trim());
-                    FileStream fs = new FileStream(@"logs\main\" + logFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+                    string pathToDir = String.Format("logs/main/{0}", DateTime.Now.Date.ToShortDateString().Replace(".", "_"));
+                    Directory.CreateDirectory(pathToDir);
+                    string logFileName = String.Format("/{0}_a{1}_{2}_ms.log", senderInfo.port.Trim(), senderInfo.addr.Trim(), senderInfo.driverName.Trim());
+                    FileStream fs = new FileStream(pathToDir + logFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
                     string resMsg = String.Format("{1} [{0}]: {2}", messageType.ToString(), DateTime.Now.ToString(), message);
 
                     sw = new StreamWriter(fs, Encoding.Default);
