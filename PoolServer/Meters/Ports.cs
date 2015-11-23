@@ -30,7 +30,7 @@ namespace Prizmer.Ports
 
         public string GetName()
         {
-            return "tcp/ip " + m_address + ":" + m_port + " ";
+            return "tcp" + m_address + "_" + m_port;
         }
 
         public TcpipPort(string address, int port, ushort write_timeout, ushort read_timeout, int delay_between_sending)
@@ -162,7 +162,7 @@ namespace Prizmer.Ports
         {
             try
             {
-                using (StreamWriter sw = new StreamWriter("TcpPorts.log", true, Encoding.Default))
+                using (StreamWriter sw = new StreamWriter(@"logs\tcp_ports.log", true, Encoding.Default))
                 {
                     sw.WriteLine(DateTime.Now.ToString() + ": " + GetName() + ": " + str);
                 }
@@ -549,7 +549,7 @@ namespace Prizmer.Ports
         {
             try
             {
-                using (StreamWriter sw = new StreamWriter("ComPorts.log", true, Encoding.Default))
+                using (StreamWriter sw = new StreamWriter(@"logs\com_ports.log", true, Encoding.Default))
                 {
                     sw.WriteLine(DateTime.Now.ToString() + ": " + GetName() + ": " + str);
                 }

@@ -61,6 +61,8 @@ namespace PollServerCfg
                 }
             }
 
+            label3.Text = PathToPollServerCfg;
+            label4.Text = PathToPollServer;
 
             // получим конфигурационный файл СО
             ExeConfigurationFileMap exfm = new ExeConfigurationFileMap();
@@ -129,6 +131,7 @@ namespace PollServerCfg
         private void button1_Click(object sender, EventArgs e)
         {
             applySettings();
+            Application.Exit();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -136,13 +139,22 @@ namespace PollServerCfg
             applySettings();
             if (File.Exists(PathToPollServer))
             {
-                Process.Start(PathToPollServer);
+                ProcessStartInfo psi = new ProcessStartInfo(PathToPollServer);
+                psi.WorkingDirectory = Path.GetDirectoryName(PathToPollServer);
+                Process p = new Process();
+                p.StartInfo = psi;
+                p.Start();
                 Application.Exit();
             }
             else
             {
                 MessageBox.Show("Не найден исполняемый файл сервера опроса PoolServer.exe",  "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
 
 
