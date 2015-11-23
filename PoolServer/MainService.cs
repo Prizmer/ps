@@ -74,8 +74,10 @@ namespace Prizmer.PoolServer
                 try
                 {
                     string logFileName = String.Format("{0}_a{1}_{2}_ms.log", senderInfo.port.Trim(), senderInfo.addr.Trim(), senderInfo.driverName.Trim());
+                    FileStream fs = new FileStream(@"logs\main\" + logFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
                     string resMsg = String.Format("{1} [{0}]: {2}", messageType.ToString(), DateTime.Now.ToString(), message);
-                    sw = new StreamWriter("logs//main//" + logFileName, true, Encoding.Default);
+
+                    sw = new StreamWriter(fs, Encoding.Default);
                     sw.WriteLine(resMsg);
                     sw.Close();
                 }
@@ -150,6 +152,10 @@ namespace Prizmer.PoolServer
 
         public MainService()
         {
+            //create dirs for logger
+            Directory.CreateDirectory("logs");
+            Directory.CreateDirectory("logs/main");
+
             //ConnectionString = global::PoolServer.Properties.Settings.Default.ConnectionString;
             ConnectionString = ConfigurationManager.ConnectionStrings["generalConnection"].ConnectionString;
 
