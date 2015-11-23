@@ -138,6 +138,10 @@ namespace Prizmer.PoolServer
 
             bStopServer = false;
 
+            //обработка всех неотлавливаемых исключений для логгирования
+            AppDomain domain = AppDomain.CurrentDomain;
+            domain.UnhandledException += new UnhandledExceptionEventHandler(UnhandledException_Handler);
+
             for (int i = 0; i < cps.Length; i++)
             {
                 //если к порту привязаны приборы, то создаем для него поток и записываем в пул потоков
@@ -170,6 +174,14 @@ namespace Prizmer.PoolServer
             ServerStorage.Close();
         }
 
+        //обработчик необработанных исключений
+        void UnhandledException_Handler(object sender, EventArgs e)
+        {
+            //MessageBox.Show("last allive");
+
+
+        }
+
         public void StopServer()
         {
             bStopServer = true;
@@ -184,6 +196,8 @@ namespace Prizmer.PoolServer
                 catch { }
             }
         }
+
+        
 
         private void pollingPortThread(object data)
         {

@@ -71,6 +71,7 @@
     <Compile Include="FormMain.Designer.cs">
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="Logger.cs" />
     <Compile Include="MainService.cs" />
     <Compile Include="Meters\CMeter.cs" />
     <Compile Include="Meters\elf108.cs" />

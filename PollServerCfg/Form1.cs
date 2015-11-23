@@ -14,6 +14,8 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Configuration;
 
+using System.Diagnostics;
+
 
 namespace PollServerCfg
 {
@@ -24,8 +26,10 @@ namespace PollServerCfg
             InitializeComponent();
         }
 
+        DirectoryInfo di = new DirectoryInfo(Directory.GetCurrentDirectory());
 
-        string defaultPath = Directory.GetCurrentDirectory() + "\\PoolServer.exe";
+        string PathToPollServerCfg = "";
+        string PathToPollServer = "";
 
         System.Configuration.Configuration config;
         AppSettingsSection appSettingsSection;
@@ -34,13 +38,22 @@ namespace PollServerCfg
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //default paths 
+            PathToPollServerCfg = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName + 
+                @"\PoolServer\bin\Debug\PoolServer.exe.config";
+            PathToPollServer = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName +
+                @"\PoolServer\bin\Debug\PoolServer.exe";
+
             OpenFileDialog fd = new OpenFileDialog();
-            if (!File.Exists(defaultPath)){
-                fd.FileName = defaultPath;
+            if (!File.Exists(PathToPollServerCfg))
+            {
+                fd.FileName = PathToPollServerCfg;
 
                 if (fd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    defaultPath = fd.FileName;
+                    FileInfo fi = new FileInfo(fd.FileName);
+                    PathToPollServerCfg = fd.FileName;
+                    PathToPollServer = fi.FullName + @"\PoolServer.exe";
                 }
                 else
                 {
@@ -51,7 +64,7 @@ namespace PollServerCfg
 
             // получим конфигурационный файл СО
             ExeConfigurationFileMap exfm = new ExeConfigurationFileMap();
-            exfm.ExeConfigFilename = fd.FileName;
+            exfm.ExeConfigFilename = PathToPollServerCfg;
             config = ConfigurationManager.OpenMappedExeConfiguration(exfm, ConfigurationUserLevel.None);
 
             //настройки подключения
@@ -86,7 +99,7 @@ namespace PollServerCfg
         }
 
 
-        private void button1_Click(object sender, EventArgs e)
+        private void applySettings()
         {
             int b_poll_items_cnt = 0;
             foreach (string setting in appSettingsSection.Settings.AllKeys)
@@ -112,6 +125,26 @@ namespace PollServerCfg
             //Force a reload of the changed section. This makes the new values available for reading.
             //ConfigurationManager.RefreshSection(sectionName);
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            applySettings();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            applySettings();
+            if (File.Exists(PathToPollServer))
+            {
+                Process.Start(PathToPollServer);
+                Application.Exit();
+            }
+            else
+            {
+                MessageBox.Show("Не найден исполняемый файл сервера опроса PoolServer.exe",  "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
 
     }
 
