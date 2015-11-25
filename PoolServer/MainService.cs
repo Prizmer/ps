@@ -19,116 +19,129 @@ using System.IO;
 
 namespace Prizmer.PoolServer
 {
-    class MainService
+    class Logger
     {
+        public Logger() { }
 
-        class Logger
+        struct SenderInfo
         {
-            public Logger() {}
-
-            struct SenderInfo
+            public SenderInfo(string port, string addr, string dName)
             {
-                public SenderInfo(string port, string addr, string dName)
-                {
-                    this.port = port;
-                    this.addr = addr;
-                    this.driverName = dName;
-                }
-
-                public string port;
-                public string addr;
-                public string driverName;
+                this.port = port;
+                this.addr = addr;
+                this.driverName = dName;
             }
 
-            SenderInfo si;
-            public void Initialize(string port, string addr, string driverName)
-            {
-                si = new SenderInfo(port, addr, driverName);
-            }
+            public string port;
+            public string addr;
+            public string driverName;
+        }
 
-            public enum MessageType
-            {
-                ERROR,
-                WARN,
-                INFO
-            }
+        string baseDirectory = "logs";
+        string workDirectory = "";
+        bool isInitialized = false;
 
-            public void LogError(string message)
-            {
-                this.writeToLog(message, si, MessageType.ERROR);
-            }
+        SenderInfo si;
+        public void Initialize(string port, string addr, string driverName, string workDirName = "")
+        {
+            if (workDirName != String.Empty)
+                workDirectory = baseDirectory + "\\" + workDirName;
+            else
+                workDirectory = baseDirectory;
 
-            public void LogInfo(string message)
-            {
-                this.writeToLog(message, si, MessageType.INFO);
-            }
+            si = new SenderInfo(port, addr, driverName);
+            Directory.CreateDirectory(workDirectory);
 
-            public void LogWarn(string message)
-            {
-                this.writeToLog(message, si, MessageType.WARN);
-            }
+            isInitialized = true;
+        }
 
+        private enum MessageType
+        {
+            ERROR,
+            WARN,
+            INFO
+        }
+
+        public void LogError(string message)
+        {
+            this.writeToLog(message, si, MessageType.ERROR);
+        }
+
+        public void LogInfo(string message)
+        {
+            this.writeToLog(message, si, MessageType.INFO);
+        }
+
+        public void LogWarn(string message)
+        {
+            this.writeToLog(message, si, MessageType.WARN);
+        }
+
+        private void writeToLoggerLog(string msg)
+        {
             StreamWriter sw = null;
-            private void writeToLog(string message, SenderInfo senderInfo, MessageType messageType)
-            {
-                try
-                {
-                    string pathToDir = String.Format("logs/main/{0}", DateTime.Now.Date.ToShortDateString().Replace(".", "_"));
-                    Directory.CreateDirectory(pathToDir);
-                    string logFileName = String.Format("/{0}_a{1}_{2}_ms.log", senderInfo.port.Trim(), senderInfo.addr.Trim(), senderInfo.driverName.Trim());
-                    FileStream fs = new FileStream(pathToDir + logFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
-                    string resMsg = String.Format("{1} [{0}]: {2}", messageType.ToString(), DateTime.Now.ToString(), message);
+            string resMsg = String.Format("{0}: {1}", DateTime.Now.ToString(), msg);
+            sw = new StreamWriter(baseDirectory + @"\loggerErr.log", true, Encoding.Default);
+            sw.WriteLine(resMsg);
+            sw.Close();
 
-                    sw = new StreamWriter(fs, Encoding.Default);
-                    sw.WriteLine(resMsg);
-                    sw.Close();
-                }
-                catch (Exception lEx)
-                {
-                    StreamWriter sw = null;
-                    string resMsg = String.Format("{0}: {1}", DateTime.Now.ToString(), lEx.Message);
-                    sw = new StreamWriter(@"logs\loggerErr.log", true, Encoding.Default);
-                    sw.WriteLine(resMsg);
-                    sw.Close();
-                }
-                finally
-                {
-                    if (sw != null)
-                    {
-                        sw.Close();
-                        sw = null;
-                    }
-                }
+            if (fs != null)
+            {
+                fs.Close();
+                fs = null;
             }
         }
 
-        public void WriteToLog(string str, string port = "", string addr = "", string mName = "", bool doWrite = true)
+        StreamWriter sw = null;
+        FileStream fs = null;
+        private void writeToLog(string message, SenderInfo senderInfo, MessageType messageType)
         {
-            /*
-            if (doWrite)
+            if (!isInitialized)
             {
-                StreamWriter sw = null;
+                writeToLoggerLog("Логгер не проинициализирован");
+                return;
+            }
 
-                try
+            try
+            {
+                string pathToDir = String.Format(workDirectory + "\\{0}", DateTime.Now.Date.ToShortDateString().Replace(".", "_"));
+                Directory.CreateDirectory(pathToDir);
+                string logFileName = String.Format("\\{0}_a{1}_{2}_ms.log", senderInfo.port.Trim(), senderInfo.addr.Trim(), senderInfo.driverName.Trim());
+                fs = new FileStream(pathToDir + logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+                string resMsg = String.Format("{1} [{0}]: {2}", messageType.ToString(), DateTime.Now.ToString(), message);
+
+                sw = new StreamWriter(fs, Encoding.Default);
+                sw.WriteLine(resMsg);
+
+                sw.Close();
+                fs.Close();
+            }
+            catch (Exception lEx)
+            {
+                writeToLoggerLog(lEx.Message);
+            }
+            finally
+            {
+                if (sw != null)
                 {
-                    string logFileName = String.Format("{0}a{1}d{2}mainservice.log", port, addr, mName);
-                    sw = new StreamWriter("/logs/main/" + logFileName, true, Encoding.Default);
-                    sw.WriteLine(DateTime.Now.ToString() + ": " + str);
                     sw.Close();
+                    sw = null;
                 }
-                catch
+
+                if (fs != null)
                 {
-                }
-                finally
-                {
-                    if (sw != null)
-                    {
-                        sw.Close();
-                        sw = null;
-                    }
+                    fs.Close();
+                    fs = null;
                 }
             }
-             * */
+        }
+    }
+
+    class MainService
+    {
+        public void WriteToLog(string str, string port = "", string addr = "", string mName = "", bool doWrite = true)
+        {
+            //TODO убрать метод, оставлен для поддержки
         }
 
         //список потоков для опроса приборов - один поток на каждый порт
@@ -154,10 +167,6 @@ namespace Prizmer.PoolServer
 
         public MainService()
         {
-            //create dirs for logger
-            Directory.CreateDirectory("logs");
-            Directory.CreateDirectory("logs/main");
-
             //ConnectionString = global::PoolServer.Properties.Settings.Default.ConnectionString;
             ConnectionString = ConfigurationManager.ConnectionStrings["generalConnection"].ConnectionString;
 
@@ -282,8 +291,6 @@ namespace Prizmer.PoolServer
             }
         }
 
-        
-
         private void pollingPortThread(object data)
         {
             Prizmer.Ports.VirtualPort m_vport = null;
@@ -353,7 +360,7 @@ namespace Prizmer.PoolServer
                 meter.Init(metersbyport[MetersCounter].address, metersbyport[MetersCounter].password, m_vport);
 
                 //инициализация логгера
-                logger.Initialize(m_vport.GetName(), metersbyport[MetersCounter].address.ToString(), typemeter.driver_name);
+                logger.Initialize(m_vport.GetName(), metersbyport[MetersCounter].address.ToString(), typemeter.driver_name, "main");
 
                 //выведем в лог общие ошибки если таковые есть
                 DateTime common_dt_install = metersbyport[MetersCounter].dt_install;

@@ -58,10 +58,12 @@ namespace Prizmer.Ports
             using (TcpClient tcp = new TcpClient())
             {
                 Queue<byte> reading_queue = new Queue<byte>(8192);
-
+               
                 try
                 {
                     Thread.Sleep(m_delay_between_sending);
+                    tcp.SendTimeout = 500;
+                    tcp.ReceiveTimeout = 500;
 
                     IAsyncResult ar = tcp.BeginConnect(m_address, m_port, null, null);
                     using (WaitHandle wh = ar.AsyncWaitHandle)
