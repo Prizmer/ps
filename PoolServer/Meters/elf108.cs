@@ -46,6 +46,10 @@ namespace Prizmer.Meters
         const byte ERROR_CODE_SIZE = 4;
         const byte ERROR_CODE_CMD = 3;
 
+        byte[] IMPULSE_INP_INDEX_ARR = { 34, 41, 48, 55 };
+        byte[] IMPULSE_INP_SIZE_ARR = { 7, 7, 7, 8 };
+        byte[] IMPULSE_INP_CMD_ARR = { 3, 3, 3, 4 };
+
         /**/
         const byte VOLUME_INDEX = 28;
         const byte VOLUME_SIZE = 6;
@@ -380,6 +384,49 @@ namespace Prizmer.Meters
         }
 
         /// <summary>
+        /// Чтение дополнительных импульстных входов (объем м3)
+        /// </summary>
+        /// <param name="outputNumber">Номер входа от 1 до 4</param>
+        /// <param name="impulseOInpVal"></param>
+        /// <returns></returns>
+        public bool ReadImpulseInput(int outputNumber, ref float impulseOInpVal)
+        {
+            if (outputNumber == 0 || outputNumber > IMPULSE_INP_CMD_ARR.Length + 1)
+            {
+                this.WriteToLog("ReadImpulseInput: outputNumber == 0 || outputNumber > IMPULSE_INP_CMD_ARR.Length");
+                return false;
+            }
+
+            byte[] data = null;
+            if (SendREQ_UD2(ref data))
+            {
+                int val_size = IMPULSE_INP_SIZE_ARR[outputNumber - 1];
+                int cmd_size = IMPULSE_INP_CMD_ARR[outputNumber - 1];
+                int val_index = IMPULSE_INP_INDEX_ARR[outputNumber - 1];
+
+                /*объем записан в 4х байтах в hex-dec*/
+                byte[] volumeBytes = new byte[val_size];
+                Array.Copy(data, val_index, volumeBytes, 0, val_size);
+                Array.Reverse(volumeBytes, cmd_size, volumeBytes.Length - cmd_size);
+
+                string hex_str = BitConverter.ToString(volumeBytes, cmd_size).Replace("-", string.Empty);
+
+                const int VOLUME_COEFFICIENT = 1000;
+                float temp_val = (float)Convert.ToDouble(hex_str) / VOLUME_COEFFICIENT;
+
+                string outp_str = "Impulse input m3(" + outputNumber.ToString() + "): " + temp_val.ToString();
+                WriteToLog(outp_str);
+                impulseOInpVal = temp_val;
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Чтение текущих значений
         /// </summary>
         /// <param name="values">Возвращаемые данные</param>
@@ -395,6 +442,7 @@ namespace Prizmer.Meters
                     case 3: return ReadTimeOn(tarif, ref recordValue);
                     case 4: return ReadErrorCode(ref recordValue);
                     case 5: return ReadCurrentTemperature(tarif, ref recordValue);
+                    case 6: return ReadImpulseInput((int)tarif, ref recordValue);
 
                     default:
                         {
