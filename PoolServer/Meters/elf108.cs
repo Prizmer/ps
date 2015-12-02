@@ -786,7 +786,7 @@ namespace Prizmer.Meters
 
             DateTime lastRecDt = lastArchiveVal.dt;
 
-            if (dt > lastRecDt)
+            if (dt.Date > lastRecDt.Date)
             {
                 WriteToLog("ReadDailyValues: на указанную дату записей не обнаружено: " + dt.ToShortDateString());
                 return false;
@@ -797,7 +797,7 @@ namespace Prizmer.Meters
             WriteToLog("ReadDailyValues: requiredDt: " + dt.ToShortDateString());
 
             //преобразуем dt в id
-            TimeSpan ts = lastRecDt - dt;
+            TimeSpan ts = lastRecDt.Date - dt.Date;
             if (ts.TotalDays == 0)
             {
                 resArchVal = lastArchiveVal;
