@@ -618,7 +618,7 @@ namespace Prizmer.Meters
 
             try
             {
-                ArchiveValueParser avp = new ArchiveValueParser(data_arr);
+                ArchiveValueParser avp = new ArchiveValueParser(data_arr, this.m_address, this.m_vport);
                 avp.GetArchiveValue(ref archVal);
             }
             catch (Exception ex)
@@ -658,7 +658,7 @@ namespace Prizmer.Meters
 
             try
             {
-                ArchiveValueParser avp = new ArchiveValueParser(data_arr);
+                ArchiveValueParser avp = new ArchiveValueParser(data_arr, this.m_address, this.m_vport);
                 return avp.GetArchiveValue(ref archVal);
             }
             catch(Exception ex)
@@ -948,8 +948,11 @@ namespace Prizmer.Meters
 
             ArchiveValue archVal;
 
-            public ArchiveValueParser(byte[] d_array)
+            public ArchiveValueParser(byte[] d_array, uint m_address, VirtualPort vport)
             {
+                this.m_address = m_address;
+                this.m_vport = vport;
+ 
                 WriteToLog("ArchiveValueParser - constructor start");
                 crc_check = CRC8(d_array, d_array.Length);
                 if (crc_check == 0x0)
