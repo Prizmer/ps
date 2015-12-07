@@ -1552,6 +1552,7 @@ namespace Prizmer.Meters
         /// <returns></returns>
         public bool ReadSliceArrInitializationDate(ref DateTime lastInitDt)
         {
+            /*
             const bool WRITE_LOG = true;
             byte firstRecordIndex = 0;
             byte lastRecordIndex = 9;
@@ -1612,6 +1613,8 @@ namespace Prizmer.Meters
             WriteToLog("ReadSliceArrInitializationDate: выбрана запись " + index.ToString() + ": " + latestDt.ToString(), WRITE_LOG);
             lastInitDt = latestDt;
             return true;
+             */
+            return false;
         }
 
 

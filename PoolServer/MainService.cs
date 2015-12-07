@@ -671,385 +671,389 @@ namespace Prizmer.PoolServer
                 if (bStopServer) goto CloseThreadPoint;
                 if (pollingParams.b_poll_halfanhour)
                 {
-                    #region ПОЛУЧАСОВЫЕ СРЕЗЫ
-                    
-                    const byte SLICE_TYPE = 4;                         //тип значения в БД (получасовой/часовой)
-                    const SlicePeriod SLICE_PERIOD = SlicePeriod.HalfAnHour;
-
-                    if (meter.OpenLinkCanal())
+                    if (typemeter.driver_name == "set4tm_03" || typemeter.driver_name == "m230")
                     {
-                        /* Цикл организуется для возможности немедленного прекращения выполнения 
-                         * блока чтения срезов в случае ошибки*/
-                        while (true)
+                        #region ПОЛУЧАСОВЫЕ СРЕЗЫ (СТАРАЯ ВЕРСИЯ)
+
+                        const byte SLICE_PER_HALF_AN_HOUR_TYPE = 4;                         //тип значения в БД (получасовой)
+                        const byte SLICE_PER_HALF_AN_HOUR_PERIOD = 30;                      //интервал записи срезов
+
+                        //чтение получасовых срезов, подлежащих чтению, относящихся к конкретному прибору
+                        TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid,
+                            SLICE_PER_HALF_AN_HOUR_TYPE);
+
+                        if (takenparams.Length > 0)
                         {
-                            //чтение 'дескрипторов' считываемых параметров указанного типа
-                            TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid,
-                                SLICE_TYPE);
-                            if (takenparams.Length == 0) break;
-
-                            string msg = String.Format("ПОЛУчасовые срезы: к считыванию подлежит {0} параметров", takenparams.Length);
-                            logger.LogInfo(msg);
-
-                            #region Выбор дат, с которых необходимо читать каждый параметр, создание словаря вида 'Дата-Список параметров с этой датой'
-
-                            //дата установки счетчика
-                            DateTime dt_install = metersbyport[MetersCounter].dt_install;
-                            DateTime dt_cur = DateTime.Now;
-
-                            //пусть дата начала = дата установки
-                            DateTime date_from = dt_install;
-
-                            if (dt_install > dt_cur)
+                            //читать данные только если прибор ответил
+                            if (meter.OpenLinkCanal())
                             {
-                                msg = String.Format("ПОЛУчасовые срезы: дата установки прибора ({0}) не может быть больше текущей", dt_install.ToString());
-                                logger.LogError(msg);
-                                break;
-                            }
+                                const bool WRITE_LOG = true;
+                                meter.WriteToLog("RSL: 1. Открыт канал для чтения получасовок", WRITE_LOG);
 
-                            if (bStopServer) goto CloseThreadPoint;
+                                //дата установки счетчика
+                                DateTime dt_install = metersbyport[MetersCounter].dt_install;
+                                DateTime dt_cur = DateTime.Now;
+                                DateTime dt_last_slice_arr_init = new DateTime();
 
-                            //некоторые счетчики хранят дату инициализации архива (начала учета)
-                            DateTime dt_last_slice_arr_init = new DateTime();
-                            //получим дату последней инициализации массива срезов (если счетчик поддерживает)
-                            if (meter.ReadSliceArrInitializationDate(ref dt_last_slice_arr_init))
-                            {
-                                msg = String.Format("ПОЛУчасовые срезы: определена дата инициализации архива ({0})",
-                                    dt_last_slice_arr_init.ToString());
-                                logger.LogInfo(msg);
-                            }
+                                //пусть дата начала = дата установки
+                                DateTime date_from = dt_install;
 
-                            //для каждого считываемого параметра определим дату начала и сопоставим дескриптору
-                            //считываемого параметра
-                            Dictionary<DateTime, List<TakenParams>> dt_param_dict = new Dictionary<DateTime, List<TakenParams>>();
-                            for (int i = 0; i < takenparams.Length; i++)
-                            {
-                                if (bStopServer) goto CloseThreadPoint;
-
-                                //получим последний (по дате) срез для читаемого параметра i
-                                Value latestSliceVal = ServerStorage.GetLatestVariousValue(takenparams[i]);
-
-                                Param p = ServerStorage.GetParamByGUID(takenparams[i].guid_params);
-                                if (p.guid == Guid.Empty)
+                                for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                                 {
-                                    msg = String.Format("ПОЛУчасовые срезы: ошибка считывания GUIDa параметра {0} из {1} считываемых, параметр: {2}",
-                                        i, takenparams.Length, p.name);
-                                    logger.LogError(msg);
-                                    continue;
-                                }
-                                else
-                                {
-                                    //string msg = String.Format("RSL: Итерация {3}: Определение даты для параметра {0}; адрес {1}; канал {2}", p.name, p.param_address, p.channel, i);
-                                    //meter.WriteToLog(msg, SEL_DATE_REGION_LOGGING);
-                                }
+                                    List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
+                                    meter.WriteToLog("RSL: 2. Вошли в цикл, итерация" + tpindex.ToString(), WRITE_LOG);
 
-                                if (latestSliceVal.dt.Ticks > 0)
-                                {
-                                    //meter.WriteToLog("RSL: В базе найден последний срез от: " + latestSliceVal.dt.ToString(), SEL_DATE_REGION_LOGGING);
-                                    TimeSpan timeSpan = new TimeSpan(dt_cur.Ticks - latestSliceVal.dt.Ticks);
-
-                                    if (timeSpan.TotalMinutes <= (int)SLICE_PERIOD)
+                                    if (dt_install > dt_cur)
                                     {
-                                        msg = String.Format("ПОЛУчасовые срезы: Не прошло {0} минут с момента добавления среза {1}, перехожу к следующему параметру",
-                                           (int)SLICE_PERIOD, latestSliceVal.dt);
-                                        logger.LogInfo(msg);
-                                        continue;
+                                        meter.WriteToLog("RSL: 3. Дата установки не может быть больше текущей: " +
+                                            dt_install.ToString(), WRITE_LOG);
+                                        break;
                                     }
-                                }
-                                else
-                                {
-                                    //meter.WriteToLog("RSL: Последний срез в базе НЕ найден", SEL_DATE_REGION_LOGGING);
-                                    msg = String.Format("ПОЛУчасовые срезы: последний срез в базе не найден");
-                                    logger.LogInfo(msg);
+                                    meter.WriteToLog("RSL: 3. Дата установки корректна: " + dt_install.ToString(), WRITE_LOG);
 
-                                    if (dt_last_slice_arr_init > date_from && dt_last_slice_arr_init < dt_cur)
-                                    {
-                                        msg = String.Format("ПОЛУчасовые срезы: дата инициализации архивов ({0}) принята за дату начала",
-                                            dt_last_slice_arr_init.ToString());
-                                        logger.LogInfo(msg);
-
-                                        date_from = dt_last_slice_arr_init;
-                                    }
-                                }
-
-                                //уточним начальную дату чтения срезов
-                                if (latestSliceVal.dt > date_from && latestSliceVal.dt < dt_cur)
-                                {
-                                    date_from = latestSliceVal.dt.AddMinutes((double)SLICE_PERIOD);
-                                    //meter.WriteToLog("RSL: Принял за начало дату ПОСЛЕДНЕГО СРЕЗА + 1 минута: " + date_from.ToString(), SEL_DATE_REGION_LOGGING);
-                                }
-
-                                if (date_from.Ticks == 0)
-                                {
-                                    msg = String.Format("ПОЛУчасовые срезы: начальная дата ({0}) НЕКОРРЕКТНА, срезы параметра прочитаны НЕ будут",
-                                        date_from.ToString());
-                                    logger.LogError(msg);
-                                    continue;
-                                }
-                                else
-                                {
-                                    msg = String.Format("ПОЛУчасовые срезы: начальная дата ({0})", date_from.ToString());
-                                    logger.LogInfo(msg);
-                                }
-
-                                //добавим пару значений в словарь
-                                if (dt_param_dict.ContainsKey(date_from))
-                                {
-                                    List<TakenParams> takenParamsList = null;
-                                    if (!dt_param_dict.TryGetValue(date_from, out takenParamsList))
-                                    {
-
-                                    }
-
-                                    dt_param_dict.Remove(date_from);
-                                    takenParamsList.Add(takenparams[i]);
-                                    dt_param_dict.Add(date_from, takenParamsList);
-                                }
-                                else
-                                {
-                                    List<TakenParams> takenParamsList = new List<TakenParams>();
-                                    takenParamsList.Add(takenparams[i]);
-                                    dt_param_dict.Add(date_from, takenParamsList);
-                                }
-                            }
-
-                            if (dt_param_dict.Count == 0)
-                            {
-                                msg = String.Format("ПОЛУчасовые срезы: cловарь 'Дата-Дескриптор параметра' пуст. Срезы прочитаны не будут");
-                                logger.LogError(msg);
-                                break;
-                            }
-
-                            #endregion
-
-                            #region Подготовка дескрипторов параметров для передачи в драйвер
-
-                            //создадим список дескрипторов срезов и заполним его дескрипторами параметров
-                            List<SliceDescriptor> sliceDescrList = new List<SliceDescriptor>();
-
-                            foreach (KeyValuePair<DateTime, List<TakenParams>> pair in dt_param_dict)
-                            {
-                                DateTime tmpDate = pair.Key;
-                                List<TakenParams> tmpTpList = pair.Value;
-
-                                SliceDescriptor sd = new SliceDescriptor(tmpDate);
-
-                                foreach (TakenParams tp in tmpTpList)
-                                {
-                                    Param p = ServerStorage.GetParamByGUID(tp.guid_params);
-                                    if (p.guid == Guid.Empty)
-                                    {
-                                        msg = String.Format("ПОЛУчасовые срезы: ошибка считывания GUIDa одного из параметров");
-                                        logger.LogError(msg);
-                                        continue;
-                                    }
-
-                                    sd.AddValueDescriptor(tp.id, p.param_address, p.channel, SLICE_PERIOD);
-                                }
-
-                                sliceDescrList.Add(sd);
-                            }
-
-                            #endregion
-
-                            #region Отправка дескрипторов счетчику и запись полученных значений в БД
-
-                            //если срезы прочитаны успешно
-                            if (meter.ReadPowerSlice(ref sliceDescrList, dt_cur, SLICE_PERIOD))
-                            {
-                                //meter.WriteToLog("RSL: Данные прочитаны, осталось занести в базу", LOG_SLICES);
-                                foreach (SliceDescriptor su in sliceDescrList)
-                                {
                                     if (bStopServer) goto CloseThreadPoint;
 
-                                    for (uint i = 0; i < su.ValuesCount; i++)
+                                    //получим последний (по дате) срез из БД
+                                    Value latestSliceVal = ServerStorage.GetLatestVariousValue(takenparams[tpindex]);
+
+                                    if (latestSliceVal.dt.Ticks > 0)
                                     {
-                                        try
-                                        {
-                                            Value val = new Value();
-                                            su.GetValueId(i, ref val.id_taken_params);
-                                            su.GetValue(i, ref val.value, ref val.status);
-                                            val.dt = su.Date;
+                                        meter.WriteToLog("RSL: 4. В базе найден последний срез от: " + latestSliceVal.dt.ToString(), WRITE_LOG);
+                                        TimeSpan timeSpan = new TimeSpan(dt_cur.Ticks - latestSliceVal.dt.Ticks);
 
 
-                                            /*добавим в БД "разное" значение и обновим dt_last_read*/
-                                            ServerStorage.AddVariousValues(val);
-                                            ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
-                                        }
-                                        catch (Exception ex)
+                                        if (timeSpan.TotalMinutes < SLICE_PER_HALF_AN_HOUR_PERIOD)
                                         {
-                                            msg = String.Format("ПОЛУчасовые срезы: ошибка перегрупировки параметров, срез ({0}) считан не будет; текст исключения: {1}",
-                                                i, ex.Message);
-                                            logger.LogError(msg);
+                                            meter.WriteToLog("RSL: 4.1. Не прошло 30 минут с момента добавления среза, выхожу из цикла", WRITE_LOG);
                                             continue;
-                                        }
-                                    }
-                                }
-                                //meter.WriteToLog("RSL: Данные успешно занесены в БД", LOG_SLICES);
-                                //meter.WriteToLog("RSL: ---/ конец чтения срезов /---", LOG_SLICES);
-                            }
-                            else
-                            {
-                                msg = String.Format("ПОЛУчасовые срезы: метод драйвера ReadPowerSlice(ref sliceDescrList, dt_cur, SLICE_PERIOD) вернул false, срезы не прочитаны");
-                                logger.LogError(msg);
-                            }
-
-                            #endregion
-
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        //ошибка Связь неустановлена
-                    }
-                    #endregion
-                }
-
-                if (bStopServer) goto CloseThreadPoint;
-                if (typemeter.driver_name == "set4tm_03" && pollingParams.b_poll_halfanhour)
-                {
-                    #region ПОЛУЧАСОВЫЕ СРЕЗЫ (СТАРАЯ ВЕРСИЯ)
-
-                    const byte SLICE_PER_HALF_AN_HOUR_TYPE = 4;                         //тип значения в БД (получасовой)
-                    const byte SLICE_PER_HALF_AN_HOUR_PERIOD = 30;                      //интервал записи срезов
-
-                    //чтение получасовых срезов, подлежащих чтению, относящихся к конкретному прибору
-                    TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid,
-                        SLICE_PER_HALF_AN_HOUR_TYPE);
-
-                    if (takenparams.Length > 0)
-                    {
-                        //читать данные только если прибор ответил
-                        if (meter.OpenLinkCanal())
-                        {
-                            const bool WRITE_LOG = true;
-                            meter.WriteToLog("RSL: 1. Открыт канал для чтения получасовок", WRITE_LOG);
-
-                            //дата установки счетчика
-                            DateTime dt_install = metersbyport[MetersCounter].dt_install;
-                            DateTime dt_cur = DateTime.Now;
-                            DateTime dt_last_slice_arr_init = new DateTime();
-
-                            //пусть дата начала = дата установки
-                            DateTime date_from = dt_install;
-
-                            for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
-                            {
-                                List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
-                                meter.WriteToLog("RSL: 2. Вошли в цикл, итерация" + tpindex.ToString(), WRITE_LOG);
-
-                                if (dt_install > dt_cur)
-                                {
-                                    meter.WriteToLog("RSL: 3. Дата установки не может быть больше текущей: " +
-                                        dt_install.ToString(), WRITE_LOG);
-                                    break;
-                                }
-                                meter.WriteToLog("RSL: 3. Дата установки корректна: " + dt_install.ToString(), WRITE_LOG);
-
-                                if (bStopServer) goto CloseThreadPoint;
-
-                                //получим последний (по дате) срез из БД
-                                Value latestSliceVal = ServerStorage.GetLatestVariousValue(takenparams[tpindex]);
-
-                                if (latestSliceVal.dt.Ticks > 0)
-                                {
-                                    meter.WriteToLog("RSL: 4. В базе найден последний срез от: " + latestSliceVal.dt.ToString(), WRITE_LOG);
-                                    TimeSpan timeSpan = new TimeSpan(dt_cur.Ticks - latestSliceVal.dt.Ticks);
-
-
-                                    if (timeSpan.TotalMinutes < SLICE_PER_HALF_AN_HOUR_PERIOD)
-                                    {
-                                        meter.WriteToLog("RSL: 4.1. Не прошло 30 минут с момента добавления среза, выхожу из цикла", WRITE_LOG);
-                                        continue;
-                                    }
-                                }
-                                else
-                                {
-                                    meter.WriteToLog("RSL: 4. Последний срез в базе НЕ найден", WRITE_LOG);
-                                    //получим дату последней инициализации массива срезов
-                                    if (meter.ReadSliceArrInitializationDate(ref dt_last_slice_arr_init))
-                                    {
-                                        if (dt_last_slice_arr_init > date_from && dt_last_slice_arr_init < dt_cur)
-                                        {
-                                            meter.WriteToLog("RSL: 5. Принял за начало дату инициализации: " +
-                                            dt_last_slice_arr_init.ToString(), WRITE_LOG);
-                                            date_from = dt_last_slice_arr_init;
                                         }
                                     }
                                     else
                                     {
-                                        meter.WriteToLog("RSL: 5. Дата инициализации НЕ найдена", WRITE_LOG);
+                                        meter.WriteToLog("RSL: 4. Последний срез в базе НЕ найден", WRITE_LOG);
+                                        //получим дату последней инициализации массива срезов
+                                        if (meter.ReadSliceArrInitializationDate(ref dt_last_slice_arr_init))
+                                        {
+                                            if (dt_last_slice_arr_init > date_from && dt_last_slice_arr_init < dt_cur)
+                                            {
+                                                meter.WriteToLog("RSL: 5. Принял за начало дату инициализации: " +
+                                                dt_last_slice_arr_init.ToString(), WRITE_LOG);
+                                                date_from = dt_last_slice_arr_init;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            meter.WriteToLog("RSL: 5. Дата инициализации НЕ найдена", WRITE_LOG);
+                                        }
+                                    }
+
+                                    //прочие проверки
+                                    Param param = ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
+                                    if (param.guid == Guid.Empty) continue;
+
+                                    meter.WriteToLog("RSL: 6. Параметру присвоен GUID, параметр:" + param.name, WRITE_LOG);
+
+
+                                    //уточним начальную дату чтения срезов
+                                    if (latestSliceVal.dt > date_from && latestSliceVal.dt < dt_cur)
+                                    {
+                                        date_from = latestSliceVal.dt.AddMinutes(1);
+                                        meter.WriteToLog("RSL: 7. Принял за начало дату ПОСЛЕДНЕГО СРЕЗА: " +
+                                        date_from.ToString(), WRITE_LOG);
+                                    }
+
+                                    if (date_from.Ticks == 0)
+                                    {
+                                        meter.WriteToLog("RSL: 8. Начальная дата НЕКОРРЕКТНА, срезы прочитаны НЕ будут: " +
+                                        date_from.ToString());
+                                    }
+                                    else
+                                    {
+                                        meter.WriteToLog("RSL: 8. ЗА дату начала приняли:" + date_from.ToString(), WRITE_LOG);
+                                        meter.WriteToLog("        ЗА дату конца приняли:" + dt_cur.ToString(), WRITE_LOG);
+                                    }
+
+                                    //если срезы из указанного диапазона дат прочитаны успешно
+                                    if (meter.ReadPowerSlice(date_from, dt_cur, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD))
+                                    {
+                                        meter.WriteToLog("RSL: 9. Данные прочитаны, осталось занести в базу", WRITE_LOG);
+                                        foreach (RecordPowerSlice rps in lrps)
+                                        {
+                                            if (bStopServer) goto CloseThreadPoint;
+
+                                            Value val = new Value();
+                                            val.dt = rps.date_time;
+                                            val.id_taken_params = takenparams[tpindex].id;
+                                            val.status = Convert.ToBoolean(rps.status);
+
+                                            switch (param.param_address)
+                                            {
+                                                case 0: { val.value = rps.APlus; break; }
+                                                case 1: { val.value = rps.AMinus; break; }
+                                                case 2: { val.value = rps.RPlus; break; }
+                                                case 3: { val.value = rps.RMinus; break; }
+                                                default:
+                                                    {
+                                                        continue;
+                                                        //meter.WriteToLog("Значения среза по каналу {0}", param.channel);
+                                                    }
+                                            }
+
+                                            /*добавим в БД "настраивоемое" значение и обновим dt_last_read*/
+                                            ServerStorage.AddVariousValues(val);
+                                            ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
+                                        }
+
+                                    }
+                                    meter.WriteToLog("RSL: 10. Данные успешно занесены в БД", WRITE_LOG);
+                                }
+                            }
+                            else
+                            {
+                                //meter.WriteToLog("Дата, с которой планируется читать срезы мощности не может быть больше текущей даты");
+                            }
+                        }
+                        #endregion
+                    }
+                    else
+                    {
+                        #region ПОЛУЧАСОВЫЕ СРЕЗЫ
+
+                        const byte SLICE_TYPE = 4;                         //тип значения в БД (получасовой/часовой)
+                        const SlicePeriod SLICE_PERIOD = SlicePeriod.HalfAnHour;
+
+                        if (meter.OpenLinkCanal())
+                        {
+                            /* Цикл организуется для возможности немедленного прекращения выполнения 
+                             * блока чтения срезов в случае ошибки*/
+                            while (true)
+                            {
+                                //чтение 'дескрипторов' считываемых параметров указанного типа
+                                TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid,
+                                    SLICE_TYPE);
+                                if (takenparams.Length == 0) break;
+
+                                string msg = String.Format("ПОЛУчасовые срезы: к считыванию подлежит {0} параметров", takenparams.Length);
+                                logger.LogInfo(msg);
+
+                                #region Выбор дат, с которых необходимо читать каждый параметр, создание словаря вида 'Дата-Список параметров с этой датой'
+
+                                //дата установки счетчика
+                                DateTime dt_install = metersbyport[MetersCounter].dt_install;
+                                DateTime dt_cur = DateTime.Now;
+
+                                //пусть дата начала = дата установки
+                                DateTime date_from = dt_install;
+
+                                if (dt_install > dt_cur)
+                                {
+                                    msg = String.Format("ПОЛУчасовые срезы: дата установки прибора ({0}) не может быть больше текущей", dt_install.ToString());
+                                    logger.LogError(msg);
+                                    break;
+                                }
+
+                                if (bStopServer) goto CloseThreadPoint;
+
+                                //некоторые счетчики хранят дату инициализации архива (начала учета)
+                                DateTime dt_last_slice_arr_init = new DateTime();
+                                //получим дату последней инициализации массива срезов (если счетчик поддерживает)
+                                if (meter.ReadSliceArrInitializationDate(ref dt_last_slice_arr_init))
+                                {
+                                    msg = String.Format("ПОЛУчасовые срезы: определена дата инициализации архива ({0})",
+                                        dt_last_slice_arr_init.ToString());
+                                    logger.LogInfo(msg);
+                                }
+
+                                //для каждого считываемого параметра определим дату начала и сопоставим дескриптору
+                                //считываемого параметра
+                                Dictionary<DateTime, List<TakenParams>> dt_param_dict = new Dictionary<DateTime, List<TakenParams>>();
+                                for (int i = 0; i < takenparams.Length; i++)
+                                {
+                                    if (bStopServer) goto CloseThreadPoint;
+
+                                    //получим последний (по дате) срез для читаемого параметра i
+                                    Value latestSliceVal = ServerStorage.GetLatestVariousValue(takenparams[i]);
+
+                                    Param p = ServerStorage.GetParamByGUID(takenparams[i].guid_params);
+                                    if (p.guid == Guid.Empty)
+                                    {
+                                        msg = String.Format("ПОЛУчасовые срезы: ошибка считывания GUIDa параметра {0} из {1} считываемых, параметр: {2}",
+                                            i, takenparams.Length, p.name);
+                                        logger.LogError(msg);
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        //string msg = String.Format("RSL: Итерация {3}: Определение даты для параметра {0}; адрес {1}; канал {2}", p.name, p.param_address, p.channel, i);
+                                        //meter.WriteToLog(msg, SEL_DATE_REGION_LOGGING);
+                                    }
+
+                                    if (latestSliceVal.dt.Ticks > 0)
+                                    {
+                                        //meter.WriteToLog("RSL: В базе найден последний срез от: " + latestSliceVal.dt.ToString(), SEL_DATE_REGION_LOGGING);
+                                        TimeSpan timeSpan = new TimeSpan(dt_cur.Ticks - latestSliceVal.dt.Ticks);
+
+                                        if (timeSpan.TotalMinutes <= (int)SLICE_PERIOD)
+                                        {
+                                            msg = String.Format("ПОЛУчасовые срезы: Не прошло {0} минут с момента добавления среза {1}, перехожу к следующему параметру",
+                                               (int)SLICE_PERIOD, latestSliceVal.dt);
+                                            logger.LogInfo(msg);
+                                            continue;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        //meter.WriteToLog("RSL: Последний срез в базе НЕ найден", SEL_DATE_REGION_LOGGING);
+                                        msg = String.Format("ПОЛУчасовые срезы: последний срез в базе не найден");
+                                        logger.LogInfo(msg);
+
+                                        if (dt_last_slice_arr_init > date_from && dt_last_slice_arr_init < dt_cur)
+                                        {
+                                            msg = String.Format("ПОЛУчасовые срезы: дата инициализации архивов ({0}) принята за дату начала",
+                                                dt_last_slice_arr_init.ToString());
+                                            logger.LogInfo(msg);
+
+                                            date_from = dt_last_slice_arr_init;
+                                        }
+                                    }
+
+                                    //уточним начальную дату чтения срезов
+                                    if (latestSliceVal.dt > date_from && latestSliceVal.dt < dt_cur)
+                                    {
+                                        date_from = latestSliceVal.dt.AddMinutes((double)SLICE_PERIOD);
+                                        //meter.WriteToLog("RSL: Принял за начало дату ПОСЛЕДНЕГО СРЕЗА + 1 минута: " + date_from.ToString(), SEL_DATE_REGION_LOGGING);
+                                    }
+
+                                    if (date_from.Ticks == 0)
+                                    {
+                                        msg = String.Format("ПОЛУчасовые срезы: начальная дата ({0}) НЕКОРРЕКТНА, срезы параметра прочитаны НЕ будут",
+                                            date_from.ToString());
+                                        logger.LogError(msg);
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        msg = String.Format("ПОЛУчасовые срезы: начальная дата ({0})", date_from.ToString());
+                                        logger.LogInfo(msg);
+                                    }
+
+                                    //добавим пару значений в словарь
+                                    if (dt_param_dict.ContainsKey(date_from))
+                                    {
+                                        List<TakenParams> takenParamsList = null;
+                                        if (!dt_param_dict.TryGetValue(date_from, out takenParamsList))
+                                        {
+
+                                        }
+
+                                        dt_param_dict.Remove(date_from);
+                                        takenParamsList.Add(takenparams[i]);
+                                        dt_param_dict.Add(date_from, takenParamsList);
+                                    }
+                                    else
+                                    {
+                                        List<TakenParams> takenParamsList = new List<TakenParams>();
+                                        takenParamsList.Add(takenparams[i]);
+                                        dt_param_dict.Add(date_from, takenParamsList);
                                     }
                                 }
 
-                                //прочие проверки
-                                Param param = ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
-                                if (param.guid == Guid.Empty) continue;
-
-                                meter.WriteToLog("RSL: 6. Параметру присвоен GUID, параметр:" + param.name, WRITE_LOG);
-
-
-                                //уточним начальную дату чтения срезов
-                                if (latestSliceVal.dt > date_from && latestSliceVal.dt < dt_cur)
+                                if (dt_param_dict.Count == 0)
                                 {
-                                    date_from = latestSliceVal.dt.AddMinutes(1);
-                                    meter.WriteToLog("RSL: 7. Принял за начало дату ПОСЛЕДНЕГО СРЕЗА: " +
-                                    date_from.ToString(), WRITE_LOG);
+                                    msg = String.Format("ПОЛУчасовые срезы: cловарь 'Дата-Дескриптор параметра' пуст. Срезы прочитаны не будут");
+                                    logger.LogError(msg);
+                                    break;
                                 }
 
-                                if (date_from.Ticks == 0)
+                                #endregion
+
+                                #region Подготовка дескрипторов параметров для передачи в драйвер
+
+                                //создадим список дескрипторов срезов и заполним его дескрипторами параметров
+                                List<SliceDescriptor> sliceDescrList = new List<SliceDescriptor>();
+
+                                foreach (KeyValuePair<DateTime, List<TakenParams>> pair in dt_param_dict)
                                 {
-                                    meter.WriteToLog("RSL: 8. Начальная дата НЕКОРРЕКТНА, срезы прочитаны НЕ будут: " +
-                                    date_from.ToString());
-                                }
-                                else
-                                {
-                                    meter.WriteToLog("RSL: 8. ЗА дату начала приняли:" + date_from.ToString(), WRITE_LOG);
-                                    meter.WriteToLog("        ЗА дату конца приняли:" + dt_cur.ToString(), WRITE_LOG);
+                                    DateTime tmpDate = pair.Key;
+                                    List<TakenParams> tmpTpList = pair.Value;
+
+                                    SliceDescriptor sd = new SliceDescriptor(tmpDate);
+
+                                    foreach (TakenParams tp in tmpTpList)
+                                    {
+                                        Param p = ServerStorage.GetParamByGUID(tp.guid_params);
+                                        if (p.guid == Guid.Empty)
+                                        {
+                                            msg = String.Format("ПОЛУчасовые срезы: ошибка считывания GUIDa одного из параметров");
+                                            logger.LogError(msg);
+                                            continue;
+                                        }
+
+                                        sd.AddValueDescriptor(tp.id, p.param_address, p.channel, SLICE_PERIOD);
+                                    }
+
+                                    sliceDescrList.Add(sd);
                                 }
 
-                                //если срезы из указанного диапазона дат прочитаны успешно
-                                if (meter.ReadPowerSlice(date_from, dt_cur, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD))
+                                #endregion
+
+                                #region Отправка дескрипторов счетчику и запись полученных значений в БД
+
+                                //если срезы прочитаны успешно
+                                if (meter.ReadPowerSlice(ref sliceDescrList, dt_cur, SLICE_PERIOD))
                                 {
-                                    meter.WriteToLog("RSL: 9. Данные прочитаны, осталось занести в базу", WRITE_LOG);
-                                    foreach (RecordPowerSlice rps in lrps)
+                                    //meter.WriteToLog("RSL: Данные прочитаны, осталось занести в базу", LOG_SLICES);
+                                    foreach (SliceDescriptor su in sliceDescrList)
                                     {
                                         if (bStopServer) goto CloseThreadPoint;
 
-                                        Value val = new Value();
-                                        val.dt = rps.date_time;
-                                        val.id_taken_params = takenparams[tpindex].id;
-                                        val.status = Convert.ToBoolean(rps.status);
-
-                                        switch (param.param_address)
+                                        for (uint i = 0; i < su.ValuesCount; i++)
                                         {
-                                            case 0: { val.value = rps.APlus; break; }
-                                            case 1: { val.value = rps.AMinus; break; }
-                                            case 2: { val.value = rps.RPlus; break; }
-                                            case 3: { val.value = rps.RMinus; break; }
-                                            default:
-                                                {
-                                                    continue;
-                                                    //meter.WriteToLog("Значения среза по каналу {0}", param.channel);
-                                                }
+                                            try
+                                            {
+                                                Value val = new Value();
+                                                su.GetValueId(i, ref val.id_taken_params);
+                                                su.GetValue(i, ref val.value, ref val.status);
+                                                val.dt = su.Date;
+
+
+                                                /*добавим в БД "разное" значение и обновим dt_last_read*/
+                                                ServerStorage.AddVariousValues(val);
+                                                ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                msg = String.Format("ПОЛУчасовые срезы: ошибка перегрупировки параметров, срез ({0}) считан не будет; текст исключения: {1}",
+                                                    i, ex.Message);
+                                                logger.LogError(msg);
+                                                continue;
+                                            }
                                         }
-
-                                        /*добавим в БД "настраивоемое" значение и обновим dt_last_read*/
-                                        ServerStorage.AddVariousValues(val);
-                                        ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
                                     }
-
+                                    //meter.WriteToLog("RSL: Данные успешно занесены в БД", LOG_SLICES);
+                                    //meter.WriteToLog("RSL: ---/ конец чтения срезов /---", LOG_SLICES);
                                 }
-                                meter.WriteToLog("RSL: 10. Данные успешно занесены в БД", WRITE_LOG);
+                                else
+                                {
+                                    msg = String.Format("ПОЛУчасовые срезы: метод драйвера ReadPowerSlice(ref sliceDescrList, dt_cur, SLICE_PERIOD) вернул false, срезы не прочитаны");
+                                    logger.LogError(msg);
+                                }
+
+                                #endregion
+
+                                break;
                             }
                         }
                         else
                         {
-                            //meter.WriteToLog("Дата, с которой планируется читать срезы мощности не может быть больше текущей даты");
+                            //ошибка Связь неустановлена
                         }
+                        #endregion
                     }
-                    #endregion
+
+                    if (bStopServer) goto CloseThreadPoint;
                 }
+
                 
                 ////////////////////ТЕКУЩИЕ///////////////////
                 if (bStopServer) goto CloseThreadPoint;
