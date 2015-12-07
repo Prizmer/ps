@@ -669,7 +669,7 @@ namespace Prizmer.PoolServer
                 }
 
                 if (bStopServer) goto CloseThreadPoint;
-                if (typemeter.driver_name != "set4tm_03" && pollingParams.b_poll_halfanhour)
+                if (pollingParams.b_poll_halfanhour)
                 {
                     #region ПОЛУЧАСОВЫЕ СРЕЗЫ
                     
