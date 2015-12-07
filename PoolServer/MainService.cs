@@ -673,9 +673,6 @@ namespace Prizmer.PoolServer
                 {
                     #region ПОЛУЧАСОВЫЕ СРЕЗЫ
                     
-                    const bool LOG_SLICES = false;
-                    const bool SEL_DATE_REGION_LOGGING = false;
-
                     const byte SLICE_TYPE = 4;                         //тип значения в БД (получасовой/часовой)
                     const SlicePeriod SLICE_PERIOD = SlicePeriod.HalfAnHour;
 
@@ -690,8 +687,8 @@ namespace Prizmer.PoolServer
                                 SLICE_TYPE);
                             if (takenparams.Length == 0) break;
 
-                            meter.WriteToLog("RSL: ---/ начало чтения срезов /---", LOG_SLICES);
-                            meter.WriteToLog("RSL: К считыванию подлежит " + takenparams.Length.ToString() + " параметров", LOG_SLICES);
+                            //meter.WriteToLog("RSL: ---/ начало чтения срезов /---", LOG_SLICES);
+                            //meter.WriteToLog("RSL: К считыванию подлежит " + takenparams.Length.ToString() + " параметров", LOG_SLICES);
 
                             #region Выбор дат, с которых необходимо читать каждый параметр, создание словаря вида 'Дата-Список параметров с этой датой'
 
@@ -704,8 +701,8 @@ namespace Prizmer.PoolServer
 
                             if (dt_install > dt_cur)
                             {
-                                meter.WriteToLog("RSL: Err1: Дата установки не может быть больше текущей: " +
-                                    dt_install.ToString(), SEL_DATE_REGION_LOGGING);
+                                string msg = String.Format("Срезы часовые: дата установки прибора ({0}) не может быть больше текущей", dt_install.ToString());
+                                logger.LogError(msg);
                                 break;
                             }
 
@@ -714,9 +711,12 @@ namespace Prizmer.PoolServer
                             //некоторые счетчики хранят дату инициализации архива (начала учета)
                             DateTime dt_last_slice_arr_init = new DateTime();
                             //получим дату последней инициализации массива срезов (если счетчик поддерживает)
-                            if (!meter.ReadSliceArrInitializationDate(ref dt_last_slice_arr_init))
-                                meter.WriteToLog("RSL: Дата инициализации архивов НЕ найдена", SEL_DATE_REGION_LOGGING);
-
+                            if (meter.ReadSliceArrInitializationDate(ref dt_last_slice_arr_init))
+                            {
+                                string msg = String.Format("Срезы часовые: определена дата инициализации архива ({0})",
+                                    dt_last_slice_arr_init.ToString());
+                                logger.LogInfo(msg);
+                            }
 
                             //для каждого считываемого параметра определим дату начала и сопоставим дескриптору
                             //считываемого параметра
@@ -731,35 +731,38 @@ namespace Prizmer.PoolServer
                                 Param p = ServerStorage.GetParamByGUID(takenparams[i].guid_params);
                                 if (p.guid == Guid.Empty)
                                 {
-                                    meter.WriteToLog("RSL: Err2: ошибка считывания GUIDa параметра на итерации " + i, SEL_DATE_REGION_LOGGING);
+                                    string msg = String.Format("Срезы часовые: ошибка считывания GUIDa параметра {0} из {1} считываемых, параметр: {2}",
+                                        i, takenparams.Length, p.name);
+                                    logger.LogError(msg);
                                     continue;
                                 }
                                 else
                                 {
-                                    string msg = String.Format("RSL: Итерация {3}: Определение даты для параметра {0}; адрес {1}; канал {2}",
-                                        p.name, p.param_address, p.channel, i);
-                                    meter.WriteToLog(msg, SEL_DATE_REGION_LOGGING);
+                                    //string msg = String.Format("RSL: Итерация {3}: Определение даты для параметра {0}; адрес {1}; канал {2}", p.name, p.param_address, p.channel, i);
+                                    //meter.WriteToLog(msg, SEL_DATE_REGION_LOGGING);
                                 }
 
                                 if (latestSliceVal.dt.Ticks > 0)
                                 {
-                                    meter.WriteToLog("RSL: В базе найден последний срез от: " + latestSliceVal.dt.ToString(), SEL_DATE_REGION_LOGGING);
+                                    //meter.WriteToLog("RSL: В базе найден последний срез от: " + latestSliceVal.dt.ToString(), SEL_DATE_REGION_LOGGING);
                                     TimeSpan timeSpan = new TimeSpan(dt_cur.Ticks - latestSliceVal.dt.Ticks);
 
                                     if (timeSpan.TotalMinutes <= (int)SLICE_PERIOD)
                                     {
-                                        meter.WriteToLog("RSL: - Не прошло period минут с момента добавления среза, перехожу к следующему параметру", SEL_DATE_REGION_LOGGING);
+                                        //meter.WriteToLog("RSL: - Не прошло period минут с момента добавления среза, перехожу к следующему параметру", SEL_DATE_REGION_LOGGING);
                                         continue;
                                     }
                                 }
                                 else
                                 {
-                                    meter.WriteToLog("RSL: Последний срез в базе НЕ найден", SEL_DATE_REGION_LOGGING);
+                                    //meter.WriteToLog("RSL: Последний срез в базе НЕ найден", SEL_DATE_REGION_LOGGING);
 
                                     if (dt_last_slice_arr_init > date_from && dt_last_slice_arr_init < dt_cur)
                                     {
-                                        meter.WriteToLog("RSL: Принял за начало дату инициализации архивов: " +
-                                        dt_last_slice_arr_init.ToString(), SEL_DATE_REGION_LOGGING);
+                                        string msg = String.Format("Срезы часовые: дата инициализации архивов ({0}) принята за дату начала",
+                                            dt_last_slice_arr_init.ToString());
+                                        logger.LogInfo(msg);
+
                                         date_from = dt_last_slice_arr_init;
                                     }
                                 }
@@ -768,20 +771,20 @@ namespace Prizmer.PoolServer
                                 if (latestSliceVal.dt > date_from && latestSliceVal.dt < dt_cur)
                                 {
                                     date_from = latestSliceVal.dt.AddMinutes((double)SLICE_PERIOD);
-                                    meter.WriteToLog("RSL: Принял за начало дату ПОСЛЕДНЕГО СРЕЗА + 1 минута: " +
-                                    date_from.ToString(), SEL_DATE_REGION_LOGGING);
+                                    //meter.WriteToLog("RSL: Принял за начало дату ПОСЛЕДНЕГО СРЕЗА + 1 минута: " + date_from.ToString(), SEL_DATE_REGION_LOGGING);
                                 }
 
                                 if (date_from.Ticks == 0)
                                 {
-                                    meter.WriteToLog("RSL: Err3: Начальная дата НЕКОРРЕКТНА, срезы параметра прочитаны НЕ будут: " +
-                                    date_from.ToString(), SEL_DATE_REGION_LOGGING);
+                                    string msg = String.Format("Срезы часовые: начальная дата ({0}) НЕКОРРЕКТНА, срезы параметра прочитаны НЕ будут",
+                                        date_from.ToString());
+                                    logger.LogError(msg);
                                     continue;
-
                                 }
                                 else
                                 {
-                                    meter.WriteToLog("RSL: ЗА дату начала приняли:" + date_from.ToString(), SEL_DATE_REGION_LOGGING);
+                                    string msg = String.Format("Срезы часовые: начальная дата ({0})", date_from.ToString());
+                                    logger.LogInfo(msg);
                                 }
 
                                 //добавим пару значений в словарь
@@ -807,7 +810,8 @@ namespace Prizmer.PoolServer
 
                             if (dt_param_dict.Count == 0)
                             {
-                                meter.WriteToLog("RSL: Err4: Словарь 'Дата-Дескриптор параметра' пуст. Срезы считаны не будут.", LOG_SLICES);
+                                string msg = String.Format("Срезы часовые: cловарь 'Дата-Дескриптор параметра' пуст. Срезы прочитаны не будут");
+                                logger.LogError(msg);
                                 break;
                             }
 
@@ -830,8 +834,8 @@ namespace Prizmer.PoolServer
                                     Param p = ServerStorage.GetParamByGUID(tp.guid_params);
                                     if (p.guid == Guid.Empty)
                                     {
-                                        meter.WriteToLog("RSL: Err: ошибка чтения GUIDa одного из параметров",
-                                        LOG_SLICES);
+                                        string msg = String.Format("Срезы часовые: ошибка считывания GUIDa одного из параметров");
+                                        logger.LogError(msg);
                                         continue;
                                     }
 
@@ -848,7 +852,7 @@ namespace Prizmer.PoolServer
                             //если срезы прочитаны успешно
                             if (meter.ReadPowerSlice(ref sliceDescrList, dt_cur, SLICE_PERIOD))
                             {
-                                meter.WriteToLog("RSL: Данные прочитаны, осталось занести в базу", LOG_SLICES);
+                                //meter.WriteToLog("RSL: Данные прочитаны, осталось занести в базу", LOG_SLICES);
                                 foreach (SliceDescriptor su in sliceDescrList)
                                 {
                                     if (bStopServer) goto CloseThreadPoint;
@@ -862,25 +866,27 @@ namespace Prizmer.PoolServer
                                             su.GetValue(i, ref val.value, ref val.status);
                                             val.dt = su.Date;
 
+
                                             /*добавим в БД "разное" значение и обновим dt_last_read*/
                                             ServerStorage.AddVariousValues(val);
                                             ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
                                         }
                                         catch (Exception ex)
                                         {
-                                            meter.WriteToLog("RSL: Err6: Ошибка перегрупировки параметров 1: " + ex.Message + " срез " + i + " считан не будет.",
-                                                 LOG_SLICES);
+                                            string msg = String.Format("Срезы часовые: ошибка перегрупировки параметров, срез ({0}) считан не будет; текст исключения: {1}",
+                                                i, ex.Message);
+                                            logger.LogError(msg);
                                             continue;
                                         }
                                     }
                                 }
-                                meter.WriteToLog("RSL: Данные успешно занесены в БД", LOG_SLICES);
-                                meter.WriteToLog("RSL: ---/ конец чтения срезов /---", LOG_SLICES);
+                                //meter.WriteToLog("RSL: Данные успешно занесены в БД", LOG_SLICES);
+                                //meter.WriteToLog("RSL: ---/ конец чтения срезов /---", LOG_SLICES);
                             }
                             else
                             {
-                                meter.WriteToLog("RSL: Err7: драйвер не может прочитать срезы", LOG_SLICES);
-                                meter.WriteToLog("RSL: ---/ конец чтения срезов /---", LOG_SLICES);
+                                string msg = String.Format("Срезы часовые: метод драйвера ReadPowerSlice(ref sliceDescrList, dt_cur, SLICE_PERIOD) вернул false, срезы не прочитаны");
+                                logger.LogError(msg);
                             }
 
                             #endregion
