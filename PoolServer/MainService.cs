@@ -701,7 +701,7 @@ namespace Prizmer.PoolServer
 
                             if (dt_install > dt_cur)
                             {
-                                string msg = String.Format("Срезы часовые: дата установки прибора ({0}) не может быть больше текущей", dt_install.ToString());
+                                string msg = String.Format("ПОЛУчасовые срезы: дата установки прибора ({0}) не может быть больше текущей", dt_install.ToString());
                                 logger.LogError(msg);
                                 break;
                             }
@@ -713,7 +713,7 @@ namespace Prizmer.PoolServer
                             //получим дату последней инициализации массива срезов (если счетчик поддерживает)
                             if (meter.ReadSliceArrInitializationDate(ref dt_last_slice_arr_init))
                             {
-                                string msg = String.Format("Срезы часовые: определена дата инициализации архива ({0})",
+                                string msg = String.Format("ПОЛУчасовые срезы: определена дата инициализации архива ({0})",
                                     dt_last_slice_arr_init.ToString());
                                 logger.LogInfo(msg);
                             }
@@ -731,7 +731,7 @@ namespace Prizmer.PoolServer
                                 Param p = ServerStorage.GetParamByGUID(takenparams[i].guid_params);
                                 if (p.guid == Guid.Empty)
                                 {
-                                    string msg = String.Format("Срезы часовые: ошибка считывания GUIDa параметра {0} из {1} считываемых, параметр: {2}",
+                                    string msg = String.Format("ПОЛУчасовые срезы: ошибка считывания GUIDa параметра {0} из {1} считываемых, параметр: {2}",
                                         i, takenparams.Length, p.name);
                                     logger.LogError(msg);
                                     continue;
@@ -759,7 +759,7 @@ namespace Prizmer.PoolServer
 
                                     if (dt_last_slice_arr_init > date_from && dt_last_slice_arr_init < dt_cur)
                                     {
-                                        string msg = String.Format("Срезы часовые: дата инициализации архивов ({0}) принята за дату начала",
+                                        string msg = String.Format("ПОЛУчасовые срезы: дата инициализации архивов ({0}) принята за дату начала",
                                             dt_last_slice_arr_init.ToString());
                                         logger.LogInfo(msg);
 
@@ -776,14 +776,14 @@ namespace Prizmer.PoolServer
 
                                 if (date_from.Ticks == 0)
                                 {
-                                    string msg = String.Format("Срезы часовые: начальная дата ({0}) НЕКОРРЕКТНА, срезы параметра прочитаны НЕ будут",
+                                    string msg = String.Format("ПОЛУчасовые срезы: начальная дата ({0}) НЕКОРРЕКТНА, срезы параметра прочитаны НЕ будут",
                                         date_from.ToString());
                                     logger.LogError(msg);
                                     continue;
                                 }
                                 else
                                 {
-                                    string msg = String.Format("Срезы часовые: начальная дата ({0})", date_from.ToString());
+                                    string msg = String.Format("ПОЛУчасовые срезы: начальная дата ({0})", date_from.ToString());
                                     logger.LogInfo(msg);
                                 }
 
@@ -810,7 +810,7 @@ namespace Prizmer.PoolServer
 
                             if (dt_param_dict.Count == 0)
                             {
-                                string msg = String.Format("Срезы часовые: cловарь 'Дата-Дескриптор параметра' пуст. Срезы прочитаны не будут");
+                                string msg = String.Format("ПОЛУчасовые срезы: cловарь 'Дата-Дескриптор параметра' пуст. Срезы прочитаны не будут");
                                 logger.LogError(msg);
                                 break;
                             }
@@ -834,7 +834,7 @@ namespace Prizmer.PoolServer
                                     Param p = ServerStorage.GetParamByGUID(tp.guid_params);
                                     if (p.guid == Guid.Empty)
                                     {
-                                        string msg = String.Format("Срезы часовые: ошибка считывания GUIDa одного из параметров");
+                                        string msg = String.Format("ПОЛУчасовые срезы: ошибка считывания GUIDa одного из параметров");
                                         logger.LogError(msg);
                                         continue;
                                     }
@@ -873,7 +873,7 @@ namespace Prizmer.PoolServer
                                         }
                                         catch (Exception ex)
                                         {
-                                            string msg = String.Format("Срезы часовые: ошибка перегрупировки параметров, срез ({0}) считан не будет; текст исключения: {1}",
+                                            string msg = String.Format("ПОЛУчасовые срезы: ошибка перегрупировки параметров, срез ({0}) считан не будет; текст исключения: {1}",
                                                 i, ex.Message);
                                             logger.LogError(msg);
                                             continue;
@@ -885,7 +885,7 @@ namespace Prizmer.PoolServer
                             }
                             else
                             {
-                                string msg = String.Format("Срезы часовые: метод драйвера ReadPowerSlice(ref sliceDescrList, dt_cur, SLICE_PERIOD) вернул false, срезы не прочитаны");
+                                string msg = String.Format("ПОЛУчасовые срезы: метод драйвера ReadPowerSlice(ref sliceDescrList, dt_cur, SLICE_PERIOD) вернул false, срезы не прочитаны");
                                 logger.LogError(msg);
                             }
 
