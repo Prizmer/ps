@@ -815,18 +815,22 @@ namespace Prizmer.Meters
 
             if (ReadArchiveValCountId(ref recCount, ref lastRecId))
             {
-                WriteToLog("case1: ReadArchiveValCountId");
                 if (ReadArchiveValById((uint)lastRecId, ref lastArchiveVal))
                     goto SUCCESS;
             }
 
-
             if (ReadArchiveLastVal(ref lastArchiveVal))
             {
-                WriteToLog("case2: ReadArchiveLastVal");
                 goto SUCCESS;
             }
 
+            if (dt.Date == DateTime.Now.Date && DateTime.Now.Hour >= 16)
+            {
+                if (ReadCurrentValues(param, tarif, ref recordValue))
+                    return true;
+            }
+
+            WriteToLog("ReadDailyValues: fail...");
             return false;
 
 
