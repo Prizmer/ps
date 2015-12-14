@@ -808,29 +808,31 @@ namespace Prizmer.Meters
         public bool ReadDailyValues(DateTime dt, ushort param, ushort tarif, ref float recordValue)
         {
             ArchiveValue resArchVal = new ArchiveValue();
-            int records = 0, lastid = 0;
-
-            try
-            {
-                if (!ReadArchiveValCountId(ref records, ref lastid)) return false;
-            }
-            catch (Exception ex)
-            {
-                //WriteToLog("ReadDailyValues->Records count/last id: " + records + "; " + lastid + "; ex");
-                WriteToLog("ReadDailyValues->ReadArchiveValCountId ex: " + ex.Message);
-            }
-
             ArchiveValue lastArchiveVal = new ArchiveValue();
+            lastArchiveVal.id = -1;
 
-            try
+            int recCount = -1, lastRecId = -1;
+
+            if (ReadArchiveValCountId(ref recCount, ref lastRecId))
             {
-                if (!ReadArchiveLastVal(ref lastArchiveVal)) return false;
-            }
-            catch (Exception ex)
-            {
-                WriteToLog("ReadDailyValues->ReadArchiveLastVal ex: " + ex.Message);
+                WriteToLog("case1: ReadArchiveValCountId");
+                if (ReadArchiveValById((uint)lastRecId, ref lastArchiveVal))
+                    goto SUCCESS;
             }
 
+
+            if (ReadArchiveLastVal(ref lastArchiveVal))
+            {
+                WriteToLog("case2: ReadArchiveLastVal");
+                goto SUCCESS;
+            }
+
+            return false;
+
+
+        SUCCESS:
+            int lastid = lastArchiveVal.id;
+            if (lastid == -1) return false;
 
             DateTime lastRecDt = lastArchiveVal.dt;
 
@@ -872,10 +874,10 @@ namespace Prizmer.Meters
 
             switch (param)
             {
-                case 1: 
+                case 1:
                     {
                         recordValue = resArchVal.energy;
-                        break; 
+                        break;
                     }
                 case 2:
                     {
@@ -892,7 +894,7 @@ namespace Prizmer.Meters
                         recordValue = resArchVal.timeErr;
                         break;
                     }
-                default :
+                default:
                     {
                         WriteToLog("ReadDailyValues: для параметра " + param.ToString() + " нет обработчика");
                         return false;
