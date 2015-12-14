@@ -821,7 +821,8 @@ namespace Prizmer.Meters
 
             if (ReadArchiveLastVal(ref lastArchiveVal))
             {
-                goto SUCCESS;
+                if (lastArchiveVal.dt.Date == dt.Date)
+                    goto SUCCESS;
             }
 
             if (dt.Date == DateTime.Now.Date && DateTime.Now.Hour >= 16)
