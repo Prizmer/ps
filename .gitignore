@@ -4,3 +4,4 @@ obj
 obj/*
 Release
 logs
+/PoolServer.suo

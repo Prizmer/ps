@@ -521,7 +521,7 @@ namespace Prizmer.Meters
                 Array.Reverse(energyBytes, ENERGY_CMD, energyBytes.Length - ENERGY_CMD);
 
                 string hex_str = BitConverter.ToString(energyBytes, ENERGY_CMD).Replace("-", string.Empty);
-                const int ENERGY_COEFFICIENT = 10000;
+                const int ENERGY_COEFFICIENT = 10000000;
                 float temp_val = (float)Convert.ToDouble(hex_str) / ENERGY_COEFFICIENT;
 
                 /*TODO: проверить ковертацию float в double*/
