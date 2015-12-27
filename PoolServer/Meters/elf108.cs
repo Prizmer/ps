@@ -111,138 +111,146 @@ namespace Prizmer.Meters
 
         bool SendPT01_CMD(byte[] outCmdBytes, ref byte[] data_arr, byte[] outCmdDataBytes = null)
         {
-
-            List<byte> resCmdList = new List<byte>();
-
-            bool isThereCmdData = false;
-            if (outCmdDataBytes != null)
+            try
             {
-                foreach (byte b in outCmdBytes)
-                    if (b != 0x0)
+                List<byte> resCmdList = new List<byte>();
+
+                bool isThereCmdData = false;
+                if (outCmdDataBytes != null)
+                {
+                    foreach (byte b in outCmdBytes)
+                        if (b != 0x0)
+                        {
+                            isThereCmdData = true;
+                            break;
+                        }
+                }
+
+                resCmdList.Add(0x4d);
+
+                byte crcn = CRC8(outCmdBytes, outCmdBytes.Length);
+                byte[] cmdTmp = new byte[outCmdBytes.Length + 1];
+                Array.Copy(outCmdBytes, cmdTmp, outCmdBytes.Length);
+                cmdTmp[cmdTmp.Length - 1] = crcn;
+                byte[] encrCmdWCS = new byte[cmdTmp.Length];
+                EncryptByteArr(cmdTmp, ref encrCmdWCS);
+                CodeControlBytes(encrCmdWCS, ref encrCmdWCS);
+                resCmdList.AddRange(encrCmdWCS);
+
+                if (isThereCmdData)
+                {
+                    byte crcd = CRC8(outCmdDataBytes, outCmdDataBytes.Length);
+                    cmdTmp = new byte[outCmdDataBytes.Length + 1];
+                    Array.Copy(outCmdDataBytes, cmdTmp, outCmdDataBytes.Length);
+                    cmdTmp[cmdTmp.Length - 1] = crcd;
+
+                    byte[] encrCmdDataWCS = new byte[cmdTmp.Length];
+                    EncryptByteArr(cmdTmp, ref encrCmdDataWCS);
+                    CodeControlBytes(encrCmdDataWCS, ref encrCmdDataWCS);
+                    resCmdList.AddRange(encrCmdDataWCS);
+                }
+
+                resCmdList.Add(0x16);
+
+                byte[] resCmd = resCmdList.ToArray();
+
+                //максимальная предполагаемая длина ответа
+                const int MAX_ANSWER_LENGTH = 200;
+                data_arr = new byte[MAX_ANSWER_LENGTH];
+
+                //если указать -1 в качестве ожидаемой длины ответа, длина ответа будет = длине принятых данных
+                if (m_vport.WriteReadData(findPackageSign, resCmd, ref data_arr, resCmd.Length, -1) == 0) return false;
+                //if (!sport_manager.WriteReadData(resCmd, ref data_arr)) return false;
+
+                List<byte> data_arr_list = new List<byte>();
+                data_arr_list.AddRange(data_arr);
+
+                //если начало правильное
+                if (data_arr_list[0] == 0x4d && data_arr_list[data_arr_list.Count - 1] == 0x16)
+                {
+                    //длина минимальной команды 6 байт
+                    if (data_arr_list.Count < 6)
                     {
-                        isThereCmdData = true;
-                        break;
+                        data_arr = null;
+                        WriteToLog("SendPT01_CMD: корректный ответ не может быть меньше 6 байт по протоколу РТ");
+                        return false;
                     }
-            }
 
-            resCmdList.Add(0x4d);
+                    Array.Copy(data_arr_list.ToArray(), 0, data_arr, 0, data_arr_list.Count);
 
-            byte crcn = CRC8(outCmdBytes, outCmdBytes.Length);
-            byte[] cmdTmp = new byte[outCmdBytes.Length + 1];
-            Array.Copy(outCmdBytes, cmdTmp, outCmdBytes.Length);
-            cmdTmp[cmdTmp.Length - 1] = crcn;
-            byte[] encrCmdWCS = new byte[cmdTmp.Length];
-            EncryptByteArr(cmdTmp, ref encrCmdWCS);
-            CodeControlBytes(encrCmdWCS, ref encrCmdWCS);
-            resCmdList.AddRange(encrCmdWCS);
+                    if (data_arr.Length == resCmd.Length)
+                    {
+                        data_arr = null;
+                        WriteToLog("SendPT01_CMD: длина ответа совпадает с длиной команды");
+                        return false;
+                    }
 
-            if (isThereCmdData)
-            {
-                byte crcd = CRC8(outCmdDataBytes, outCmdDataBytes.Length);
-                cmdTmp = new byte[outCmdDataBytes.Length + 1];
-                Array.Copy(outCmdDataBytes, cmdTmp, outCmdDataBytes.Length);
-                cmdTmp[cmdTmp.Length - 1] = crcd;
+                    //теперь необходимо оставить только полезные данные
+                    /*ответ состоит из:
+                     1. Команда полностью с двумя контрольными символами
+                     2. Контрольный символ начала ответа
+                     3. Команда с новым числом данных и контрольной суммой
+                     4. Данные с контрольной суммой
+                     5. Контрольный символ завершения*/
 
-                byte[] encrCmdDataWCS = new byte[cmdTmp.Length];
-                EncryptByteArr(cmdTmp, ref encrCmdDataWCS);
-                CodeControlBytes(encrCmdDataWCS, ref encrCmdDataWCS);
-                resCmdList.AddRange(encrCmdDataWCS);
-            }
+                    //индекс первого байта команды
+                    int fi = resCmd.Length + 1;
+                    //индекс первого байта полезных данных
+                    int se = fi + outCmdBytes.Length + 1;
 
-            resCmdList.Add(0x16);
+                    //определим кол-во байт полезных данных в ответе
+                    byte[] bCountArr = new byte[2];
+                    Array.Copy(data_arr, fi + 2, bCountArr, 0, 2);
+                    DecodeControlBytes(bCountArr, ref bCountArr);
+                    if (!BitConverter.IsLittleEndian)
+                        Array.Reverse(bCountArr);
 
-            byte[] resCmd = resCmdList.ToArray();
+                    DecryptByteArr(bCountArr, ref bCountArr);
+                    byte[] bCountArr2 = new byte[4];
+                    Array.Copy(bCountArr, bCountArr2, bCountArr.Length);
+                    //полезные данные без учета байта crc8
+                    int answerBytesCount = BitConverter.ToInt32(bCountArr2, 0);
+                    if (answerBytesCount >= data_arr.Length && answerBytesCount == 0)
+                    {
+                        WriteToLog("SendPT01_CMD: неверно определено кол-во байт данных в ответе");
+                        Array.Clear(data_arr, 0, data_arr.Length);
+                        return false;
+                    }
 
-            //максимальная предполагаемая длина ответа
-            const int MAX_ANSWER_LENGTH = 200;
-            data_arr = new byte[MAX_ANSWER_LENGTH];
+                    //+1 - учет байта контрольной суммы
+                    byte[] final_data_arr = new byte[answerBytesCount + 1];
+                    try
+                    {
+                        Array.Copy(data_arr, se, final_data_arr, 0, answerBytesCount + 1);
+                        DecodeControlBytes(final_data_arr, ref final_data_arr);
+                        DecryptByteArr(final_data_arr, ref final_data_arr);
+                        data_arr = final_data_arr;
 
-            //если указать -1 в качестве ожидаемой длины ответа, длина ответа будет = длине принятых данных
-            if (m_vport.WriteReadData(findPackageSign, resCmd, ref data_arr, resCmd.Length, -1) == 0) return false;
-            //if (!sport_manager.WriteReadData(resCmd, ref data_arr)) return false;
+                    }
+                    catch (Exception ex)
+                    {
+                        WriteToLog("SendPT01_CMD: " + ex.Message);
+                        Array.Clear(data_arr, 0, data_arr.Length);
+                        return false;
+                    }
 
-            List<byte> data_arr_list = new List<byte>();
-            data_arr_list.AddRange(data_arr);
 
-            //если начало правильное
-            if (data_arr_list[0] == 0x4d && data_arr_list[data_arr_list.Count - 1] == 0x16)
-            {
-                //длина минимальной команды 6 байт
-                if (data_arr_list.Count < 6)
-                {
-                    data_arr = null;
-                    WriteToLog("SendPT01_CMD: корректный ответ не может быть меньше 6 байт по протоколу РТ");
-                    return false;
+                    return true;
                 }
-
-                Array.Copy(data_arr_list.ToArray(), 0, data_arr, 0, data_arr_list.Count);
-
-                if (data_arr.Length == resCmd.Length)
+                else
                 {
-                    data_arr = null;
-                    WriteToLog("SendPT01_CMD: длина ответа совпадает с длиной команды");
-                    return false;
-                }
-
-                //теперь необходимо оставить только полезные данные
-                /*ответ состоит из:
-                 1. Команда полностью с двумя контрольными символами
-                 2. Контрольный символ начала ответа
-                 3. Команда с новым числом данных и контрольной суммой
-                 4. Данные с контрольной суммой
-                 5. Контрольный символ завершения*/
-
-                //индекс первого байта команды
-                int fi = resCmd.Length + 1;
-                //индекс первого байта полезных данных
-                int se = fi + outCmdBytes.Length + 1;
-
-                //определим кол-во байт полезных данных в ответе
-                byte[] bCountArr = new byte[2];
-                Array.Copy(data_arr, fi + 2, bCountArr, 0, 2);
-                DecodeControlBytes(bCountArr, ref bCountArr);
-                if (!BitConverter.IsLittleEndian)
-                    Array.Reverse(bCountArr);
-
-                DecryptByteArr(bCountArr, ref bCountArr);
-                byte[] bCountArr2 = new byte[4];
-                Array.Copy(bCountArr, bCountArr2, bCountArr.Length);
-                //полезные данные без учета байта crc8
-                int answerBytesCount = BitConverter.ToInt32(bCountArr2, 0);
-                if (answerBytesCount >= data_arr.Length && answerBytesCount == 0)
-                {
-                    WriteToLog("SendPT01_CMD: неверно определено кол-во байт данных в ответе");
                     Array.Clear(data_arr, 0, data_arr.Length);
+                    WriteToLog("SendPT01_CMD: принятые данные некорректны");
                     return false;
                 }
-
-                //+1 - учет байта контрольной суммы
-                byte[] final_data_arr = new byte[answerBytesCount + 1];
-                try
-                {
-                    Array.Copy(data_arr, se, final_data_arr, 0, answerBytesCount + 1);
-                    DecodeControlBytes(final_data_arr, ref final_data_arr);
-                    DecryptByteArr(final_data_arr, ref final_data_arr);
-                    data_arr = final_data_arr;
-
-                }
-                catch (Exception ex)
-                {
-                    WriteToLog("SendPT01_CMD: " + ex.Message);
-                    Array.Clear(data_arr, 0, data_arr.Length);
-                    return false;
-                }
-
-
-                return true;
             }
-            else
+            catch (Exception ex)
             {
-                Array.Clear(data_arr, 0, data_arr.Length);
-                WriteToLog("SendPT01_CMD: принятые данные некорректны");
+                string msg = String.Format("SendPT01_CMD: произошла неизвестная ОШИБКА: {0}\n{1}.\nДлины аргументов " +
+                    "функции: {2}, {3}, {4}", ex.Message, ex.StackTrace, outCmdBytes.Length, data_arr.ToString(), outCmdDataBytes.ToString());
+                WriteToLog(msg);
                 return false;
             }
-
         }
 
         bool isControlByte(byte b)
