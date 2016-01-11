@@ -305,6 +305,20 @@ namespace Prizmer.Meters
                 return false;
         }
 
+        private bool checkIndex(int index, int recBytesCount, string addMsg)
+        {
+            if (index < recBytesCount)
+            {
+                return true;
+            }
+            else
+            {
+                string msg = String.Format("checkIndex: {2}: index {0} > recordBytes.count - 1 = {1}", index, recBytesCount - 1, addMsg);
+                WriteToLog(msg);
+                return false;
+            }
+        }
+
         public bool SplitRecords(List<byte> recordsBytes, ref List<Record> recordsList)
         {
             recordsList = new List<Record>();
@@ -330,6 +344,8 @@ namespace Prizmer.Meters
                 {
                     //переход к байту DIFE
                     index++;
+                    if (!checkIndex(index, recordsBytes.Count, "1")) return false;
+
                     byte DIFE = recordsBytes[index];
                     tmpRec.DIFEs.Add(DIFE);
 
@@ -337,6 +353,7 @@ namespace Prizmer.Meters
                     {
                         //перейдем к следующему DIFE
                         index++;
+                        if (!checkIndex(index, recordsBytes.Count, "2")) return false;
                         DIFE = recordsBytes[index];
                         tmpRec.DIFEs.Add(DIFE);
                     }
@@ -344,12 +361,14 @@ namespace Prizmer.Meters
 
                 //переход к VIF
                 index++;
+                if (!checkIndex(index, recordsBytes.Count, "3")) return false;
                 tmpRec.VIF = recordsBytes[index];
 
                 //проверим на наличие специального VIF, после которого следует ASCII строка
                 if (tmpRec.VIF == Convert.ToByte("11111100", 2))
                 {
                     index++;
+                    if (!checkIndex(index, recordsBytes.Count, "3")) return false;
                     int str_length = recordsBytes[index];
                     index += str_length;
                 }
@@ -358,6 +377,7 @@ namespace Prizmer.Meters
                 {
                     //переход к VIFE
                     index++;
+                    if (!checkIndex(index, recordsBytes.Count, "5")) return false;
                     byte VIFE = recordsBytes[index];
                     tmpRec.VIFEs.Add(VIFE);
 
@@ -365,6 +385,7 @@ namespace Prizmer.Meters
                     {
                         //перейдем к следующему VIFE
                         index++;
+                        if (!checkIndex(index, recordsBytes.Count, "6")) return false;
                         VIFE = recordsBytes[index];
                         tmpRec.VIFEs.Add(VIFE);
                     }
@@ -375,6 +396,7 @@ namespace Prizmer.Meters
                 int dataCnt = 0;
                 while (dataCnt < dataLength)
                 {
+                    if (!checkIndex(index, recordsBytes.Count, (7 + dataCnt).ToString())) return false;
                     tmpRec.dataBytes.Add(recordsBytes[index]);
                     index++;
                     dataCnt++;
