@@ -428,7 +428,7 @@ namespace Prizmer.Meters
                 string answ_str = "";
                 foreach (byte b in inp)
                     answ_str += Convert.ToString(b, 16) + " ";
-                WriteToLog(answ_str);
+                //WriteToLog(answ_str);
 
                 int firstAnswerByteIndex = -1;
                 int byteCIndex = -1;
