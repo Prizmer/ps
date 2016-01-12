@@ -980,16 +980,13 @@ namespace Prizmer.Meters
                     return false;
                 }
 
-                if (inp[inp.Length - 1] == 0xE5)
-                {
-                    return true;
-                }
-                else
-                {
-                    WriteToLog("В ответе SND_NKE не найден подтверждающий байт 0xE5");
-                    return false;
-                }
+                foreach (byte b in inp)
+                    if (b == 0xE5)
+                        return true;
 
+                WriteToLog("В ответе SND_NKE не найден подтверждающий байт 0xE5");
+                WriteToLog("SND_NKE: " + BitConverter.ToString(inp).Replace("-"," "));
+                return false;
 
             }
             catch (Exception ex)
