@@ -148,7 +148,15 @@ namespace Prizmer.Meters
             //if (address > 239) this.m_address = address - 239;
             //else this.m_address = address;
 
+            if (address == 0)
+            {
+                WriteToLog("Init: Не возможно проинициализировать драйвер m230 с адресом 0");
+                return;
+            } 
+
             this.m_address = address % 239;
+            if (m_address == 0) m_address = 239;
+
             password.CopyTo(this.m_password, 0);
 
             m_vport = data_vport;
