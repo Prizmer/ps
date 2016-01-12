@@ -1107,8 +1107,9 @@ namespace Prizmer.Meters
         /// <param name="tarif"></param>
         /// <param name="recordValue"></param>
         /// <returns></returns>
-        public bool ReadDailyValues(DateTime dt, ushort param, ushort tarif, ref float recordValue)
+        public bool ReadDailyValuesPT(DateTime dt, ushort param, ushort tarif, ref float recordValue)
         {
+
             ArchiveValue resArchVal = new ArchiveValue();
             ArchiveValue lastArchiveVal = new ArchiveValue();
             lastArchiveVal.id = -1;
@@ -1210,6 +1211,29 @@ namespace Prizmer.Meters
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Считывает значения на начало суток через MBUS
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="param"></param>
+        /// <param name="tarif"></param>
+        /// <param name="recordValue"></param>
+        /// <returns></returns>
+        public bool ReadDailyValues(DateTime dt, ushort param, ushort tarif, ref float recordValue)
+        {
+            if (dt.Date == DateTime.Now.Date && DateTime.Now.Hour <= 2)
+            {
+                if (ReadCurrentValues(param, tarif, ref recordValue))
+                {
+                    return true;
+                } else {
+                    return false;
+                }
+            }else{
+                return false;
+            }
         }
 
         /// <summary>
