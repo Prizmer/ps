@@ -1223,7 +1223,7 @@ namespace Prizmer.Meters
         /// <returns></returns>
         public bool ReadDailyValues(DateTime dt, ushort param, ushort tarif, ref float recordValue)
         {
-            if (dt.Date == DateTime.Now.Date && DateTime.Now.Hour <= 2)
+            if (dt.Date == DateTime.Now.Date)
             {
                 if (ReadCurrentValues(param, tarif, ref recordValue))
                 {
