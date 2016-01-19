@@ -1054,7 +1054,7 @@ namespace Prizmer.Meters
                     }
                 case 4:
                     {
-                        return getRecordValueByParam(Params.TIME_ON_ERR, records, out recordValue);
+                        return getRecordValueByParam(Params.ERR_CODE, records, out recordValue);
                     }
                 case 5:
                     {
@@ -1088,7 +1088,10 @@ namespace Prizmer.Meters
 
                         return getRecordValueByParam(tmp_param, records, out recordValue);
                     }
-
+                case 7:
+                    {
+                        return getRecordValueByParam(Params.TIME_ON_ERR, records, out recordValue);
+                    }
                 default:
                     {
                         WriteToLog("ReadCurrentValues: для параметра " + param.ToString() + " нет обработчика");
