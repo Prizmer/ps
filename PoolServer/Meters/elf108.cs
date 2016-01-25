@@ -1125,6 +1125,7 @@ namespace Prizmer.Meters
                     goto SUCCESS;
             }
 
+            /*
             if (ReadArchiveLastVal(ref lastArchiveVal))
             {
                 if (lastArchiveVal.dt.Date == dt.Date)
@@ -1136,8 +1137,9 @@ namespace Prizmer.Meters
                 if (ReadCurrentValues(param, tarif, ref recordValue))
                     return true;
             }
+             * */
 
-            WriteToLog("ReadDailyValues: fail...");
+            WriteToLog("ReadDailyValuesPT: fail...");
             return false;
 
 
@@ -1234,7 +1236,20 @@ namespace Prizmer.Meters
                 } else {
                     return false;
                 }
-            }else{
+            }
+            else if (dt.Date < DateTime.Now.Date)
+            {
+                if (ReadDailyValuesPT(dt, param, tarif, ref recordValue))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
                 return false;
             }
         }
@@ -1249,6 +1264,7 @@ namespace Prizmer.Meters
         /// <returns></returns>
         public bool ReadDailyValues(uint recordId, ushort param, ushort tarif, ref float recordValue)
         {
+            /*
             ArchiveValue resArchVal = new ArchiveValue();
             if (!ReadArchiveValById(recordId, ref resArchVal))
             {
@@ -1284,8 +1300,9 @@ namespace Prizmer.Meters
                         return false;
                     }
             }
+             * */
 
-            return true;          
+            return false;          
         }
 
 

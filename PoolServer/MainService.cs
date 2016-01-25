@@ -1258,7 +1258,6 @@ namespace Prizmer.PoolServer
 
                     DateTime cur_date = DateTime.Now.Date;
                     DateTime dt_install = metersbyport[MetersCounter].dt_install.Date;
-                    DateTime prev_date = cur_date.AddDays(-1);
 
                     //чтение архивных параметров, подлежащих чтению, относящихся к конкретному прибору
                     TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid, 3);
@@ -1271,25 +1270,21 @@ namespace Prizmer.PoolServer
                             //получим все записи в интервале от даты установки (если нет, от начала НЭ) до текущего момента
                             Value[] valueArr = ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], dt_install, cur_date);
 
-                            bool dailyValuesExist = false;
-                            if (valueArr.Length > 0) dailyValuesExist = true;
+                            //пусть по умолчанию, читаются данные за двое предыдущих суток
+                            DateTime fromDate = DateTime.Now.Date.AddDays(-2);
 
-                            //если значения dt_install нет, то считаем что счетчик установлен сегодня
-                            if (dt_install.Date == new DateTime(0).Date)
-                                dt_install = DateTime.Now.Date;
+                            //если задано dt_install, то используем его
+                            if (dt_install.Date != new DateTime(0).Date)
+                                fromDate = dt_install.Date;
 
-                            DateTime fromDate = DateTime.Now.Date;
-
-                            if (dailyValuesExist)
+                            //если в базе найдено суточное показание и оно не за сегодня, прибавим день и примем дату за начальную
+                            if (valueArr.Length > 0)
                             {
-                                DateTime lastValDt = valueArr[valueArr.Length - 1].dt.Date;
-                                //если последнее значение записано сегодня, рассматриваем следующий параметр
-                                if (lastValDt.Date == cur_date.Date) continue;
-                                fromDate = lastValDt.Date;
-                            }
-                            else
-                            {
-                                fromDate = dt_install;
+                                fromDate = valueArr[valueArr.Length - 1].dt.Date;
+                                if (fromDate.Date == cur_date.Date)
+                                    continue;
+                                else
+                                    fromDate.AddDays(1);
                             }
 
                             TimeSpan diff = cur_date.Date - fromDate.Date;
@@ -1304,8 +1299,6 @@ namespace Prizmer.PoolServer
 
                                 for (int i = 0; i <= diff.TotalDays; i++)
                                 {
-                                    //meter.WriteToLog("Арх: читаю параметр (" + tpindex.ToString() + "): " + param.name);
-                                    //чтение суточных параметров
                                     int cnt = 0;
                                 READAGAIN:
                                     if (meter.ReadDailyValues(fromDate, param.param_address, param.channel, ref curValue))
