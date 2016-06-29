@@ -17,7 +17,6 @@ namespace Prizmer.Meters
             this.m_address = address;
             this.m_addr = (byte)(this.m_address & 0x000000ff);
             this.m_vport = vp;
-
         }
 
         private byte m_addr = 0x0;

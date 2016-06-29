@@ -349,6 +349,7 @@ namespace Prizmer.PoolServer
                     case "spg76212": meter = new spg76212(); break;
                     case "teplouchet1": meter = new teplouchet1(); break;
                     case "m200": meter = new Mercury200(); break;
+                    case "opcretranslator": meter = new OpcRetranslator(); break;
                 }
 
                 if (meter == null)
