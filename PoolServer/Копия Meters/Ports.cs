@@ -6,7 +6,6 @@ using System.Threading;
 
 using System.IO;
 using System.IO.Ports;
-using System.Net;
 using System.Net.Sockets;
 
 namespace Prizmer.Ports
@@ -56,13 +55,8 @@ namespace Prizmer.Ports
         public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
             int reading_size = 0;
-            byte[] ipArr = { 127, 0, 0, 1 };
-            IPAddress ipa = new IPAddress(ipArr);
-            IPEndPoint ipe = new IPEndPoint(ipa, 7778);
-            TcpClient tcp = new TcpClient();
-            
-        //    using (TcpClient tcp = new TcpClient())
-         //   {
+            using (TcpClient tcp = new TcpClient())
+            {
                 Queue<byte> reading_queue = new Queue<byte>(8192);
                
                 try
@@ -70,12 +64,6 @@ namespace Prizmer.Ports
                     Thread.Sleep(m_delay_between_sending);
                     tcp.SendTimeout = 500;
                     tcp.ReceiveTimeout = 500;
-
-                    
-                    tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                    tcp.Client.Bind(ipe);
-
-                    Thread.Sleep(1000);
 
                     IAsyncResult ar = tcp.BeginConnect(m_address, m_port, null, null);
                     using (WaitHandle wh = ar.AsyncWaitHandle)
@@ -96,7 +84,7 @@ namespace Prizmer.Ports
                                 {
                                     uint elapsed_time_count = 0;
 
-                                    Thread.Sleep(1000);
+                                    Thread.Sleep(50);
 
                                     // чтение данных
                                     while (elapsed_time_count < m_read_timeout)
@@ -140,7 +128,8 @@ namespace Prizmer.Ports
                                                 target_in_length = Convert.ToInt32(temp_buffer[pos_count_data_size] * size_data + header_size);
                                             }
                                         }
-                                        else if (target_in_length > 0)
+
+                                        if (target_in_length > 0)
                                         {
                                             if (reading_size >= target_in_length)
                                             {
@@ -151,21 +140,6 @@ namespace Prizmer.Ports
                                                 }
                                             }
                                         }
-                                        else if (target_in_length < 0)
-                                        {
-
-                                            target_in_length = reading_queue.Count;
-                                            reading_size = target_in_length;
-                                            in_buffer = new byte[reading_size];
-
-                                            for (int i = 0; i < in_buffer.Length; i++)
-                                                in_buffer[i] = temp_buffer[i];
-
-                                            tcp.Close();
-                                            
-                                            return reading_size;
-                                        }
-
                                     }
                                 }
                             }
@@ -181,7 +155,7 @@ namespace Prizmer.Ports
                 {
                     reading_queue.Clear();
                 }
-           // }
+            }
 
             return reading_size;
         }
