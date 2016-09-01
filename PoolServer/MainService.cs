@@ -1231,6 +1231,7 @@ namespace Prizmer.PoolServer
                                             value.id_taken_params = takenparams[tpindex].id;
                                             value.status = false;
                                             value.value = curvalue;
+                                            value.value = (float)Math.Round(value.value, 4, MidpointRounding.AwayFromZero);
                                             ServerStorage.AddMonthlyValues(value);
                                             ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
                                         }
@@ -1254,9 +1255,9 @@ namespace Prizmer.PoolServer
 
                 ////////////////////АРХИВЫ///////////////////
                 if (bStopServer) goto CloseThreadPoint;
-                if (true && pollingParams.b_poll_archive)
+                if (false && pollingParams.b_poll_archive)
                 {
-                    #region АРХИВНЫЕ ДАННЫЕ
+                    #region АРХИВНЫЕ ДАННЫЕ СТАРЫЙ МЕТОД
 
                     DateTime cur_date = DateTime.Now.Date;
                     DateTime dt_install = metersbyport[MetersCounter].dt_install.Date;
@@ -1337,6 +1338,88 @@ namespace Prizmer.PoolServer
 
                         }
 
+                    }
+                    #endregion
+                }
+
+                ////////////////////АРХИВЫ_НОВЫЙ_АКТУАЛЬНЫЙ_АЛГ///////////////////
+                if (bStopServer) goto CloseThreadPoint;
+                if (true && pollingParams.b_poll_archive)
+                {
+                    #region АРХИВНЫЕ ДАННЫЕ НОВ
+
+                    DateTime cur_date = DateTime.Now.Date;
+                    //если дата установки отсутствует, считаем что счетчик установлен сегодня
+                    DateTime dt_install = metersbyport[MetersCounter].dt_install.Date.Ticks == 0 ? new DateTime(0).Date : metersbyport[MetersCounter].dt_install.Date;
+
+                    //чтение архивных параметров, подлежащих чтению, относящихся к конкретному прибору
+                    TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid, 3);
+                    if (takenparams.Length > 0)
+                    {
+                        for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
+                        {
+                            if (bStopServer) goto CloseThreadPoint;
+                            Param param = ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
+                            if (param.guid == Guid.Empty) continue;
+
+                            //пусть по умолчанию, читаются данные за двое предыдущих суток
+                            DateTime fromDate = DateTime.Now.Date.AddDays(-2);
+
+                            //если задана реальная dt_install, то используем ее
+                            if (dt_install.Date != new DateTime(0).Date)
+                            {          
+                                TimeSpan ts1 = DateTime.Now.Date - dt_install.Date;
+                                if (ts1.Days < 31) fromDate = dt_install.Date;
+                                else fromDate = DateTime.Now.Date.AddDays(-31);
+                            }
+
+                            TimeSpan diff = DateTime.Now.Date - fromDate.Date;
+
+                            //читать данные только если прибор ответил
+                            if (meter.OpenLinkCanal())
+                            {
+                                float curValue = 0;
+
+                                DateTime tmpDT = new DateTime(fromDate.Ticks);
+                                for (int i = 0; i <= diff.TotalDays; i++)
+                                {
+                                    int cnt = 0;
+                                    //получим все записи в интервале от даты установки (если нет, от начала НЭ) до текущего момента
+                                    Value[] valueArr = ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], tmpDT, cur_date);
+                                    //если в базе найдено суточное показание продолжим
+                                    if (valueArr.Length > 0)
+                                        continue;
+
+                                READAGAIN:
+                                    if (meter.ReadDailyValues(tmpDT, param.param_address, param.channel, ref curValue))
+                                    {
+                                        Value value = new Value();
+                                        value.dt = fromDate;
+                                        value.id_taken_params = takenparams[tpindex].id;
+                                        value.status = false;
+                                        value.value = curValue;
+                                        value.value = (float)Math.Round(value.value, 2, MidpointRounding.AwayFromZero);
+                                        ServerStorage.AddDailyValues(value);
+                                        ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
+                                        //meter.WriteToLog("Арх: записал в базу " + value.value.ToString());
+                                    }
+                                    else
+                                    {
+                                        string s_log = String.Format("Архивные: попытка {4}, метод драйвера ReadDailyValues вернул false. Параметр {0} с адресом {1} каналом {2} не прочитан. Запрашиваемая дата: {3}",
+                                            param.name, param.param_address, param.channel, tmpDT.ToString(), cnt);
+                                        logger.LogError(s_log);
+
+                                        if (cnt < 2)
+                                        {
+                                            cnt++;
+                                            goto READAGAIN;
+                                        }
+                                    }
+
+                                    tmpDT = tmpDT.AddDays(1);
+                                }
+                            }
+                        }
                     }
                     #endregion
                 }
