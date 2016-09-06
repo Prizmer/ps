@@ -1447,7 +1447,8 @@ namespace Prizmer.PoolServer
                                     //если в базе найдено суточное показание продолжим
                                     if (valueArr.Length > 0)
                                     {
-                                        if (doArchLog) logger.LogInfo(String.Format("Архивные: в базе есть показание на эту дату: {0}; дата: {1};", valueArr[0].value.ToString(), valueArr[0].dt.ToString())); 
+                                        if (doArchLog) logger.LogInfo(String.Format("Архивные: в базе есть показание на эту дату: {0}; дата: {1};", valueArr[0].value.ToString(), valueArr[0].dt.ToString()));
+                                        tmpDT = tmpDT.AddDays(1);
                                         continue;
                                     }
                                         
