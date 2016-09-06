@@ -37,9 +37,14 @@ namespace Prizmer.PoolServer
             public string driverName;
         }
 
-        string baseDirectory = "logs";
+        static string baseDirectory = "logs";
         string workDirectory = "";
         bool isInitialized = false;
+
+        public static string BaseDirectory
+        {
+            get { return baseDirectory; }
+        }
 
         SenderInfo si;
         public void Initialize(string port, string addr, string driverName, string workDirName = "")
@@ -135,10 +140,31 @@ namespace Prizmer.PoolServer
                 }
             }
         }
+
+        public static void DeleteDirectory(string target_dir)
+        {
+            string[] files = Directory.GetFiles(target_dir);
+            string[] dirs = Directory.GetDirectories(target_dir);
+
+            foreach (string file in files)
+            {
+                File.SetAttributes(file, FileAttributes.Normal);
+                File.Delete(file);
+            }
+
+            foreach (string dir in dirs)
+            {
+                DeleteDirectory(dir);
+            }
+
+            Directory.Delete(target_dir, false);
+        }
+
     }
 
     class MainService
     {
+
         public void WriteToLog(string str, string port = "", string addr = "", string mName = "", bool doWrite = true)
         {
             //TODO убрать метод, оставлен для поддержки
@@ -264,6 +290,11 @@ namespace Prizmer.PoolServer
                 }
             }
 
+            object iLogsAreAliveDays = 15;
+            Thread logsEreaserThread = new Thread(new ParameterizedThreadStart(DeleteLogsDirectory));
+            logsEreaserThread.IsBackground = true;
+            logsEreaserThread.Start(iLogsAreAliveDays);
+
             //закрываем соединение с БД
             ServerStorage.Close();
         }
@@ -275,7 +306,6 @@ namespace Prizmer.PoolServer
 
 
         }
-
         public void StopServer()
         {
             bStopServer = true;
@@ -288,6 +318,29 @@ namespace Prizmer.PoolServer
                     PortsThreads[i].Abort();
                 }
                 catch { }
+            }
+        }
+
+        public void DeleteLogsDirectory(object param)
+        {
+            while (Thread.CurrentThread.IsAlive)
+            {
+                //Автоудаление логов
+                try
+                {
+                    DirectoryInfo di = new DirectoryInfo(Logger.BaseDirectory);
+                    if (di.Exists)
+                    {
+                        TimeSpan ts = DateTime.Now.Date - di.CreationTime.Date;
+                        if (ts.TotalDays >= (int)param)
+                            Logger.DeleteDirectory(di.FullName);
+                    }
+                }
+                catch (Exception ex)
+                { }
+
+                TimeSpan sleepSpan = new TimeSpan(1, 0, 0);
+                Thread.Sleep(sleepSpan);
             }
         }
 
@@ -1347,10 +1400,13 @@ namespace Prizmer.PoolServer
                 if (true && pollingParams.b_poll_archive)
                 {
                     #region АРХИВНЫЕ ДАННЫЕ НОВ
+                    bool doArchLog = true;
 
-                    DateTime cur_date = DateTime.Now.Date;
+                    DateTime cur_date = new DateTime(DateTime.Now.Date.Ticks);
+                  
                     //если дата установки отсутствует, считаем что счетчик установлен сегодня
-                    DateTime dt_install = metersbyport[MetersCounter].dt_install.Date.Ticks == 0 ? new DateTime(0).Date : metersbyport[MetersCounter].dt_install.Date;
+                    DateTime dt_install = new DateTime();
+                    dt_install = metersbyport[MetersCounter].dt_install.Date.Ticks == 0 ? new DateTime(0).Date : metersbyport[MetersCounter].dt_install.Date;
 
                     //чтение архивных параметров, подлежащих чтению, относящихся к конкретному прибору
                     TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid, 3);
@@ -1373,28 +1429,34 @@ namespace Prizmer.PoolServer
                                 else fromDate = DateTime.Now.Date.AddDays(-31);
                             }
 
+                            if (doArchLog) logger.LogInfo("Архивные: дата начала: " + fromDate.ToString()); 
                             TimeSpan diff = DateTime.Now.Date - fromDate.Date;
-
+                            if (doArchLog) logger.LogInfo("Архивные: разница в днях между тек. и нач. датами: " + diff.TotalDays.ToString()); 
                             //читать данные только если прибор ответил
-                            if (meter.OpenLinkCanal())
+                            if (true)//meter.OpenLinkCanal())
                             {
                                 float curValue = 0;
 
                                 DateTime tmpDT = new DateTime(fromDate.Ticks);
                                 for (int i = 0; i <= diff.TotalDays; i++)
                                 {
+
                                     int cnt = 0;
                                     //получим все записи в интервале от даты установки (если нет, от начала НЭ) до текущего момента
                                     Value[] valueArr = ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], tmpDT, cur_date);
                                     //если в базе найдено суточное показание продолжим
                                     if (valueArr.Length > 0)
+                                    {
+                                        if (doArchLog) logger.LogInfo(String.Format("Архивные: в базе есть показание на эту дату: {0}; дата: {1};", valueArr[0].value.ToString(), valueArr[0].dt.ToString())); 
                                         continue;
+                                    }
+                                        
 
                                 READAGAIN:
                                     if (meter.ReadDailyValues(tmpDT, param.param_address, param.channel, ref curValue))
                                     {
                                         Value value = new Value();
-                                        value.dt = fromDate;
+                                        value.dt = tmpDT;
                                         value.id_taken_params = takenparams[tpindex].id;
                                         value.status = false;
                                         value.value = curValue;
