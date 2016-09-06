@@ -290,7 +290,7 @@ namespace Prizmer.PoolServer
                 }
             }
 
-            object iLogsAreAliveDays = 15;
+            object iLogsAreAliveDays = 6;
             Thread logsEreaserThread = new Thread(new ParameterizedThreadStart(DeleteLogsDirectory));
             logsEreaserThread.IsBackground = true;
             logsEreaserThread.Start(iLogsAreAliveDays);
@@ -1414,6 +1414,7 @@ namespace Prizmer.PoolServer
                     {
                         for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                         {
+                            if (doArchLog) logger.LogInfo("Архивные: параметр: " + tpindex.ToString()); 
                             if (bStopServer) goto CloseThreadPoint;
                             Param param = ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
                             if (param.guid == Guid.Empty) continue;
