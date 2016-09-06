@@ -1442,8 +1442,8 @@ namespace Prizmer.PoolServer
                                 {
                                     if (doArchLog) logger.LogInfo(String.Format("Архивные: день: {0}; дата: {1};", i, tmpDT.ToString())); 
                                     int cnt = 0;
-                                    //получим все записи в интервале от даты установки (если нет, от начала НЭ) до текущего момента
-                                    Value[] valueArr = ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], tmpDT, cur_date);
+                                    //получим все записи в интервале от даты установки (если нет, от начала НЭ) до текущего 
+                                    Value[] valueArr = ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], tmpDT, tmpDT);
                                     //если в базе найдено суточное показание продолжим
                                     if (valueArr.Length > 0)
                                     {
