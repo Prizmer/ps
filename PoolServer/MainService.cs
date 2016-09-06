@@ -1433,14 +1433,14 @@ namespace Prizmer.PoolServer
                             TimeSpan diff = DateTime.Now.Date - fromDate.Date;
                             if (doArchLog) logger.LogInfo("Архивные: разница в днях между тек. и нач. датами: " + diff.TotalDays.ToString()); 
                             //читать данные только если прибор ответил
-                            if (true)//meter.OpenLinkCanal())
+                            if (meter.OpenLinkCanal())
                             {
                                 float curValue = 0;
 
                                 DateTime tmpDT = new DateTime(fromDate.Ticks);
                                 for (int i = 0; i <= diff.TotalDays; i++)
                                 {
-
+                                    if (doArchLog) logger.LogInfo(String.Format("Архивные: день: {0}; дата: {1};", i, tmpDT.ToString())); 
                                     int cnt = 0;
                                     //получим все записи в интервале от даты установки (если нет, от начала НЭ) до текущего момента
                                     Value[] valueArr = ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], tmpDT, cur_date);
