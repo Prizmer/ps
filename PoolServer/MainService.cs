@@ -37,6 +37,8 @@ namespace Prizmer.PoolServer
             public string driverName;
         }
 
+        public static volatile bool bRestrict = false;
+
         static string baseDirectory = "logs";
         string workDirectory = "";
         bool isInitialized = false;
@@ -84,6 +86,8 @@ namespace Prizmer.PoolServer
 
         private void writeToLoggerLog(string msg)
         {
+            if (bRestrict) return;
+
             StreamWriter sw = null;
             string resMsg = String.Format("{0}: {1}", DateTime.Now.ToString(), msg);
             sw = new StreamWriter(baseDirectory + @"\loggerErr.log", true, Encoding.Default);
@@ -101,6 +105,8 @@ namespace Prizmer.PoolServer
         FileStream fs = null;
         private void writeToLog(string message, SenderInfo senderInfo, MessageType messageType)
         {
+            if (!bRestrict) return; 
+
             if (!isInitialized)
             {
                 writeToLoggerLog("Логгер не проинициализирован");
@@ -333,7 +339,13 @@ namespace Prizmer.PoolServer
                     {
                         TimeSpan ts = DateTime.Now.Date - di.CreationTime.Date;
                         if (ts.TotalDays >= (int)param)
+                        {
+                            Logger.bRestrict = true;
+                            Thread.Sleep(100);
                             Logger.DeleteDirectory(di.FullName);
+                            Logger.bRestrict = false;
+                        }
+                            
                     }
                 }
                 catch (Exception ex)
