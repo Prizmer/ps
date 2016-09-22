@@ -299,7 +299,7 @@ namespace Prizmer.PoolServer
             object iLogsAreAliveDays = 6;
             Thread logsEreaserThread = new Thread(new ParameterizedThreadStart(DeleteLogsDirectory));
             logsEreaserThread.IsBackground = true;
-            logsEreaserThread.Start(iLogsAreAliveDays);
+            //logsEreaserThread.Start(iLogsAreAliveDays);
 
             //закрываем соединение с БД
             ServerStorage.Close();
@@ -309,8 +309,6 @@ namespace Prizmer.PoolServer
         void UnhandledException_Handler(object sender, UnhandledExceptionEventArgs e)
         {
             MessageBox.Show(e.ExceptionObject.ToString());
-
-
         }
         public void StopServer()
         {
