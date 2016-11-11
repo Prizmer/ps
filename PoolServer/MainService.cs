@@ -413,7 +413,7 @@ namespace Prizmer.PoolServer
                     case "teplouchet1": meter = new teplouchet1(); break;
                     case "m200": meter = new Mercury200(); break;
                     case "opcretranslator": meter = new OpcRetranslator(); break;
-                    case "domovoymeters": meter = new DomovoyMeters(); break;
+                    case "sayani_kombik": meter = new sayani_kombik(); break;
                 }
 
                 if (meter == null)
