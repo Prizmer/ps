@@ -1233,7 +1233,7 @@ namespace Prizmer.PoolServer
                                 {
                                     string s_log = String.Format("Суточные: метод драйвера ReadDailyValues вернул false. Параметр {0} с адресом {1} каналом {2} не прочитан",
                                         param.name, param.param_address, param.channel);
-                                    logger.LogError(s_log);
+                                   // logger.LogError(s_log);
                                   //  WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" + tpindex.ToString() + ") не записан", portStr, mAddr, LOG_DAILY_ERRORS);
                                 }
                             }
