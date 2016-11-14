@@ -19,6 +19,30 @@ using System.Globalization;
 
 namespace Prizmer.Meters
 {
+
+    public struct Params
+    {
+        /**   2 bytes   **/
+        public float[] Q;    //Q1-Q2
+        public float[] T;    //T1-T4
+        public float[] M;    //M1-M4
+        public float V5;
+
+        /**   1 byte   **/
+        public float[] P;    //P1-P4 
+
+
+        public int[] NC;     //NC1-NC2
+        public int TimeMinutes1;
+        public int VoltsBattery;
+        public int TimeMinutes2;
+        public int Reserved;
+    };
+    public struct MeterInfo
+    {
+        public string serialNumber;
+    };
+
     public class sayani_kombik : CMeter, IMeter
     {
         ~sayani_kombik()
@@ -44,7 +68,7 @@ namespace Prizmer.Meters
         bool StopFlag = false;
 
         //время ожидания завершения работы утиллиты rds
-        const int waitRDSTimeInSec = 12;
+        const int waitRDSTimeInSec = 60;
         const byte RecordLength = 32;
         const byte bytesFromTheEnd = 32;
 
@@ -54,28 +78,7 @@ namespace Prizmer.Meters
         string directoryBase = "";
 
 
-        public struct Params
-        {
-            /**   2 bytes   **/
-            public float[] Q;    //Q1-Q2
-            public float[] T;    //T1-T4
-            public float[] M;    //M1-M4
-            public float V5;
 
-            /**   1 byte   **/
-            public float[] P;    //P1-P4 
-
-
-            public int[] NC;     //NC1-NC2
-            public int TimeMinutes1;
-            public int VoltsBattery;
-            public int TimeMinutes2;
-            public int Reserved;
-        };
-        public struct MeterInfo
-        {
-            public string serialNumber;
-        };
 
         #region Низкоуровневый разбор дампа
 
@@ -103,7 +106,7 @@ namespace Prizmer.Meters
                 return -2;
             }
         }
-        private bool GetParamValues(FileStream fs, int bytesFromTheEnd, ref Params prms, ref string strRepresentation)
+        public bool GetParamValues(FileStream fs, int bytesFromTheEnd, ref Params prms, ref string strRepresentation)
         {
             strRepresentation = "";
 
@@ -254,6 +257,33 @@ namespace Prizmer.Meters
             return true;
         }
 
+
+        public bool IsDatFileAvailable(string fileName)
+        {
+            FileStream testFs;
+            if (File.Exists(fileName))
+            {
+                try
+                {
+                    testFs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    MeterInfo testMi = new MeterInfo();
+                    bool res = GetMeterInfo(testFs, ref testMi);
+                    testFs.Close();
+                    
+                    return res;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+
         private bool ExecuteBatchConnection(BatchConnection batchConn)
         {
             string tmpCmd = batchConn.Command;
@@ -275,11 +305,18 @@ namespace Prizmer.Meters
             Process procCommand = Process.Start(psiOpt);
             procCommand.StandardInput.WriteLine(tmpCmd);
 
-
+            bool tmpRes = false;
             for (int t = 0; t < waitRDSTimeInSec; t++)
             {
                 if (StopFlag)
-                    return false;
+                    break;
+
+                if (IsDatFileAvailable(batchConn.FileNameDump))
+                {
+                    
+                    tmpRes = true;
+                    break;
+                }
 
                 Thread.Sleep(1000);
             }
@@ -291,14 +328,7 @@ namespace Prizmer.Meters
             catch (Exception ex)
             { }
 
-            if (File.Exists(batchConn.FileNameDump))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return tmpRes;
         }
 
         private bool ParseDumpFile(string fileName, ref MeterInfo mi, ref Params prms, bool deleteAfterParse = false)
@@ -311,19 +341,27 @@ namespace Prizmer.Meters
                 return false;
 
 
-            FileStream dumpFileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            try
+            {
+                FileStream dumpFileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-            bool tmpRes = false;
-            if (GetMeterInfo(dumpFileStream, ref mi))
-                if (GetParamValues(dumpFileStream, bytesFromTheEnd, ref prms, ref strValues))
-                    tmpRes = true;
+                bool tmpRes = false;
+                if (GetMeterInfo(dumpFileStream, ref mi))
+                    if (GetParamValues(dumpFileStream, bytesFromTheEnd, ref prms, ref strValues))
+                        tmpRes = true;
 
-            dumpFileStream.Close();
+                dumpFileStream.Close();
 
-            if (tmpRes && deleteAfterParse)
-                DeleteDumpFileAndLogs(fileName);
+                if (tmpRes && deleteAfterParse)
+                    DeleteDumpFileAndLogs(fileName);
 
-            return tmpRes;
+
+                return tmpRes;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
         private bool GetParamValueFromParams(Params prms, ushort param, ushort tarif, out float recordValue)
@@ -413,13 +451,12 @@ namespace Prizmer.Meters
         }
 
 
-        private bool DeleteDumpFileAndLogs(string dumpFileName)
+        public bool DeleteDumpFileAndLogs(string dumpFileName)
         {
-
-            File.Delete(dumpFileName);
-
             try
             {
+                File.Delete(dumpFileName);
+
                 //разберемся с файлом лога
                 string logDir = Path.GetDirectoryName(dumpFileName);
                 string logFName = Path.GetFileNameWithoutExtension(dumpFileName);
