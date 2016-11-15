@@ -419,7 +419,7 @@ namespace Prizmer.Meters
         }
 
         public bool LatestDumpFileName(string directoryPath, string serialNumberDec, out string fileName, out DateTime dt, 
-            string pattern = "*.dat")
+            string pattern = ".dat")
         {
             fileName = "";
             dt = new DateTime().Date;
@@ -427,7 +427,12 @@ namespace Prizmer.Meters
             if (!Directory.Exists(directoryPath))
                 return false;
 
-            string[] fileNames = Directory.GetFiles(directoryPath, pattern, SearchOption.TopDirectoryOnly);
+            var fileNamesV = Directory.GetFiles(
+                directoryPath, "*.*", SearchOption.TopDirectoryOnly).Where(s => s.EndsWith(serialNumberDec + pattern));
+
+
+            string[] fileNames = fileNamesV.ToArray<string>();
+
             if (fileNames.Length == 0)
                 return false;
 
