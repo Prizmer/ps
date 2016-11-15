@@ -1198,7 +1198,7 @@ namespace Prizmer.PoolServer
 
                             Value[] lastvalue = ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], PrevTime, CurTime);
                             //если значение в БД уже есть, то не читать его из прибора
-                            if (lastvalue.Length > 0) continue;
+                            if (lastvalue.Length > 0 && typemeter.driver_name != "sayani_kombik") continue;
                             //WriteToLog(mName + " - готов прочитать " + takenparams.Length.ToString() + " СУТОЧНЫХ параметров", portStr, mAddr, LOG_DAILY);
                             //читать данные только если прибор ответил
                            if (meter.OpenLinkCanal())
