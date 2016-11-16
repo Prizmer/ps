@@ -149,7 +149,8 @@ namespace Prizmer.Ports
                                         }
                                         else if (target_in_length > 0)
                                         {
-                                            WriteToLog("Ожидаемая длина данных > 0");
+                                            WriteToLog("Ожидаемая длина данных: " + reading_size.ToString());
+                                            WriteToLog("Целевая длина данных: " + target_in_length.ToString());
                                             if (reading_size >= target_in_length)
                                             {
                                                 reading_size = target_in_length;
@@ -158,6 +159,11 @@ namespace Prizmer.Ports
                                                     in_buffer[i] = temp_buffer[i];
                                                 }
                                             }
+
+                                            if (in_buffer != null)
+                                                WriteToLog("Длина возвращаемого функцией массива: " + in_buffer.Length);
+
+                                            tcp.Close();
                                         }
                                         else if (target_in_length < 0)
                                         {
