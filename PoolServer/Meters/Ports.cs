@@ -137,35 +137,24 @@ namespace Prizmer.Ports
                                             reading_queue.Dequeue();
                                         }
 
+
+                                        WriteToLog("Прочитано данных: " + reading_size);
                                         byte[] temp_buffer = new byte[reading_size = reading_queue.Count];
                                         temp_buffer = reading_queue.ToArray();
 
-                                        if (target_in_length == 0)
+
+                                        if (target_in_length > 0 && reading_size >= target_in_length)
                                         {
-                                            if (reading_size > pos_count_data_size)
+                                            reading_size = target_in_length;
+                                            for (int i = 0; i < target_in_length && i < in_buffer.Length; i++)
                                             {
-                                                target_in_length = Convert.ToInt32(temp_buffer[pos_count_data_size] * size_data + header_size);
-                                            }
-                                        }
-                                        else if (target_in_length > 0)
-                                        {
-                                            WriteToLog("Ожидаемая длина данных: " + reading_size.ToString());
-                                            WriteToLog("Целевая длина данных: " + target_in_length.ToString());
-                                            if (reading_size >= target_in_length)
-                                            {
-                                                reading_size = target_in_length;
-                                                for (int i = 0; i < target_in_length && i < in_buffer.Length; i++)
-                                                {
-                                                    in_buffer[i] = temp_buffer[i];
-                                                }
+                                                in_buffer[i] = temp_buffer[i];
                                             }
 
-                                            if (in_buffer != null)
-                                                WriteToLog("Длина возвращаемого функцией массива: " + in_buffer.Length);
-
-                                            tcp.Close();
+                                            return reading_size;
                                         }
-                                        else if (target_in_length < 0)
+
+                                        if (target_in_length < 0)
                                         {
 
                                             target_in_length = reading_queue.Count;
@@ -176,10 +165,19 @@ namespace Prizmer.Ports
                                                 in_buffer[i] = temp_buffer[i];
 
                                             tcp.Close();
-                                            
+
                                             return reading_size;
                                         }
 
+                                        if (target_in_length == 0)
+                                        {
+                                            if (reading_size > pos_count_data_size)
+                                            {
+                                                target_in_length = Convert.ToInt32(temp_buffer[pos_count_data_size] * size_data + header_size);
+                                            }
+                                        }
+
+                                        return reading_size;
                                     }
                                 }
                             }
