@@ -97,6 +97,7 @@ namespace Prizmer.Ports
                                 // посылка данных
                                 if (tcp.Client.Send(out_buffer, out_length, SocketFlags.None) == out_length)
                                 {
+                                    WriteToLog("Данные отправлены в порт");
                                     uint elapsed_time_count = 0;
 
                                     Thread.Sleep(1000);
@@ -106,6 +107,7 @@ namespace Prizmer.Ports
                                     {
                                         if (tcp.Client.Available > 0)
                                         {
+                                            WriteToLog("На входе порта есть данные");
                                             try
                                             {
                                                 byte[] tmp_buff = new byte[tcp.Available];
@@ -124,6 +126,8 @@ namespace Prizmer.Ports
                                         elapsed_time_count += 50;
                                         Thread.Sleep(50);
                                     }
+
+                                    WriteToLog("Ожидание данных завершено");
 
                                     int pos = -1;
                                     if ((pos = func(reading_queue)) >= 0)
@@ -145,6 +149,7 @@ namespace Prizmer.Ports
                                         }
                                         else if (target_in_length > 0)
                                         {
+                                            WriteToLog("Ожидаемая длина данных > 0");
                                             if (reading_size >= target_in_length)
                                             {
                                                 reading_size = target_in_length;
