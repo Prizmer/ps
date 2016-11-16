@@ -1221,11 +1221,15 @@ namespace Prizmer.Meters
             {
                 if (param >= 0 && param <= 4)
                 {
-                    return this.ReadCurrentMeterageToTarif(param, (byte)tarif, ref recordValue);
+                    bool r = this.ReadCurrentMeterageToTarif(param, (byte)tarif, ref recordValue);
+                    recordValue = (float)Math.Round(recordValue, 2, MidpointRounding.AwayFromZero);
+                    return r;
                 }
                 else if (param >= 5)
                 {
-                    return this.ReadAuxilaryParams(param, (byte)tarif, ref recordValue);
+                    bool r2 = this.ReadAuxilaryParams(param, (byte)tarif, ref recordValue);
+                    recordValue = (float)Math.Round(recordValue, 2, MidpointRounding.AwayFromZero);
+                    return r2;
                 }
             }
 
@@ -1370,8 +1374,11 @@ namespace Prizmer.Meters
         {
             if ((tarif == 0) | (((this.m_maskaTarif >> tarif) & 0x1) == 1))
             {
-                return this.ReadDailyMeterageToTarif(param, (byte)tarif, ref recordValue);
+                bool r = this.ReadDailyMeterageToTarif(param, (byte)tarif, ref recordValue);
+                recordValue = (float)Math.Round(recordValue, 2, MidpointRounding.AwayFromZero);
+                return r;
             }
+
 
             return false;
         }
