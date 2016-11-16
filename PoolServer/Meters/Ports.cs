@@ -56,10 +56,10 @@ namespace Prizmer.Ports
         public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
             int reading_size = 0;
-            //byte[] ipArr = { 192, 168, 0, 1 };
-            //IPAddress ipa = new IPAddress(ipArr);
+            byte[] ipArr = { 192, 168, 23, 1 };
+            IPAddress ipa = new IPAddress(ipArr);
 
-            IPEndPoint ipe = new IPEndPoint(IPAddress.Any, 7778);
+            IPEndPoint ipe = new IPEndPoint(ipa, 7778);
 
 
             TcpClient tcp = new TcpClient();
