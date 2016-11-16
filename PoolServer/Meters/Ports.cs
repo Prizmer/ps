@@ -56,9 +56,12 @@ namespace Prizmer.Ports
         public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
             int reading_size = 0;
-            byte[] ipArr = { 127, 0, 0, 1 };
-            IPAddress ipa = new IPAddress(ipArr);
-            IPEndPoint ipe = new IPEndPoint(ipa, 7778);
+            //byte[] ipArr = { 192, 168, 0, 1 };
+            //IPAddress ipa = new IPAddress(ipArr);
+
+            IPEndPoint ipe = new IPEndPoint(IPAddress.Any, 7778);
+
+
             TcpClient tcp = new TcpClient();
             
         //    using (TcpClient tcp = new TcpClient())
@@ -70,13 +73,13 @@ namespace Prizmer.Ports
                     Thread.Sleep(m_delay_between_sending);
                     tcp.SendTimeout = 500;
                     tcp.ReceiveTimeout = 500;
+                    
 
                     
                     tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                     tcp.Client.Bind(ipe);
 
                     Thread.Sleep(1000);
-
                     IAsyncResult ar = tcp.BeginConnect(m_address, m_port, null, null);
                     using (WaitHandle wh = ar.AsyncWaitHandle)
                     {
