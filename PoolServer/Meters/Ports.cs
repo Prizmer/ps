@@ -40,6 +40,8 @@ namespace Prizmer.Ports
         
         IPAddress ipLocalAddr = null;
         IPEndPoint ipLocalEndpoint = null;
+        IPEndPoint remoteEndPoint = null;
+        Socket sender = null;
 
         public TcpipPort(string address, int port, ushort write_timeout, ushort read_timeout, int delay_between_sending)
         {
@@ -52,10 +54,21 @@ namespace Prizmer.Ports
             byte[] ipAddrLocalArr = { 192, 168, 0, 1 };
             ipLocalAddr = new IPAddress(ipAddrLocalArr);
             bool bRes = GetLocalEndPointIp(ref ipLocalAddr);
-
             ipLocalEndpoint = new IPEndPoint(ipLocalAddr, GetFreeTcpPort());
 
-            WriteToLog("TCPPortInit: id=" + ipLocalEndpoint.Address.ToString() + "; port=" + ipLocalEndpoint.Port.ToString());
+            sender =  new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            remoteEndPoint = new IPEndPoint(IPAddress.Parse(m_address), (int)m_port);
+            sender.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            sender.ReceiveTimeout = 1000;
+
+            try
+            {
+                sender.Bind(ipLocalEndpoint);
+            }
+            catch (Exception ex)
+            {
+                WriteToLog("При создании потока для tcp порта, порт не был инициализирован по причине: " + ex.Message);
+            }
         }
 
         public void Write(byte[] m_cmd, int leng)
@@ -315,28 +328,95 @@ namespace Prizmer.Ports
             return reading_size;
         }
 
-        public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
+
+
+        public bool ManageUpWithReceivedBytes(List<byte> readBytesList, 
+            FindPacketSignature func,  int target_in_length,
+            out byte[] outDataArr, out int outReadingSize,
+            uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
-            int reading_size = 0;
-
-
-            Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            sender.ReceiveTimeout = 1000;
-
-            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(m_address), (int)m_port);
+            outDataArr = new byte[1];
+            outDataArr[0] = 0x0;
+            outReadingSize = 0;
 
             //очередь для поддержки делегатов в старых драйверах
             Queue<byte> reading_queue = new Queue<byte>(8192);
+
+            int reading_size = 0;
+
+            if (readBytesList.Count > 0)
+            {
+                /*попытаемся определить начало полезных данных в буфере-на-вход
+                    при помощи связанного делегата*/
+                for (int i = 0; i < readBytesList.Count; i++)
+                    reading_queue.Enqueue(readBytesList[i]);
+
+                int pos = func(reading_queue);
+                if (pos >= 0)
+                {
+                    //избавимся от лишних данных спереди
+                    for (int i = 0; i < pos; i++)
+                        reading_queue.Dequeue();
+
+                    //оставшиеся данные преобразуем обратно в массив
+                    byte[] temp_buffer = new byte[reading_size = reading_queue.Count];
+
+                    //WriteToLog("reading_queue.Count: " + reading_size.ToString());
+
+                    temp_buffer = reading_queue.ToArray();
+                    //WriteToLog(BitConverter.ToString(temp_buffer));
+
+                    //если длина полезных данных ответа определена как 0, произведем расчет по необязательнм параметрам
+                    if (target_in_length == 0)
+                    {
+                        if (reading_size > pos_count_data_size)
+                            target_in_length = Convert.ToInt32(temp_buffer[pos_count_data_size] * size_data + header_size);
+
+                        outReadingSize = reading_size;
+                        return true;
+                    }
+
+                    if (target_in_length == -1)
+                    {
+                        target_in_length = reading_queue.Count;
+                        reading_size = target_in_length;
+                        outDataArr = new byte[reading_size];
+
+                        for (int i = 0; i < outDataArr.Length; i++)
+                            outDataArr[i] = temp_buffer[i];
+
+                        outReadingSize = reading_size;
+                        return true;
+                    }
+
+                    if (target_in_length > 0 && reading_size >= target_in_length)
+                    {
+                        reading_size = target_in_length;
+                        for (int i = 0; i < target_in_length && i < outDataArr.Length; i++)
+                            outDataArr[i] = temp_buffer[i];
+
+                        outReadingSize = reading_size;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
+        public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
+        {
             List<byte> readBytesList = new List<byte>(8192);
+            int readingSize = 0;
 
             try
             {
-                sender.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                sender.Bind(ipLocalEndpoint);
                 sender.Connect(remoteEndPoint);
 
                 if (sender.Connected)
                 {
+                    NetworkStream ns = new NetworkStream(sender);
                     // Send the data through the socket.
                     int bytesSent = sender.Send(out_buffer);
 
@@ -366,65 +446,8 @@ namespace Prizmer.Ports
 
                     sender.Close();
 
-                    if (readBytesList.Count > 0)
-                    {
-                        /*попытаемся определить начало полезных данных в буфере-на-вход
-                            при помощи связанного делегата*/
-                        for (int i = 0; i < readBytesList.Count; i++)
-                            reading_queue.Enqueue(readBytesList[i]);
-
-                        int pos = func(reading_queue);
-                        if (pos >= 0)
-                        {
-                            //избавимся от лишних данных спереди
-                            for (int i = 0; i < pos; i++)
-                            {
-                                reading_queue.Dequeue();
-                            }
-
-                            //оставшиеся данные преобразуем обратно в массив
-                            byte[] temp_buffer = new byte[reading_size = reading_queue.Count];
-
-                            //WriteToLog("reading_queue.Count: " + reading_size.ToString());
-
-                            temp_buffer = reading_queue.ToArray();
-                            //WriteToLog(BitConverter.ToString(temp_buffer));
-
-                            //если длина полезных данных ответа определена как 0, произведем расчет по необязательнм параметрам
-                            if (target_in_length == 0)
-                            {
-                                if (reading_size > pos_count_data_size)
-                                    target_in_length = Convert.ToInt32(temp_buffer[pos_count_data_size] * size_data + header_size);
-
-                                return reading_size;
-                            }
-
-                            if (target_in_length == -1)
-                            {
-                                target_in_length = reading_queue.Count;
-                                reading_size = target_in_length;
-                                in_buffer = new byte[reading_size];
-
-                                for (int i = 0; i < in_buffer.Length; i++)
-                                    in_buffer[i] = temp_buffer[i];
-
-                  
-                                return reading_size;
-                            }
-
-                            if (target_in_length > 0 && reading_size >= target_in_length)
-                            {
-                                reading_size = target_in_length;
-                                for (int i = 0; i < target_in_length && i < in_buffer.Length; i++)
-                                {
-                                    in_buffer[i] = temp_buffer[i];
-                                }
-
-   
-                                return reading_size;
-                            }
-                        }
-                    }
+                    bool bManageRes = ManageUpWithReceivedBytes(readBytesList, func, target_in_length, out in_buffer, out readingSize,
+                        pos_count_data_size, size_data, header_size);
                 }
                 else
                 {
@@ -438,12 +461,11 @@ namespace Prizmer.Ports
             }
             finally
             {
-                reading_queue.Clear();
+
                 sender.Close();
             }
-            // }
 
-            return reading_size;
+            return readingSize;
         }
 
 
