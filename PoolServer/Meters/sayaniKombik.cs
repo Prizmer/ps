@@ -75,7 +75,7 @@ namespace Prizmer.Meters
         bool StopFlag = false;
 
         //время ожидания завершения работы утиллиты rds
-        const int waitRDSTimeInSec = 60;
+        const int waitRDSTimeInSec = 25;
         const byte RecordLength = 32;
         const byte bytesFromTheEnd = 32;
 

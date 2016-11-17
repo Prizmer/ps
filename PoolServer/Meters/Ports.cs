@@ -112,6 +112,7 @@ namespace Prizmer.Ports
             bool successfull = GetLocalEndPointIp(ref ipa);
 
             IPEndPoint ipe = new IPEndPoint(ipa, GetFreeTcpPort());
+            WriteToLog("WriteReadData: id=" + ipe.Address.ToString() + "; port=" + ipe.Port.ToString());
             TcpClient tcp = new TcpClient();
 
             //очередь для поддержки делегатов в старых драйверах
@@ -122,12 +123,12 @@ namespace Prizmer.Ports
             {
                 Thread.Sleep(m_delay_between_sending);
                 tcp.SendTimeout = 500;
-                tcp.ReceiveTimeout = 1000;
+                tcp.ReceiveTimeout = m_read_timeout;
 
                 tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 tcp.Client.Bind(ipe);
 
-                Thread.Sleep(1000);
+//                Thread.Sleep(200);
                 IAsyncResult ar = tcp.BeginConnect(m_address, m_port, null, null);
                 using (WaitHandle wh = ar.AsyncWaitHandle)
                 {
@@ -148,7 +149,7 @@ namespace Prizmer.Ports
                                 Thread.Sleep(100);
                                 uint elapsed_time_count = 100;
 
-                                while (elapsed_time_count <= 1000)//m_read_timeout)
+                                while (elapsed_time_count <= m_read_timeout)//m_read_timeout)
                                 {
                                     if (tcp.Client.Available > 0)
                                     {
@@ -235,7 +236,7 @@ namespace Prizmer.Ports
                         }
                         else
                         {
-                            WriteToLog("Ошибка соединения");
+                            WriteToLog("WriteReadData: ошибка соединения");
                         }
                     }
                 }
