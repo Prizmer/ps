@@ -69,18 +69,25 @@ namespace Prizmer.Ports
 
         bool ClosePort(TcpClient tcp)
         {
-            int p = ((IPEndPoint)tcp.Client.RemoteEndPoint).Port;
-            tcp.Close();
-            Thread.Sleep(10);
-            bool isFreeNow = IsTcpPortFree(p);
-            
-            if (isFreeNow)
+            try
             {
-                return true;
+                int p = ((IPEndPoint)tcp.Client.RemoteEndPoint).Port;
+                tcp.Close();
+                Thread.Sleep(10);
+                bool isFreeNow = IsTcpPortFree(p);
+
+                if (isFreeNow)
+                {
+                    return true;
+                }
+                else
+                {
+                    WriteToLog("CloseTCPPort: can't close port: " + p.ToString());
+                    return false;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                WriteToLog("CloseTCPPort: can't close port: " + p.ToString());
                 return false;
             }
         }
@@ -175,10 +182,10 @@ namespace Prizmer.Ports
                 tcp.ReceiveTimeout = m_read_timeout;
 
                 tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                tcp.Client.Bind(ipLocalEndpoint);
 
                 try
                 {
+                    tcp.Client.Bind(ipLocalEndpoint);
                     tcp.Client.Connect(remoteEndPoint);
                 }
                 catch (SocketException sEx)
