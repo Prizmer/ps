@@ -37,6 +37,11 @@ namespace Prizmer.Ports
             return "tcp" + m_address + "_" + m_port;
         }
 
+        ~TcpipPort()
+        {
+            if (sender != null)
+                sender.Close();
+        }
         
         IPAddress ipLocalAddr = null;
         IPEndPoint ipLocalEndpoint = null;
@@ -55,15 +60,16 @@ namespace Prizmer.Ports
             ipLocalAddr = new IPAddress(ipAddrLocalArr);
             bool bRes = GetLocalEndPointIp(ref ipLocalAddr);
             ipLocalEndpoint = new IPEndPoint(ipLocalAddr, GetFreeTcpPort());
+            remoteEndPoint = new IPEndPoint(IPAddress.Parse(m_address), (int)m_port);
 
             sender =  new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            remoteEndPoint = new IPEndPoint(IPAddress.Parse(m_address), (int)m_port);
             sender.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             sender.ReceiveTimeout = 1000;
 
             try
             {
                 sender.Bind(ipLocalEndpoint);
+                sender.Connect(remoteEndPoint);
             }
             catch (Exception ex)
             {
@@ -412,8 +418,6 @@ namespace Prizmer.Ports
 
             try
             {
-                sender.Connect(remoteEndPoint);
-
                 if (sender.Connected)
                 {
                     NetworkStream ns = new NetworkStream(sender);
@@ -444,7 +448,7 @@ namespace Prizmer.Ports
                         Thread.Sleep(100);
                     }
 
-                    sender.Close();
+                    //sender.Close();
 
                     bool bManageRes = ManageUpWithReceivedBytes(readBytesList, func, target_in_length, out in_buffer, out readingSize,
                         pos_count_data_size, size_data, header_size);
@@ -462,7 +466,7 @@ namespace Prizmer.Ports
             finally
             {
 
-                sender.Close();
+                //sender.Close();
             }
 
             return readingSize;
