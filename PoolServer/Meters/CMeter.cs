@@ -28,35 +28,6 @@ namespace Prizmer.Meters
             if (doWrite)
             {
                 mLogger.LogInfo(str);
-                /*
-    StreamWriter sw = null;
-    FileStream fs = null;
-    try
-    {
-        fs = new FileStream(@"logs\driversSummary.log", FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
-        sw = new StreamWriter(fs, Encoding.Default);
-        if (m_vport == null) sw.WriteLine(DateTime.Now.ToString() + ": Unknown port: adress: " + m_address + ": " + str);
-        else sw.WriteLine(DateTime.Now.ToString() + ": " + m_vport.GetName() + ": adress: " + m_address + ": " + str);
-        sw.Close();
-        fs.Close();
-    }
-    catch
-    {
-    }
-    finally
-    {
-        if (sw != null)
-        {
-            sw.Close();
-            sw = null;
-        }
-        if (fs != null)
-        {
-            fs.Close();
-            fs = null;
-        }
-    }
- * */
             }
         }
     }

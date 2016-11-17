@@ -105,7 +105,7 @@ namespace Prizmer.PoolServer
         FileStream fs = null;
         private void writeToLog(string message, SenderInfo senderInfo, MessageType messageType)
         {
-            if (!bRestrict) return; 
+            if (bRestrict) return; 
 
             if (!isInitialized)
             {
@@ -297,8 +297,8 @@ namespace Prizmer.PoolServer
             }
 
             object iLogsAreAliveDays = 6;
-            Thread logsEreaserThread = new Thread(new ParameterizedThreadStart(DeleteLogsDirectory));
-            logsEreaserThread.IsBackground = true;
+            //Thread logsEreaserThread = new Thread(new ParameterizedThreadStart(DeleteLogsDirectory));
+            //logsEreaserThread.IsBackground = true;
             //logsEreaserThread.Start(iLogsAreAliveDays);
 
             //закрываем соединение с БД
