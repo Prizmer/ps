@@ -8,6 +8,7 @@ using System.IO;
 using System.IO.Ports;
 using System.Net;
 using System.Net.Sockets;
+using System.Net.NetworkInformation;
 
 using System.Configuration;
 
@@ -36,6 +37,10 @@ namespace Prizmer.Ports
             return "tcp" + m_address + "_" + m_port;
         }
 
+        
+        IPAddress ipLocalAddr = null;
+        IPEndPoint ipLocalEndpoint = null;
+
         public TcpipPort(string address, int port, ushort write_timeout, ushort read_timeout, int delay_between_sending)
         {
             m_address = address;
@@ -43,6 +48,14 @@ namespace Prizmer.Ports
             m_write_timeout = write_timeout;
             m_read_timeout = read_timeout;
             m_delay_between_sending = delay_between_sending;
+
+            byte[] ipAddrLocalArr = { 192, 168, 0, 1 };
+            ipLocalAddr = new IPAddress(ipAddrLocalArr);
+            bool bRes = GetLocalEndPointIp(ref ipLocalAddr);
+
+            ipLocalEndpoint = new IPEndPoint(ipLocalAddr, GetFreeTcpPort());
+
+            WriteToLog("TCPPortInit: id=" + ipLocalEndpoint.Address.ToString() + "; port=" + ipLocalEndpoint.Port.ToString());
         }
 
         public void Write(byte[] m_cmd, int leng)
@@ -54,6 +67,24 @@ namespace Prizmer.Ports
             return 0;
         }
 
+        bool ClosePort(TcpClient tcp)
+        {
+            int p = ((IPEndPoint)tcp.Client.RemoteEndPoint).Port;
+            tcp.Close();
+            Thread.Sleep(10);
+            bool isFreeNow = IsTcpPortFree(p);
+            
+            if (isFreeNow)
+            {
+                return true;
+            }
+            else
+            {
+                WriteToLog("CloseTCPPort: can't close port: " + p.ToString());
+                return false;
+            }
+        }
+
         int GetFreeTcpPort()
         {
             TcpListener l = new TcpListener(IPAddress.Loopback, 0);
@@ -62,8 +93,30 @@ namespace Prizmer.Ports
             l.Stop();
             return port;
         }
+        bool IsTcpPortFree(int tcpPort)
+        {
+            bool isAvailable = true;
 
-        public string GetLocalIPAddress()
+            // Evaluate current system tcp connections. This is the same information provided
+            // by the netstat command line application, just in .Net strongly-typed object
+            // form.  We will look through the list, and if our port we would like to use
+            // in our TcpClient is occupied, we will set isAvailable to false.
+            IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+            TcpConnectionInformation[] tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
+
+            foreach (TcpConnectionInformation tcpi in tcpConnInfoArray)
+            {
+                if (tcpi.LocalEndPoint.Port == tcpPort)
+                {
+                    isAvailable = false;
+                    break;
+                }
+            }
+
+            return isAvailable;
+        }
+
+        string GetLocalIPAddress()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
             foreach (var ip in host.AddressList)
@@ -77,7 +130,6 @@ namespace Prizmer.Ports
 
             return "192.168.0.1";
         }
-
         bool GetLocalEndPointIp(ref IPAddress localEndpointIp)
         {
             string strIpConfig = "";
@@ -107,13 +159,10 @@ namespace Prizmer.Ports
         {
             int reading_size = 0;
 
-            byte[] ipArr = { 192, 168, 0, 1 };
-            IPAddress ipa = new IPAddress(ipArr);
-            bool successfull = GetLocalEndPointIp(ref ipa);
 
-            IPEndPoint ipe = new IPEndPoint(ipa, GetFreeTcpPort());
-            WriteToLog("WriteReadData: id=" + ipe.Address.ToString() + "; port=" + ipe.Port.ToString());
             TcpClient tcp = new TcpClient();
+
+            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(m_address), (int)m_port);
 
             //очередь для поддержки делегатов в старых драйверах
             Queue<byte> reading_queue = new Queue<byte>(8192);
@@ -126,131 +175,124 @@ namespace Prizmer.Ports
                 tcp.ReceiveTimeout = m_read_timeout;
 
                 tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                tcp.Client.Bind(ipe);
+                tcp.Client.Bind(ipLocalEndpoint);
 
-//                Thread.Sleep(200);
-                IAsyncResult ar = tcp.BeginConnect(m_address, m_port, null, null);
-                using (WaitHandle wh = ar.AsyncWaitHandle)
+                tcp.Client.Connect(remoteEndPoint);
+
+                Thread.Sleep(100);
+
+                if (tcp.Client.Connected)
                 {
-                    if (!ar.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(10), false))
+                    tcp.Client.ReceiveTimeout = m_read_timeout;
+                    tcp.Client.SendTimeout = m_write_timeout;
+
+                    // посылка данных
+                    if (tcp.Client.Send(out_buffer, out_length, SocketFlags.None) == out_length)
                     {
-                        throw new TimeoutException();
-                    }
-                    else
-                    {
-                        if (tcp.Client.Connected)
+                        Thread.Sleep(100);
+                        uint elapsed_time_count = 100;
+
+                        while (elapsed_time_count <= m_read_timeout)//m_read_timeout)
                         {
-                            tcp.Client.ReceiveTimeout = m_read_timeout;
-                            tcp.Client.SendTimeout = m_write_timeout;
-
-                            // посылка данных
-                            if (tcp.Client.Send(out_buffer, out_length, SocketFlags.None) == out_length)
+                            if (tcp.Client.Available > 0)
                             {
-                                Thread.Sleep(100);
-                                uint elapsed_time_count = 100;
-
-                                while (elapsed_time_count <= m_read_timeout)//m_read_timeout)
+                                try
                                 {
-                                    if (tcp.Client.Available > 0)
-                                    {
-                                        try
-                                        {
-                                            byte[] tmp_buff = new byte[tcp.Available];
-                                            int readed_bytes = tcp.Client.Receive(tmp_buff, 0, tmp_buff.Length, SocketFlags.None);
+                                    byte[] tmp_buff = new byte[tcp.Available];
+                                    int readed_bytes = tcp.Client.Receive(tmp_buff, 0, tmp_buff.Length, SocketFlags.None);
 
-                                            readBytesList.AddRange(tmp_buff);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            WriteToLog("WriteReadData: Read from port error: " + ex.Message);
-                                        }
-                                    }
+                                    readBytesList.AddRange(tmp_buff);
+                                }
+                                catch (Exception ex)
+                                {
+                                    WriteToLog("WriteReadData: Read from port error: " + ex.Message);
+                                }
+                            }
 
-                                    elapsed_time_count += 100;
-                                    Thread.Sleep(100);
+                            elapsed_time_count += 100;
+                            Thread.Sleep(100);
+                        }
+
+
+                        /*TODO: Откуда взялась константа 4, почему 4?*/
+                        if (readBytesList.Count > 0)
+                        {
+                            /*попытаемся определить начало полезных данных в буфере-на-вход
+                                при помощи связанного делегата*/
+                            for (int i = 0; i < readBytesList.Count; i++)
+                                reading_queue.Enqueue(readBytesList[i]);
+
+                            int pos = func(reading_queue);
+                            if (pos >= 0)
+                            {
+                                //избавимся от лишних данных спереди
+                                for (int i = 0; i < pos; i++)
+                                {
+                                    reading_queue.Dequeue();
                                 }
 
+                                //оставшиеся данные преобразуем обратно в массив
+                                byte[] temp_buffer = new byte[reading_size = reading_queue.Count];
 
-                                /*TODO: Откуда взялась константа 4, почему 4?*/
-                                if (readBytesList.Count > 0)
+                                //WriteToLog("reading_queue.Count: " + reading_size.ToString());
+
+                                temp_buffer = reading_queue.ToArray();
+                                //WriteToLog(BitConverter.ToString(temp_buffer));
+
+                                //если длина полезных данных ответа определена как 0, произведем расчет по необязательнм параметрам
+                                if (target_in_length == 0)
                                 {
-                                    /*попытаемся определить начало полезных данных в буфере-на-вход
-                                        при помощи связанного делегата*/
-                                    for (int i = 0; i < readBytesList.Count; i++)
-                                        reading_queue.Enqueue(readBytesList[i]);
+                                    if (reading_size > pos_count_data_size)
+                                        target_in_length = Convert.ToInt32(temp_buffer[pos_count_data_size] * size_data + header_size);
 
-                                    int pos = func(reading_queue);
-                                    if (pos >= 0)
+                                    ClosePort(tcp);
+                                    return reading_size;
+                                }
+
+                                if (target_in_length == -1)
+                                {
+                                    target_in_length = reading_queue.Count;
+                                    reading_size = target_in_length;
+                                    in_buffer = new byte[reading_size];
+
+                                    for (int i = 0; i < in_buffer.Length; i++)
+                                        in_buffer[i] = temp_buffer[i];
+
+                                    ClosePort(tcp);
+                                    return reading_size;
+                                }
+
+                                if (target_in_length > 0 && reading_size >= target_in_length)
+                                {
+                                    reading_size = target_in_length;
+                                    for (int i = 0; i < target_in_length && i < in_buffer.Length; i++)
                                     {
-                                        //избавимся от лишних данных спереди
-                                        for (int i = 0; i < pos; i++)
-                                        {
-                                            reading_queue.Dequeue();
-                                        }
-
-                                        //оставшиеся данные преобразуем обратно в массив
-                                        byte[] temp_buffer = new byte[reading_size = reading_queue.Count];
-
-                                        //WriteToLog("reading_queue.Count: " + reading_size.ToString());
-
-                                        temp_buffer = reading_queue.ToArray();
-                                        //WriteToLog(BitConverter.ToString(temp_buffer));
-
-                                        //если длина полезных данных ответа определена как 0, произведем расчет по необязательнм параметрам
-                                        if (target_in_length == 0)
-                                        {
-                                            if (reading_size > pos_count_data_size)
-                                                target_in_length = Convert.ToInt32(temp_buffer[pos_count_data_size] * size_data + header_size);
-
-                                            tcp.Close();
-                                            return reading_size;
-                                        }
-
-                                        if (target_in_length == -1)
-                                        {
-                                            target_in_length = reading_queue.Count;
-                                            reading_size = target_in_length;
-                                            in_buffer = new byte[reading_size];
-
-                                            for (int i = 0; i < in_buffer.Length; i++)
-                                                in_buffer[i] = temp_buffer[i];
-
-                                            tcp.Close();
-                                            return reading_size;
-                                        }
-
-                                        if (target_in_length > 0 && reading_size >= target_in_length)
-                                        {
-                                            reading_size = target_in_length;
-                                            for (int i = 0; i < target_in_length && i < in_buffer.Length; i++)
-                                            {
-                                                in_buffer[i] = temp_buffer[i];
-                                            }
-
-                                            tcp.Close();
-                                            return reading_size;
-                                        }
+                                        in_buffer[i] = temp_buffer[i];
                                     }
+
+                                    ClosePort(tcp);
+                                    return reading_size;
                                 }
                             }
                         }
-                        else
-                        {
-                            WriteToLog("WriteReadData: ошибка соединения");
-                        }
                     }
                 }
+                else
+                {
+                    WriteToLog("WriteReadData: ошибка соединения");
+                }
+
             }
             catch (Exception ex)
             {
                 WriteToLog("WriteReadData: " + ex.Message);
-                tcp.Close();
+                ClosePort(tcp);
                 return -1;
             }
             finally
             {
                 reading_queue.Clear();
-                tcp.Close();
+                ClosePort(tcp);
             }
             // }
 
