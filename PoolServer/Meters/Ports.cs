@@ -177,7 +177,16 @@ namespace Prizmer.Ports
                 tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 tcp.Client.Bind(ipLocalEndpoint);
 
-                tcp.Client.Connect(remoteEndPoint);
+                try
+                {
+                    tcp.Client.Connect(remoteEndPoint);
+                }
+                catch (SocketException sEx)
+                {
+                    tcp.Close();
+                    return 0;
+                }
+
 
                 Thread.Sleep(100);
 
