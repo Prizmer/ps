@@ -202,7 +202,7 @@ namespace Prizmer.Ports
                                             if (reading_size > pos_count_data_size)
                                                 target_in_length = Convert.ToInt32(temp_buffer[pos_count_data_size] * size_data + header_size);
 
-                                            tcp.Client.Close();
+                                            tcp.Close();
                                             return reading_size;
                                         }
 
@@ -215,7 +215,7 @@ namespace Prizmer.Ports
                                             for (int i = 0; i < in_buffer.Length; i++)
                                                 in_buffer[i] = temp_buffer[i];
 
-                                            tcp.Client.Close();
+                                            tcp.Close();
                                             return reading_size;
                                         }
 
@@ -227,7 +227,7 @@ namespace Prizmer.Ports
                                                 in_buffer[i] = temp_buffer[i];
                                             }
 
-                                            tcp.Client.Close();
+                                            tcp.Close();
                                             return reading_size;
                                         }
                                     }
@@ -243,7 +243,8 @@ namespace Prizmer.Ports
             }
             catch (Exception ex)
             {
-                WriteToLog(ex.Message);
+                WriteToLog("WriteReadData: " + ex.Message);
+                tcp.Close();
                 return -1;
             }
             finally
