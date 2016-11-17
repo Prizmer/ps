@@ -431,11 +431,6 @@ namespace Prizmer.PoolServer
                 DateTime common_dt_install = metersbyport[MetersCounter].dt_install;
                 DateTime common_dt_cur = DateTime.Now;
 
-                if (common_dt_install.Ticks == 0)
-                    logger.LogWarn("Дата установки прибора не задана, критично для некотрых типов параметров");
-                if (common_dt_install > common_dt_cur)
-                    logger.LogWarn("Дата установки прибора не может быть больше текущей даты, критично для некотрых типов параметров");
-
                 if (!meter.OpenLinkCanal())
                     logger.LogWarn("Связь с прибором в начале цикла опроса не установлена. Значения могут быть искажены.");
 
@@ -492,11 +487,12 @@ namespace Prizmer.PoolServer
                                 SLICE_TYPE);
                             if (takenparams.Length == 0) break;
 
-
-                            //WriteToLog("RSL: ---/ начало чтения срезов /---", "","",LOG_SLICES);
-                            //WriteToLog("RSL: К считыванию подлежит " + takenparams.Length.ToString() + " параметров", "","", LOG_SLICES);
-
                             #region Выбор дат, с которых необходимо читать каждый параметр, создание словаря вида 'Дата-Список параметров с этой датой'
+
+                            if (common_dt_install.Ticks == 0)
+                                logger.LogWarn("Дата установки прибора не задана, критично для ЧАСОВЫХ СРЕЗОВ");
+                            if (common_dt_install > common_dt_cur)
+                                logger.LogWarn("Дата установки прибора не может быть больше текущей даты, критично для ЧАСОВЫХ СРЕЗОВ");
 
                             //дата установки счетчика
                             DateTime dt_install = metersbyport[MetersCounter].dt_install;
@@ -755,6 +751,11 @@ namespace Prizmer.PoolServer
                                 const bool WRITE_LOG = true;
                                 meter.WriteToLog("RSL: 1. Открыт канал для чтения получасовок", WRITE_LOG);
 
+                                if (common_dt_install.Ticks == 0)
+                                    logger.LogWarn("Дата установки прибора не задана, критично для ПОЛУЧАСОВЫХ СРЕЗОВ");
+                                if (common_dt_install > common_dt_cur)
+                                    logger.LogWarn("Дата установки прибора не может быть больше текущей даты, критично для ПОЛУЧАСОВЫХ СРЕЗОВ");
+
                                 //дата установки счетчика
                                 DateTime dt_install = metersbyport[MetersCounter].dt_install;
                                 DateTime dt_cur = DateTime.Now;
@@ -889,6 +890,11 @@ namespace Prizmer.PoolServer
 
                         if (meter.OpenLinkCanal())
                         {
+                            if (common_dt_install.Ticks == 0)
+                                logger.LogWarn("Дата установки прибора не задана, критично для ПОЛУЧАСОВЫХ СРЕЗОВ");
+                            if (common_dt_install > common_dt_cur)
+                                logger.LogWarn("Дата установки прибора не может быть больше текущей даты, критично для ПОЛУЧАСОВЫХ СРЕЗОВ");
+
                             /* Цикл организуется для возможности немедленного прекращения выполнения 
                              * блока чтения срезов в случае ошибки*/
                             while (true)
@@ -1322,6 +1328,11 @@ namespace Prizmer.PoolServer
                 {
                     #region АРХИВНЫЕ ДАННЫЕ СТАРЫЙ МЕТОД
 
+                    if (common_dt_install.Ticks == 0)
+                        logger.LogWarn("Дата установки прибора не задана, критично для АРХИВНЫХ ПАРАМЕТРОВ");
+                    if (common_dt_install > common_dt_cur)
+                        logger.LogWarn("Дата установки прибора не может быть больше текущей даты, критично для АРХИВНЫХ ПАРАМЕТРОВ");
+
                     DateTime cur_date = DateTime.Now.Date;
                     DateTime dt_install = metersbyport[MetersCounter].dt_install.Date;
 
@@ -1413,6 +1424,11 @@ namespace Prizmer.PoolServer
                     bool doArchLog = true;
 
                     DateTime cur_date = new DateTime(DateTime.Now.Date.Ticks);
+
+                    if (common_dt_install.Ticks == 0)
+                        logger.LogWarn("Дата установки прибора не задана, критично для АРХИВНЫХ ПАРАМЕТРОВ");
+                    if (common_dt_install > common_dt_cur)
+                        logger.LogWarn("Дата установки прибора не может быть больше текущей даты, критично для АРХИВНЫХ ПАРАМЕТРОВ");
                   
                     //если дата установки отсутствует, считаем что счетчик установлен сегодня
                     DateTime dt_install = new DateTime();
