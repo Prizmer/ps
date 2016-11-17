@@ -431,8 +431,8 @@ namespace Prizmer.PoolServer
                 DateTime common_dt_install = metersbyport[MetersCounter].dt_install;
                 DateTime common_dt_cur = DateTime.Now;
 
-                if (!meter.OpenLinkCanal())
-                    logger.LogWarn("Связь с прибором в начале цикла опроса не установлена. Значения могут быть искажены.");
+               // if (!meter.OpenLinkCanal())
+                    //logger.LogWarn("Связь с прибором в начале цикла опроса не установлена. Значения могут быть искажены.");
 
 
                 ////////////////////Блок чтения серийника///////////////////
@@ -890,11 +890,6 @@ namespace Prizmer.PoolServer
 
                         if (meter.OpenLinkCanal())
                         {
-                            if (common_dt_install.Ticks == 0)
-                                logger.LogWarn("Дата установки прибора не задана, критично для ПОЛУЧАСОВЫХ СРЕЗОВ");
-                            if (common_dt_install > common_dt_cur)
-                                logger.LogWarn("Дата установки прибора не может быть больше текущей даты, критично для ПОЛУЧАСОВЫХ СРЕЗОВ");
-
                             /* Цикл организуется для возможности немедленного прекращения выполнения 
                              * блока чтения срезов в случае ошибки*/
                             while (true)
@@ -903,6 +898,12 @@ namespace Prizmer.PoolServer
                                 TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid,
                                     SLICE_TYPE);
                                 if (takenparams.Length == 0) break;
+
+                                if (common_dt_install.Ticks == 0)
+                                    logger.LogWarn("Дата установки прибора не задана, критично для ПОЛУЧАСОВЫХ СРЕЗОВ");
+                                if (common_dt_install > common_dt_cur)
+                                    logger.LogWarn("Дата установки прибора не может быть больше текущей даты, критично для ПОЛУЧАСОВЫХ СРЕЗОВ");
+
 
                                 string msg = String.Format("ПОЛУчасовые срезы: к считыванию подлежит {0} параметров", takenparams.Length);
                                 logger.LogInfo(msg);
@@ -1328,11 +1329,6 @@ namespace Prizmer.PoolServer
                 {
                     #region АРХИВНЫЕ ДАННЫЕ СТАРЫЙ МЕТОД
 
-                    if (common_dt_install.Ticks == 0)
-                        logger.LogWarn("Дата установки прибора не задана, критично для АРХИВНЫХ ПАРАМЕТРОВ");
-                    if (common_dt_install > common_dt_cur)
-                        logger.LogWarn("Дата установки прибора не может быть больше текущей даты, критично для АРХИВНЫХ ПАРАМЕТРОВ");
-
                     DateTime cur_date = DateTime.Now.Date;
                     DateTime dt_install = metersbyport[MetersCounter].dt_install.Date;
 
@@ -1340,6 +1336,11 @@ namespace Prizmer.PoolServer
                     TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid, 3);
                     if (takenparams.Length > 0)
                     {
+                        if (common_dt_install.Ticks == 0)
+                            logger.LogWarn("Дата установки прибора не задана, критично для АРХИВНЫХ ПАРАМЕТРОВ");
+                        if (common_dt_install > common_dt_cur)
+                            logger.LogWarn("Дата установки прибора не может быть больше текущей даты, критично для АРХИВНЫХ ПАРАМЕТРОВ");
+
                         for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                         {
                             if (bStopServer) goto CloseThreadPoint;
@@ -1424,11 +1425,6 @@ namespace Prizmer.PoolServer
                     bool doArchLog = true;
 
                     DateTime cur_date = new DateTime(DateTime.Now.Date.Ticks);
-
-                    if (common_dt_install.Ticks == 0)
-                        logger.LogWarn("Дата установки прибора не задана, критично для АРХИВНЫХ ПАРАМЕТРОВ");
-                    if (common_dt_install > common_dt_cur)
-                        logger.LogWarn("Дата установки прибора не может быть больше текущей даты, критично для АРХИВНЫХ ПАРАМЕТРОВ");
                   
                     //если дата установки отсутствует, считаем что счетчик установлен сегодня
                     DateTime dt_install = new DateTime();
@@ -1438,6 +1434,11 @@ namespace Prizmer.PoolServer
                     TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid, 3);
                     if (takenparams.Length > 0)
                     {
+                        if (common_dt_install.Ticks == 0)
+                            logger.LogWarn("Дата установки прибора не задана, критично для АРХИВНЫХ ПАРАМЕТРОВ");
+                        if (common_dt_install > common_dt_cur)
+                            logger.LogWarn("Дата установки прибора не может быть больше текущей даты, критично для АРХИВНЫХ ПАРАМЕТРОВ");
+
                         for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                         {
                             if (doArchLog) logger.LogInfo("Архивные: параметр: " + tpindex.ToString()); 
