@@ -162,7 +162,7 @@ namespace Prizmer.Ports
             }
         }
 
-        public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
+        public int WriteReadData_2(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
             int reading_size = 0;
 
@@ -315,6 +315,136 @@ namespace Prizmer.Ports
             return reading_size;
         }
 
+        public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
+        {
+            int reading_size = 0;
+
+
+            Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            sender.ReceiveTimeout = 1000;
+
+            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(m_address), (int)m_port);
+
+            //очередь для поддержки делегатов в старых драйверах
+            Queue<byte> reading_queue = new Queue<byte>(8192);
+            List<byte> readBytesList = new List<byte>(8192);
+
+            try
+            {
+                sender.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                sender.Bind(ipLocalEndpoint);
+                sender.Connect(remoteEndPoint);
+
+                if (sender.Connected)
+                {
+                    // Send the data through the socket.
+                    int bytesSent = sender.Send(out_buffer);
+
+                    Thread.Sleep(100);
+                    uint elapsed_time_count = 100;
+
+                    while (elapsed_time_count <= 1000)//m_read_timeout)
+                    {
+                        if (sender.Available > 0)
+                        {
+                            try
+                            {
+                                byte[] tmp_buff = new byte[sender.Available];
+                                int readed_bytes = sender.Receive(tmp_buff);
+
+                                readBytesList.AddRange(tmp_buff);
+                            }
+                            catch (Exception ex)
+                            {
+                                WriteToLog("WriteReadData: Read from port error: " + ex.Message);
+                            }
+                        }
+
+                        elapsed_time_count += 100;
+                        Thread.Sleep(100);
+                    }
+
+                    sender.Close();
+
+                    if (readBytesList.Count > 0)
+                    {
+                        /*попытаемся определить начало полезных данных в буфере-на-вход
+                            при помощи связанного делегата*/
+                        for (int i = 0; i < readBytesList.Count; i++)
+                            reading_queue.Enqueue(readBytesList[i]);
+
+                        int pos = func(reading_queue);
+                        if (pos >= 0)
+                        {
+                            //избавимся от лишних данных спереди
+                            for (int i = 0; i < pos; i++)
+                            {
+                                reading_queue.Dequeue();
+                            }
+
+                            //оставшиеся данные преобразуем обратно в массив
+                            byte[] temp_buffer = new byte[reading_size = reading_queue.Count];
+
+                            //WriteToLog("reading_queue.Count: " + reading_size.ToString());
+
+                            temp_buffer = reading_queue.ToArray();
+                            //WriteToLog(BitConverter.ToString(temp_buffer));
+
+                            //если длина полезных данных ответа определена как 0, произведем расчет по необязательнм параметрам
+                            if (target_in_length == 0)
+                            {
+                                if (reading_size > pos_count_data_size)
+                                    target_in_length = Convert.ToInt32(temp_buffer[pos_count_data_size] * size_data + header_size);
+
+                                return reading_size;
+                            }
+
+                            if (target_in_length == -1)
+                            {
+                                target_in_length = reading_queue.Count;
+                                reading_size = target_in_length;
+                                in_buffer = new byte[reading_size];
+
+                                for (int i = 0; i < in_buffer.Length; i++)
+                                    in_buffer[i] = temp_buffer[i];
+
+                  
+                                return reading_size;
+                            }
+
+                            if (target_in_length > 0 && reading_size >= target_in_length)
+                            {
+                                reading_size = target_in_length;
+                                for (int i = 0; i < target_in_length && i < in_buffer.Length; i++)
+                                {
+                                    in_buffer[i] = temp_buffer[i];
+                                }
+
+   
+                                return reading_size;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    WriteToLog("WriteReadData: ошибка соединения");
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteToLog("WriteReadData: " + ex.Message);
+                return -1;
+            }
+            finally
+            {
+                reading_queue.Clear();
+                sender.Close();
+            }
+            // }
+
+            return reading_size;
+        }
 
 
         public void WriteToLog(string str)
