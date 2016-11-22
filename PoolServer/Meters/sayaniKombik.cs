@@ -23,21 +23,17 @@ namespace Prizmer.Meters
 
     public struct Params
     {
-        /**   2 bytes   **/
+        /**   4 bytes   **/
         public float[] Q;    //Q1-Q2
-        public float[] T;    //T1-T4
         public float[] M;    //M1-M4
-        public float V5;
+        public float[] V;
+
+        /**   2 bytes   **/
+        public float[] T;    //T1-T4
 
         /**   1 byte   **/
-        public float[] P;    //P1-P4 
-
-
         public int[] NC;     //NC1-NC2
-        public int TimeMinutes1;
-        public int VoltsBattery;
-        public int TimeMinutes2;
-        public int Reserved;
+        public float VoltsBattery;
     };
     public struct MeterInfo
     {
@@ -52,6 +48,12 @@ namespace Prizmer.Meters
 
     public class sayani_kombik : CMeter, IMeter
     {
+        public sayani_kombik()
+        {
+            CreateEEPROMParamList(ref EEPROMParamList);
+            CreateHourRecordParamList(ref HourRecordParamList);
+        }
+
         ~sayani_kombik()
         {
             StopFlag = true;
@@ -75,7 +77,7 @@ namespace Prizmer.Meters
         bool StopFlag = false;
 
         //время ожидания завершения работы утиллиты rds
-        const int waitRDSTimeInSec = 25;
+        const int waitRDSTimeInSec = 60;
         const byte RecordLength = 32;
         const byte bytesFromTheEnd = 32;
 
@@ -87,27 +89,274 @@ namespace Prizmer.Meters
         // передаем в конструктор тип класса
         XmlSerializer formatter = new XmlSerializer(typeof(DumpMeta));
 
+        List<MeterParam> EEPROMParamList = null;
+        public void CreateEEPROMParamList(ref List<MeterParam> paramsList)
+        {
+            EEPROMParamList = new List<MeterParam>();
+
+            int k1 = 4 * 1000;
+
+            EEPROMParamList.Add(new MeterParam(0x1B8, 4, "Q1", "ГДж", k1));
+            EEPROMParamList.Add(new MeterParam(0x1BC, 4, "Q2", "ГДж", k1));
+
+            EEPROMParamList.Add(new MeterParam(0x1C0, 4, "M1", "Т", k1));
+            EEPROMParamList.Add(new MeterParam(0x1C4, 4, "M2", "Т", k1));
+            EEPROMParamList.Add(new MeterParam(0x1C8, 4, "M3", "Т", k1));
+            EEPROMParamList.Add(new MeterParam(0x1CC, 4, "M4", "Т", k1));
+
+            EEPROMParamList.Add(new MeterParam(0x1D0, 4, "V1", "м3", k1));
+            EEPROMParamList.Add(new MeterParam(0x1D4, 4, "V2", "м3", k1));
+            EEPROMParamList.Add(new MeterParam(0x1D8, 4, "V3", "м3", k1));
+            EEPROMParamList.Add(new MeterParam(0x1DC, 4, "V4", "м3", k1));
+        }
+
+        List<MeterParam> HourRecordParamList = null;
+        public void CreateHourRecordParamList(ref List<MeterParam> paramsList)
+        {
+            HourRecordParamList = new List<MeterParam>();
+
+            HourRecordParamList.Add(new MeterParam(0, 2, "Q1", "ГДж", 4*1000));
+            HourRecordParamList.Add(new MeterParam(2, 2, "Q2", "ГДж", 4*1000));
+
+            HourRecordParamList.Add(new MeterParam(4, 2, "T1", "C", -56, 256));
+            HourRecordParamList.Add(new MeterParam(6, 2, "T2", "C", -56, 256));
+            HourRecordParamList.Add(new MeterParam(8, 2, "T3", "C", -56, 256));
+            HourRecordParamList.Add(new MeterParam(10, 2, "T4", "C", -56, 256));
+
+            HourRecordParamList.Add(new MeterParam(12, 2, "М1", "Л", 4 * 1000));
+            HourRecordParamList.Add(new MeterParam(14, 2, "М2", "Л", 4 * 1000));
+            HourRecordParamList.Add(new MeterParam(16, 2, "М3", "Л", 4 * 1000));
+            HourRecordParamList.Add(new MeterParam(18, 2, "М4", "Л", 4 * 1000));
+
+            HourRecordParamList.Add(new MeterParam(20, 2, "V5", "м3", 4));
+
+            HourRecordParamList.Add(new MeterParam(22, 1, "P1", "0.1*атм", 4));
+            HourRecordParamList.Add(new MeterParam(23, 1, "P2", "0.1*атм", 4));
+            HourRecordParamList.Add(new MeterParam(24, 1, "P3", "0.1*атм", 4));
+            HourRecordParamList.Add(new MeterParam(25, 1, "P4", "0.1*атм", 4));
+
+            HourRecordParamList.Add(new MeterParam(26, 1, "НС1"));
+            HourRecordParamList.Add(new MeterParam(27, 1, "НС2"));
+
+            HourRecordParamList.Add(new MeterParam(28, 1, "Tвыч1", "мин"));
+            HourRecordParamList.Add(new MeterParam(29, 1, "Uбат", "В", 100));
+            HourRecordParamList.Add(new MeterParam(30, 1, "Tвыч2", "мин"));
 
 
+        }
 
         #region Низкоуровневый разбор дампа
 
-        private int GiveMeNextValue(FileStream fs, int valBytesCount)
+        private string GetNSDescription(int NC)
         {
+            string sNCDescription = "";
+            if (((NC>> 0) & 0x01) == 0x01) sNCDescription += "Ошибка термодатчика 1;";
+            if (((NC>> 1) & 0x01) == 0x01) sNCDescription += "Ошибка термодатчика 2;";
+            if (((NC>> 2) & 0x01) == 0x01) sNCDescription += "T1<T2 или T1-T2 меньше порога;";
+            if (((NC>> 3) & 0x01) == 0x01) sNCDescription += "Т2<Tх;";
+            if (((NC>> 4) & 0x01) == 0x01) sNCDescription += "dQ1<0;";
+            if (((NC>> 5) & 0x01) == 0x01) sNCDescription += "нет внешнего питания;";
+            if (((NC>> 6) & 0x01) == 0x01) sNCDescription += "проводилась коррекция времени;";
+            if (((NC>> 7) & 0x01) == 0x01) sNCDescription += "изменялось содержимое EEPROM;";
+
+            if (sNCDescription == "") sNCDescription = "OK";
+
+            return sNCDescription;
+        }
+
+        private float RoundFloat(float a)
+        {
+            return (float)Math.Round(a, 3, MidpointRounding.AwayFromZero);
+        }
+
+        public bool FillParamsStructure(FileStream fsDump, out Params structParams, out string strRepresentation)
+        {
+            structParams = new Params();
+            strRepresentation = "";
+            byte[] sourceBytes = null;
+
+            if (fsDump != null)
+            {
+                try
+                {
+                    //СНАЧАЛА ВСЕ ПАРАМЕТРЫ ИЗ EEPROM
+
+                    //Q
+                    structParams.Q = new float[2];
+                    MeterParam Q1 = EEPROMParamList.Find((x) => { return x.PName == "Q1"; });
+                    fsDump.Seek(Q1.PIndex, SeekOrigin.Begin);
+                    Q1.PValue = GiveMeNextValue(fsDump, Q1.PLength, ref sourceBytes);
+                    Q1.PValue /= Q1.Coefficient;
+                    structParams.Q[0] = RoundFloat(Q1.PValue);
+
+                    MeterParam Q2 = EEPROMParamList.Find((x) => { return x.PName == "Q2"; });
+                    Q2.PValue = GiveMeNextValue(fsDump, Q2.PLength, ref sourceBytes);
+                    Q2.PValue /= Q2.Coefficient;
+                    structParams.Q[1] = RoundFloat(Q2.PValue);
+
+                    for (int i = 0; i < structParams.Q.Length; i++)
+                        strRepresentation += String.Format("Q{0}: {1}{2}; ", i + 1, structParams.Q[i], " " + Q1.PUnit);
+
+                    //M
+                    structParams.M = new float[4];
+                    MeterParam M1 = EEPROMParamList.Find((x) => { return x.PName == "M1"; });
+                    M1.PValue = GiveMeNextValue(fsDump, M1.PLength, ref sourceBytes);
+                    M1.PValue /= M1.Coefficient;
+                    structParams.M[0] = RoundFloat(M1.PValue);
+
+                    MeterParam M2 = EEPROMParamList.Find((x) => { return x.PName == "M2"; });
+                    M2.PValue = GiveMeNextValue(fsDump, M2.PLength, ref sourceBytes);
+                    M2.PValue /= M2.Coefficient;
+                    structParams.M[1] = RoundFloat(M2.PValue);
+
+                    MeterParam M3 = EEPROMParamList.Find((x) => { return x.PName == "M3"; });
+                    M3.PValue = GiveMeNextValue(fsDump, M3.PLength, ref sourceBytes);
+                    M3.PValue /= M3.Coefficient;
+                    structParams.M[2] = RoundFloat(M3.PValue);
+
+                    MeterParam M4 = EEPROMParamList.Find((x) => { return x.PName == "M4"; });
+                    M4.PValue = GiveMeNextValue(fsDump, M4.PLength, ref sourceBytes);
+                    M4.PValue /= M4.Coefficient;
+                    structParams.M[3] = RoundFloat(M4.PValue);
+
+                    for (int i = 0; i < structParams.M.Length; i++)
+                        strRepresentation += String.Format("M{0}: {1}{2}; ", i + 1, structParams.M[i], " " + M1.PUnit);
+
+                    //V
+                    structParams.V = new float[4];
+                    MeterParam V1 = EEPROMParamList.Find((x) => { return x.PName == "V1"; });
+                    V1.PValue = GiveMeNextValue(fsDump, V1.PLength, ref sourceBytes);
+                    V1.PValue /= V1.Coefficient;
+                    structParams.V[0] = RoundFloat(V1.PValue);
+
+                    MeterParam V2 = EEPROMParamList.Find((x) => { return x.PName == "V2"; });
+                    V2.PValue = GiveMeNextValue(fsDump, V2.PLength, ref sourceBytes);
+                    V2.PValue /= V2.Coefficient;
+                    structParams.V[1] = RoundFloat(V2.PValue);
+
+                    MeterParam V3 = EEPROMParamList.Find((x) => { return x.PName == "V3"; });
+                    V3.PValue = GiveMeNextValue(fsDump, V3.PLength, ref sourceBytes);
+                    V3.PValue /= V3.Coefficient;
+                    structParams.V[2] = RoundFloat(V3.PValue);
+
+                    MeterParam V4 = EEPROMParamList.Find((x) => { return x.PName == "V4"; });
+                    V4.PValue = GiveMeNextValue(fsDump, V4.PLength, ref sourceBytes);
+                    V4.PValue /= V4.Coefficient;
+                    structParams.V[3] = RoundFloat(V4.PValue);
+
+                    for (int i = 0; i < structParams.V.Length; i++)
+                        strRepresentation += String.Format("V{0}: {1}{2}; ", i + 1, structParams.V[i], " " + V1.PUnit);
+
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    //ТЕПЕРЬ ПЕРЕМЕСТИМСЯ К КРАЙНЕЙ ЧАСОВОЙ ЗАПИСИ 
+
+                    //Внимание! В часовых записях, хранится только приращение величины за последний час (кроме T и служебных параметров)
+                    int offsetFromTheEnd = ((int)bytesFromTheEnd + RecordLength) * -1;
+                    fsDump.Seek(offsetFromTheEnd, SeekOrigin.End);
+
+                    //T
+                    structParams.T = new float[4];
+                    MeterParam T1 = HourRecordParamList.Find((x) => { return x.PName == "T1"; });
+                    fsDump.Seek(T1.PIndex, SeekOrigin.Current);
+                    GiveMeNextValue(fsDump, T1.PLength, ref sourceBytes);
+                    if (sourceBytes[1] > 0)
+                        T1.PValue = sourceBytes[1] + T1.Coefficient;
+                    T1.PValue += (float)sourceBytes[0] / T1.Coefficient2;
+                    structParams.T[0] = RoundFloat(T1.PValue);
+
+                    MeterParam T2 = HourRecordParamList.Find((x) => { return x.PName == "T2"; });
+                    GiveMeNextValue(fsDump, T2.PLength, ref sourceBytes);
+                    if (sourceBytes[1] > 0)
+                        T2.PValue = sourceBytes[1] + T2.Coefficient;
+                    T2.PValue += (float)sourceBytes[0] / T2.Coefficient2;
+                    structParams.T[1] = RoundFloat(T2.PValue);
+
+                    MeterParam T3 = HourRecordParamList.Find((x) => { return x.PName == "T3"; });
+                    GiveMeNextValue(fsDump, T3.PLength, ref sourceBytes);
+                    if (sourceBytes[1] > 0)
+                        T3.PValue = sourceBytes[1] + T3.Coefficient;
+                    T3.PValue += (float)sourceBytes[0] / T3.Coefficient2;
+                    structParams.T[2] = RoundFloat(T3.PValue);
+
+                    MeterParam T4 = HourRecordParamList.Find((x) => { return x.PName == "T4"; });
+                    GiveMeNextValue(fsDump, T4.PLength, ref sourceBytes);
+                    if (sourceBytes[1] > 0)
+                        T4.PValue = sourceBytes[1] + T4.Coefficient;
+                    T4.PValue += (float)sourceBytes[0] / T4.Coefficient2;
+                    structParams.T[3] = RoundFloat(T4.PValue);
+
+                    for (int i = 0; i < structParams.T.Length; i++)
+                        strRepresentation += String.Format("T{0}: {1}{2}; ", i + 1, structParams.T[i], " " + T1.PUnit);
+
+
+                    //ETC
+                    fsDump.Seek(offsetFromTheEnd, SeekOrigin.End);
+
+                    structParams.NC = new int[2];
+                    MeterParam NC1 = HourRecordParamList.Find((x) => { return x.PName == "НС1"; });
+                    fsDump.Seek(NC1.PIndex, SeekOrigin.Current);
+                    NC1.PValue = GiveMeNextValue(fsDump, NC1.PLength, ref sourceBytes);
+                    structParams.NC[0] = (int)NC1.PValue;
+
+                    MeterParam NC2 = HourRecordParamList.Find((x) => { return x.PName == "НС2"; });
+                    NC2.PValue = GiveMeNextValue(fsDump, NC2.PLength, ref sourceBytes);
+                    NC2.PValue /= NC2.Coefficient;
+                    structParams.VoltsBattery = NC2.PValue;
+
+
+                    MeterParam Ubat = HourRecordParamList.Find((x) => { return x.PName == "Uбат"; });
+                    fsDump.Seek(offsetFromTheEnd, SeekOrigin.End);
+                    fsDump.Seek(Ubat.PIndex, SeekOrigin.Current);
+                    Ubat.PValue = GiveMeNextValue(fsDump, Ubat.PLength, ref sourceBytes);
+                    Ubat.PValue /= Ubat.Coefficient;
+                    structParams.VoltsBattery = Ubat.PValue;
+
+                    for (int i = 0; i < structParams.NC.Length; i++)
+                        strRepresentation += String.Format("Вычислитель {0}: {1} [{2}];\n", i + 1,
+                            structParams.NC[i], GetNSDescription(structParams.NC[i]));
+
+                    strRepresentation += String.Format("U батареи: {1}{2}; ", "", structParams.VoltsBattery, " " + Ubat.PUnit);
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private int GiveMeNextValue(FileStream fs, int valBytesCount, ref byte[] sourceBytes)
+        {      
             try
             {
                 int fsPosition = (int)fs.Position;
                 byte[] buffer = new byte[fs.Length];
                 int bytesRead = fs.Read(buffer, fsPosition, valBytesCount);
 
-                byte[] tmpInt16Buffer = new byte[valBytesCount];
-                Array.Copy(buffer, fsPosition, tmpInt16Buffer, 0, valBytesCount);
-                //Array.Reverse(tmpInt16Buffer);
+                byte[] tmpIntBuffer = new byte[valBytesCount];
+                Array.Copy(buffer, fsPosition, tmpIntBuffer, 0, valBytesCount);
+                //Array.Reverse(tmpIntBuffer);
+
+                sourceBytes = new byte[tmpIntBuffer.Length];
+                Array.Copy(tmpIntBuffer, sourceBytes, tmpIntBuffer.Length);
+  
                 int val = -2;
                 if (valBytesCount == 1)
-                    return (int)tmpInt16Buffer[0];
+                    return (int)tmpIntBuffer[0];
                 else if (valBytesCount == 2)
-                    val = BitConverter.ToInt16(tmpInt16Buffer, 0);
+                    val = BitConverter.ToInt16(tmpIntBuffer, 0);
+                else if (valBytesCount == 4)
+                    val = BitConverter.ToInt32(tmpIntBuffer, 0);
 
                 return val;
             }
@@ -115,84 +364,6 @@ namespace Prizmer.Meters
             {
                 return -2;
             }
-        }
-        public bool GetParamValues(FileStream fs, int bytesFromTheEnd, ref Params prms, ref string strRepresentation)
-        {
-            strRepresentation = "";
-
-            if (fs != null)
-            {
-                int lastFileByteIndex = (int)(fs.Length);
-                long lastRecordFirstIndex = lastFileByteIndex - bytesFromTheEnd - RecordLength;
-                fs.Seek((int)lastRecordFirstIndex, SeekOrigin.Begin);
-
-                prms = new Params();
-
-                prms.Q = new float[2];
-                for (int i = 0; i < 2; i++)
-                {
-                    prms.Q[i] = (float)GiveMeNextValue(fs, 2);
-                    strRepresentation += String.Format("Q{0}: {1}{2}; ", i + 1, prms.Q[i], "");
-                }
-
-                prms.T = new float[4];
-                for (int i = 0; i < 4; i++)
-                {
-                    prms.T[i] = (float)GiveMeNextValue(fs, 2);
-                    strRepresentation += String.Format("T{0}: {1}{2}; ", i + 1, prms.T[i], "");
-                }
-
-                prms.M = new float[4];
-                for (int i = 0; i < 4; i++)
-                {
-                    prms.M[i] = (float)GiveMeNextValue(fs, 2);
-                    strRepresentation += String.Format("M{0}: {1}{2}; ", i + 1, prms.M[i], "");
-                }
-
-
-                prms.V5 = (float)GiveMeNextValue(fs, 2);
-                strRepresentation += String.Format("V{0}: {1}{2}; ", 5, prms.V5, "");
-
-                prms.P = new float[4];
-                for (int i = 0; i < 4; i++)
-                {
-                    prms.P[i] = (float)GiveMeNextValue(fs, 1);
-                    strRepresentation += String.Format("P{0}: {1}{2}; ", i + 1, prms.P[i], "");
-                }
-                prms.NC = new int[2];
-                for (int i = 0; i < 2; i++)
-                {
-                    prms.NC[i] = GiveMeNextValue(fs, 1);
-
-                    string sNCDescription = "";
-                    if (((prms.NC[i] >> 0) & 0x01) == 0x01) sNCDescription += "Ошибка термодатчика 1;";
-                    if (((prms.NC[i] >> 1) & 0x01) == 0x01) sNCDescription += "Ошибка термодатчика 2;";
-                    if (((prms.NC[i] >> 2) & 0x01) == 0x01) sNCDescription += "T1<T2 или T1-T2 меньше порога;";
-                    if (((prms.NC[i] >> 3) & 0x01) == 0x01) sNCDescription += "Т2<Tх;";
-                    if (((prms.NC[i] >> 4) & 0x01) == 0x01) sNCDescription += "dQ1<0;";
-                    if (((prms.NC[i] >> 5) & 0x01) == 0x01) sNCDescription += "нет внешнего питания;";
-                    if (((prms.NC[i] >> 6) & 0x01) == 0x01) sNCDescription += "проводилась коррекция времени;";
-                    if (((prms.NC[i] >> 7) & 0x01) == 0x01) sNCDescription += "изменялось содержимое EEPROM;";
-
-                    if (sNCDescription == "") sNCDescription = "OK";
-
-                    strRepresentation += String.Format("Вычислитель {0}: {1} [{2}];\n", i + 1, prms.NC[i], sNCDescription);
-                }
-
-                prms.TimeMinutes1 = GiveMeNextValue(fs, 1);
-                prms.VoltsBattery = GiveMeNextValue(fs, 1);
-                prms.TimeMinutes2 = GiveMeNextValue(fs, 1);
-                prms.Reserved = GiveMeNextValue(fs, 1);
-
-                strRepresentation += String.Format("Time{0}: {1}{2}; ", 1, prms.TimeMinutes1, "");
-                strRepresentation += String.Format("Time{0}: {1}{2}; ", 2, prms.TimeMinutes2, "");
-                strRepresentation += String.Format("Battery{0}: {1}{2}; ", "", prms.VoltsBattery, " Volts");
-                strRepresentation += String.Format("Reserved{0}: {1}{2}; ", "", prms.Reserved, "");
-
-                return true;
-            }
-
-            return false;
         }
 
         private bool GetMeterInfo(FileStream fs, ref MeterInfo mInfo)
@@ -240,6 +411,8 @@ namespace Prizmer.Meters
         private bool CreateBatchConnectionList(List<FileInfo> fileInfoList, ref List<BatchConnection> batchConnectionList)
         {
             batchConnectionList = new List<BatchConnection>();
+
+            bool baseReplaceRes  = BaseReplace();
 
 
             for (int i = 0; i < fileInfoList.Count; i++)
@@ -292,7 +465,6 @@ namespace Prizmer.Meters
                 return false;
             }
         }
-
 
         private bool ExecuteBatchConnection(BatchConnection batchConn)
         {
@@ -357,7 +529,7 @@ namespace Prizmer.Meters
 
                 bool tmpRes = false;
                 if (GetMeterInfo(dumpFileStream, ref mi))
-                    if (GetParamValues(dumpFileStream, bytesFromTheEnd, ref prms, ref strValues))
+                    if (FillParamsStructure(dumpFileStream, out prms, out strValues))
                         tmpRes = true;
 
                 dumpFileStream.Close();
@@ -419,7 +591,7 @@ namespace Prizmer.Meters
         }
 
         public bool LatestDumpFileName(string directoryPath, string serialNumberDec, out string fileName, out DateTime dt, 
-            string pattern = ".dat")
+            string pattern = "*.dat")
         {
             fileName = "";
             dt = new DateTime().Date;
@@ -427,12 +599,7 @@ namespace Prizmer.Meters
             if (!Directory.Exists(directoryPath))
                 return false;
 
-            var fileNamesV = Directory.GetFiles(
-                directoryPath, "*.*", SearchOption.TopDirectoryOnly).Where(s => s.EndsWith(serialNumberDec + pattern));
-
-
-            string[] fileNames = fileNamesV.ToArray<string>();
-
+            string[] fileNames = Directory.GetFiles(directoryPath, pattern, SearchOption.TopDirectoryOnly);
             if (fileNames.Length == 0)
                 return false;
 
@@ -465,7 +632,6 @@ namespace Prizmer.Meters
             return true;
         }
 
-
         public void ReplaceExtensionInFileName(string fullFileName, string newExtenstion, ref string newFullFileName)
         {
             //разберемся с файлом лога
@@ -474,6 +640,39 @@ namespace Prizmer.Meters
             string logFullFileName = logDir + "\\" + logFName + newExtenstion;
 
             newFullFileName = logFullFileName;
+        }
+
+        public static bool DeleteDumpDirectory()
+        {
+            try
+            {
+                string path = AppDomain.CurrentDomain.BaseDirectory + "RDS\\Dumps";
+                Directory.Delete(path, true);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public bool BaseReplace()
+        {
+            try
+            {
+                string newBasePath = directoryBase + "RDS\\Backup\\4rmd.gdb";
+                string oldBasePath = directoryBase + "RDS\\4rmd.gdb";
+                File.Delete(oldBasePath);
+                File.Copy(newBasePath, oldBasePath);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
         }
 
         public bool DeleteDumpFileAndLogs(string dumpFileName)
@@ -788,6 +987,73 @@ namespace Prizmer.Meters
 
         #endregion
 
+    }
+
+    public class MeterParam
+    {
+        public MeterParam(int index, int length, string name, string unit = "", float k = 1, float k2 = 1)
+        {
+            _index = index;
+            _length = length;
+            _k = k;
+            _k2 = k2;
+
+            _name = name;
+            _unit = unit;
+        }
+
+        int _index;
+        int _length;
+        public int PIndex
+        {
+            get { return _index; }
+        }
+
+        public int PLength
+        {
+            get { return _length; }
+        }
+
+        string _name;
+        public string PName
+        {
+            get { return _name; }
+        }
+
+        string _unit;
+        public string PUnit
+        {
+            get { return _unit; }
+        }
+
+        float _k;
+        public float Coefficient
+        {
+            get { return _k;}
+            set
+            {
+                _k = value;
+            }
+        }
+        float _k2;
+        public float Coefficient2
+        {
+            get { return _k2; }
+            set
+            {
+                _k2 = value;
+            }
+        }
+
+        float _value = 0;
+        public float PValue
+        {
+            get { return _value; }
+            set
+            {
+                _value = value;
+            }
+        }     
     }
 
     public class BatchConnection

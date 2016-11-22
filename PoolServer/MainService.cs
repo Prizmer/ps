@@ -247,6 +247,11 @@ namespace Prizmer.PoolServer
 
             PgStorage ServerStorage = new PgStorage();
 
+            #region Блок особых действий
+                sayani_kombik.DeleteDumpDirectory();
+
+            #endregion
+
             //подключение к БД
             System.Data.ConnectionState conState = ServerStorage.Open(ConnectionString);
 
@@ -437,7 +442,7 @@ namespace Prizmer.PoolServer
 
                 ////////////////////Блок чтения серийника///////////////////
                 if (bStopServer) goto CloseThreadPoint;
-                if (false)
+                if (true)
                 {
                     string serial_number = String.Empty;
                     if (meter.OpenLinkCanal())
