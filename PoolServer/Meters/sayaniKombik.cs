@@ -659,6 +659,7 @@ namespace Prizmer.Meters
 
         public bool BaseReplace()
         {
+            return true;
             try
             {
                 string newBasePath = directoryBase + "RDS\\Backup\\4rmd.gdb";
