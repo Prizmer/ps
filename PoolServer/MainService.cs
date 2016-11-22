@@ -248,7 +248,7 @@ namespace Prizmer.PoolServer
             PgStorage ServerStorage = new PgStorage();
 
             #region Блок особых действий
-                sayani_kombik.DeleteDumpDirectory();
+                //sayani_kombik.DeleteDumpDirectory();
 
             #endregion
 
