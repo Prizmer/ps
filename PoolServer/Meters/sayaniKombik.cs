@@ -680,7 +680,8 @@ namespace Prizmer.Meters
                 FileInfo tmpFileInfo = new FileInfo(fileNames[i]);
                 string tmpFileName = tmpFileInfo.Name;
                 string[] splittedFn = tmpFileName.Split('_');
-                if (splittedFn.Length == 0) continue;
+                if (splittedFn.Length < 2) continue;
+                if (splittedFn[1] != serialNumberDec) continue;
 
                 CultureInfo provider = CultureInfo.InvariantCulture;
                 DateTime tmpDt = new DateTime();
