@@ -681,7 +681,7 @@ namespace Prizmer.Meters
                 string tmpFileName = tmpFileInfo.Name;
                 string[] splittedFn = tmpFileName.Split('_');
                 if (splittedFn.Length < 2) continue;
-                if (splittedFn[1] != serialNumberDec) continue;
+                if (!splittedFn[1].Contains(serialNumberDec)) continue;
 
                 CultureInfo provider = CultureInfo.InvariantCulture;
                 DateTime tmpDt = new DateTime();
@@ -692,6 +692,8 @@ namespace Prizmer.Meters
 
                 dateList.Add(tmpDt);
             }
+
+            if (dateList.Count == 0) return false;
 
             List<DateTime> orderedList = new List<DateTime>();
             orderedList = dateList.OrderBy(x => x.Date).ToList();
