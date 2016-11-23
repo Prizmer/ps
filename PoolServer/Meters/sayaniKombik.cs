@@ -52,7 +52,21 @@ namespace Prizmer.Meters
         {
             CreateEEPROMParamList(ref EEPROMParamList);
             CreateHourRecordParamList(ref HourRecordParamList);
-        }
+
+
+            //параметры исполнения процесса cmd
+            // создаем процесс cmd.exe с параметрами "ipconfig /all"
+            psiOpt = new ProcessStartInfo(@"cmd.exe");
+
+            psiOpt.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            // скрываем окно запущенного процесса
+            psiOpt.WindowStyle = ProcessWindowStyle.Normal;
+            psiOpt.RedirectStandardOutput = true;
+            psiOpt.RedirectStandardInput = true;
+            psiOpt.RedirectStandardError = true;
+           psiOpt.UseShellExecute = false;
+           psiOpt.CreateNoWindow = true;
+          }
 
         ~sayani_kombik()
         {
@@ -77,7 +91,7 @@ namespace Prizmer.Meters
         bool StopFlag = false;
 
         //время ожидания завершения работы утиллиты rds
-        const int waitRDSTimeInSec = 30;
+        const int waitRDSTimeInSec = 60;
         const byte RecordLength = 32;
         const byte bytesFromTheEnd = 32;
 
@@ -144,6 +158,14 @@ namespace Prizmer.Meters
 
 
         }
+
+        //информация о консольном процессе
+        ProcessStartInfo psiOpt = null;
+        Process procCommand = null;
+
+        public event EventHandler<EventArgs> BatchFileExecutionStartEvent;
+        public event EventHandler<EventArgs> BatchFileExecutionEndEvent;
+        public event EventHandler<EventArgs> BatchFileTickEvent;
 
         #region Низкоуровневый разбор дампа
 
@@ -436,7 +458,6 @@ namespace Prizmer.Meters
             if (batchConnectionList.Count == 0)
                 return false;
 
-
             return true;
         }
 
@@ -466,26 +487,35 @@ namespace Prizmer.Meters
             }
         }
 
-        private bool ExecuteBatchConnection(BatchConnection batchConn)
+
+
+        string tmpLogString = "";
+
+
+        public bool ExecuteBatchConnection(BatchConnection batchConn)
         {
-            string tmpCmd = batchConn.Command;
+            WriteToRDSLog(batchConn.FileNameLog, "Начат процесс чтения");
+
+            tmpLogString = "";
+            if (BatchFileExecutionStartEvent != null)
+                BatchFileExecutionStartEvent.Invoke(null, new EventArgs());
 
             if (!batchConn.ExistsRDS)
                 return false;
 
-            // создаем процесс cmd.exe с параметрами "ipconfig /all"
-            ProcessStartInfo psiOpt = new ProcessStartInfo(@"cmd.exe");
-
-            psiOpt.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            // скрываем окно запущенного процесса
-            psiOpt.WindowStyle = ProcessWindowStyle.Hidden;
-            psiOpt.RedirectStandardOutput = true;
-            psiOpt.RedirectStandardInput = true;
-            psiOpt.UseShellExecute = false;
-            psiOpt.CreateNoWindow = true;
             // запускаем процесс
-            Process procCommand = Process.Start(psiOpt);
-            procCommand.StandardInput.WriteLine(tmpCmd);
+            psiOpt.FileName = "\"" + batchConn.FileNameRDSLib + "\"";         
+            psiOpt.Arguments = batchConn.ArgumentsForRDS;
+
+            procCommand = Process.Start(psiOpt);
+            procCommand.EnableRaisingEvents = true;
+
+            //procCommand.Exited += new EventHandler(procCommand_Exited);
+            procCommand.OutputDataReceived += new DataReceivedEventHandler(procCommand_OutputStreamDataReceived);
+            procCommand.ErrorDataReceived += new DataReceivedEventHandler(procCommand_OutputStreamDataReceived);
+
+            procCommand.BeginOutputReadLine();
+            procCommand.BeginErrorReadLine();
 
             bool tmpRes = false;
             for (int t = 0; t < waitRDSTimeInSec; t++)
@@ -493,24 +523,49 @@ namespace Prizmer.Meters
                 if (StopFlag)
                     break;
 
-                if (IsDatFileAvailable(batchConn.FileNameDump))
+                if (procCommand.HasExited)
                 {
-                    
-                    tmpRes = true;
+                    if (IsDatFileAvailable(batchConn.FileNameDump))
+                        tmpRes = true;
                     break;
                 }
 
                 Thread.Sleep(1000);
+
+                if (BatchFileTickEvent != null)
+                    BatchFileTickEvent.Invoke(null, new EventArgs());
             }
 
-            try
+            if (!tmpRes)
             {
-                procCommand.CloseMainWindow();
+                WriteToRDSLog(batchConn.FileNameLog, "Не удалось прочитать данные");
             }
-            catch (Exception ex)
-            { }
+
+            if (BatchFileExecutionEndEvent != null)
+                BatchFileExecutionEndEvent.Invoke(null, new EventArgs());
+
+            if (tmpLogString.Length > 0)
+                WriteToRDSLog(batchConn.FileNameLog, tmpLogString);
 
             return tmpRes;
+        }
+
+
+        void procCommand_OutputStreamDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            tmpLogString += e.Data + Environment.NewLine;
+        }
+
+        private void WriteToRDSLog(string logFileName, string msg)
+        {
+            if (msg.Length > 0)
+            {
+                FileStream fs = new FileStream(logFileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+                StreamWriter sw = new StreamWriter(fs);
+                sw.Write(msg + Environment.NewLine);
+                sw.Flush();
+                sw.Close();
+            }
         }
 
         private bool ParseDumpFile(string fileName, ref MeterInfo mi, ref Params prms, bool deleteAfterParse = false)
@@ -648,6 +703,7 @@ namespace Prizmer.Meters
             {
                 string path = AppDomain.CurrentDomain.BaseDirectory + "RDS\\Dumps";
                 Directory.Delete(path, true);
+                Directory.CreateDirectory(path);
 
                 return true;
             }
@@ -659,7 +715,6 @@ namespace Prizmer.Meters
 
         public bool BaseReplace()
         {
-            return true;
             try
             {
                 string newBasePath = directoryBase + "RDS\\Backup\\4rmd.gdb";
@@ -915,7 +970,8 @@ namespace Prizmer.Meters
             if (!Directory.Exists(curBatchDirectory) || !File.Exists(curBatchFilename))
                 return false;
 
-            //все готово к генерации нового дампа
+            //ВСЕ ГОТОВО К РЕАЛЬНОМУ ЧТЕНИЮ И ГЕНЕРАЦИИ ДАМПА
+
             FileInfo batchFileInfo = new FileInfo(curBatchFilename);
             List<FileInfo> batchFIList = new List<FileInfo>();
             batchFIList.Add(batchFileInfo);
@@ -1131,6 +1187,16 @@ namespace Prizmer.Meters
             set
             {
                 _batchContentString = value;
+            }
+        }
+
+        public string ArgumentsForRDS
+        {
+            get
+            {
+                string withoutRdsExe = _batchContentString.Replace("\"" +FileNameRDSLib + "\"","");
+                string str = Regex.Replace(withoutRdsExe, " ? \\d> ?\".*", "");
+                return str;
             }
         }
 
