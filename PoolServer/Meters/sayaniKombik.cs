@@ -444,9 +444,6 @@ namespace Prizmer.Meters
         {
             batchConnectionList = new List<BatchConnection>();
 
-            bool baseReplaceRes  = BaseReplace();
-
-
             for (int i = 0; i < fileInfoList.Count; i++)
             {
                 try
