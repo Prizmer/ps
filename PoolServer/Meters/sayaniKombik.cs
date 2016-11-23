@@ -563,6 +563,13 @@ namespace Prizmer.Meters
             if (tmpLogString.Length > 0)
                 WriteToRDSLog(batchConn.FileNameLog, tmpLogString);
 
+            try
+            {
+                procCommand.Close();
+            }
+            catch (Exception ex)
+            {}
+
             return tmpRes;
         }
 
