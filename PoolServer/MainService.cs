@@ -1535,12 +1535,12 @@ namespace Prizmer.PoolServer
                     {
                         metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
                     }
+
+                    if (m_vport.GetConnectionType() == "tcp")
+                        m_vport.ReInitialize();
                 }
 
                 Thread.Sleep(1000);
-
-                //if (m_vport.GetConnectionType() == "tcp")
-                //    m_vport.ReInitialize();
             }
 
             //закрываем соединение с БД

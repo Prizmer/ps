@@ -100,7 +100,6 @@ namespace Prizmer.Ports
             }
         }
 
-
         int GetFreeTcpPort()
         {
             TcpListener l = new TcpListener(IPAddress.Loopback, 0);
@@ -245,7 +244,6 @@ namespace Prizmer.Ports
             return false;
         }
 
-
         public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
             List<byte> readBytesList = new List<byte>(8192);
@@ -253,41 +251,47 @@ namespace Prizmer.Ports
 
             try
             {
-                if (sender.Connected)
+                for (int i = 0; i < 2; i++)
                 {
-                    // Send the data through the socket.
-                    sender.Send(out_buffer, 0, out_length, SocketFlags.None);
-    
-                    Thread.Sleep(10);
-                    uint elapsed_time_count = 100;
-
-                    while (elapsed_time_count <= m_read_timeout)
+                    if (sender.Connected)
                     {
-                        if (sender.Available > 0)
-                        {
-                            try
-                            {
-                                byte[] tmp_buff = new byte[sender.Available];
-                                int readed_bytes = sender.Receive(tmp_buff);
+                        // Send the data through the socket.
+                        sender.Send(out_buffer, 0, out_length, SocketFlags.None);
 
-                                readBytesList.AddRange(tmp_buff);
-                            }
-                            catch (Exception ex)
+                        Thread.Sleep(10);
+                        uint elapsed_time_count = 100;
+
+                        while (elapsed_time_count <= m_read_timeout)
+                        {
+                            if (sender.Available > 0)
                             {
-                                WriteToLog("WriteReadData: Read from port error: " + ex.Message);
+                                try
+                                {
+                                    byte[] tmp_buff = new byte[sender.Available];
+                                    int readed_bytes = sender.Receive(tmp_buff);
+
+                                    readBytesList.AddRange(tmp_buff);
+                                }
+                                catch (Exception ex)
+                                {
+                                    WriteToLog("WriteReadData: Read from port error: " + ex.Message);
+                                }
                             }
+
+                            elapsed_time_count += 100;
+                            Thread.Sleep(100);
                         }
 
-                        elapsed_time_count += 100;
-                        Thread.Sleep(100);
+                        bool bManageRes = ManageUpWithReceivedBytes(readBytesList, func, target_in_length, out in_buffer, out readingSize,
+                            pos_count_data_size, size_data, header_size);
                     }
-
-                    bool bManageRes = ManageUpWithReceivedBytes(readBytesList, func, target_in_length, out in_buffer, out readingSize,
-                        pos_count_data_size, size_data, header_size);
-                }
-                else
-                {
-                    WriteToLog("WriteReadData: ошибка соединения");
+                    else
+                    {
+                        if (i == 0)
+                            ReInitialize();
+                        else
+                            WriteToLog("WriteReadData: ошибка соединения");
+                    }
                 }
             }
             catch (Exception ex)
@@ -298,7 +302,6 @@ namespace Prizmer.Ports
 
             return readingSize;
         }
-
 
         public void WriteToLog(string str)
         {
@@ -313,7 +316,6 @@ namespace Prizmer.Ports
             {
             }
         }
-
 
         public string GetConnectionType()
         {
