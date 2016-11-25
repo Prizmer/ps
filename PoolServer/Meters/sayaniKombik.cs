@@ -675,18 +675,23 @@ namespace Prizmer.Meters
             if (fileNames.Length == 0)
                 return false;
 
-            fileInfo = new FileInfo(fileNames[0]);
+            FileInfo resFileInfo = null;
 
             for (int i = 0; i < fileNames.Length; i++)
             {
-                FileInfo tmpFileInfo = new FileInfo(fileNames[i]);           
-                if (!tmpFileInfo.Name.Contains(serialNumberDec)) continue;
+                if (!fileNames[i].Contains(serialNumberDec)) continue;
+                FileInfo tmpFI = new FileInfo(fileNames[i]);
 
-                if (tmpFileInfo.LastWriteTime.Date > fileInfo.LastWriteTime.Date)
-                    fileInfo = tmpFileInfo;
+                if (resFileInfo == null || (resFileInfo.LastWriteTime.Date < tmpFI.LastWriteTime.Date))
+                    resFileInfo = tmpFI;
             }
 
-            return true;
+            fileInfo = resFileInfo;
+
+            if (resFileInfo != null)
+                return true;
+            else
+                return false;
         }
 
         public void ReplaceExtensionInFileName(string fullFileName, string newExtenstion, ref string newFullFileName)
