@@ -468,7 +468,6 @@ namespace Prizmer.Meters
             return true;
         }
 
-
         public bool IsDatFileAvailable(string fileName)
         {
             FileStream testFs;
@@ -665,11 +664,9 @@ namespace Prizmer.Meters
             return false;
         }
 
-        public bool LatestByDateFileName(string directoryPath, string serialNumberDec, out string fileName, out DateTime dt, 
-            string pattern = "*.dat")
+        public bool LatestByDateFileInfo(string directoryPath, string serialNumberDec, ref FileInfo fileInfo, string pattern = "*.dat")
         {
-            fileName = "";
-            dt = new DateTime().Date;
+            fileInfo = null;
 
             if (!Directory.Exists(directoryPath))
                 return false;
@@ -678,34 +675,16 @@ namespace Prizmer.Meters
             if (fileNames.Length == 0)
                 return false;
 
-            List<DateTime> dateList = new List<DateTime>();
+            fileInfo = new FileInfo(fileNames[0]);
+
             for (int i = 0; i < fileNames.Length; i++)
             {
-                FileInfo tmpFileInfo = new FileInfo(fileNames[i]);
-                string tmpFileName = tmpFileInfo.Name;
-                string[] splittedFn = tmpFileName.Split('_');
-                if (splittedFn.Length < 2) continue;
-                if (!splittedFn[1].Contains(serialNumberDec)) continue;
+                FileInfo tmpFileInfo = new FileInfo(fileNames[i]);           
+                if (!tmpFileInfo.Name.Contains(serialNumberDec)) continue;
 
-                CultureInfo provider = CultureInfo.InvariantCulture;
-                DateTime tmpDt = new DateTime();
-                if (!DateTime.TryParseExact(splittedFn[0], BatchConnection.DATE_FMT, provider, DateTimeStyles.None, out tmpDt))
-                    continue;
-
-                tmpDt = tmpDt.Date;
-
-                dateList.Add(tmpDt);
+                if (tmpFileInfo.LastWriteTime.Date > fileInfo.LastWriteTime.Date)
+                    fileInfo = tmpFileInfo;
             }
-
-            if (dateList.Count == 0) return false;
-
-            List<DateTime> orderedList = new List<DateTime>();
-            orderedList = dateList.OrderBy(x => x.Date).ToList();
-
-            DateTime latestDate = dateList[dateList.Count - 1];
-            dt = latestDate;
-            int latestDateIndex = dateList.FindIndex((x) => { return x.Ticks == latestDate.Ticks; });
-            fileName = fileNames[latestDateIndex];
 
             return true;
         }
@@ -763,9 +742,6 @@ namespace Prizmer.Meters
                 //разберемся с файлом лога
                 string logFullFileName = "";
                 ReplaceExtensionInFileName(dumpFileName, ".log", ref logFullFileName);
-
-                //уберем метаданные
-                DeleteDumpMeta(dumpFileName);
 
                 if (File.Exists(logFullFileName))
                     File.Delete(logFullFileName);
@@ -946,10 +922,14 @@ namespace Prizmer.Meters
         {
             string latestLogFileName = "";
             DateTime latestLogDate = new DateTime();
+            FileInfo latestLogFileInfo = null;
             strTerminationCode = "";
 
-            if (LatestByDateFileName(directoryPath, serialNumberDec, out latestLogFileName, out latestLogDate, "*.log"))
+            if (LatestByDateFileInfo(directoryPath, serialNumberDec, ref latestLogFileInfo, "*.log"))
             {
+                latestLogDate = latestLogFileInfo.LastWriteTime.Date;
+                latestLogFileName = latestLogFileInfo.FullName;
+
                 string logContentString = "";
                 FileInfo logFileInfo = new FileInfo(latestLogFileName);
 
@@ -1022,39 +1002,37 @@ namespace Prizmer.Meters
 
             string latestDumpFileName = "";
             DateTime latestDumpDate = new DateTime();
-            if (LatestByDateFileName(curDumpDir, m_address.ToString(), out latestDumpFileName, out latestDumpDate, "*.dat"))
+            FileInfo latestDumpFileInfo = null;
+
+            if (LatestByDateFileInfo(curDumpDir, m_address.ToString(), ref latestDumpFileInfo, "*.dat"))
             {
+                latestDumpFileName = latestDumpFileInfo.FullName;
+                latestDumpDate = latestDumpFileInfo.LastWriteTime.Date;
+
                 if (File.Exists(latestDumpFileName))
                 { 
                     DateTime dateCur = DateTime.Now.Date;
                     TimeSpan ts = dateCur - latestDumpDate;
 
-                    //если прошло <= N дней и искомый параметр уже считан, однозначно выходим
-                    if ((ts.TotalDays < readDailyTimeoutInDays) &&
-                        (DumpMetaParamsExist(latestDumpFileName, param, tarif)))
-                    {
-                        return false;
-                    }
-                    //если прошло менее N дней, но искомого параметра еще нет
-                    else if (!DumpMetaParamsExist(latestDumpFileName, param, tarif))
+                    //если мы дошли до сюда, то искомого параметра нет в таблице "суточные" (см. mainservice)
+                    //чтобы не дергать счетчик, введено ограничение - мы реально запрашиваем дамп со 
+                    //только раз в readDailyTimeoutInDays суток, поэтому:
+                    //
+                    //если прошло меньше чем readDailyTimeoutInDays дней
+                    if (ts.TotalDays < readDailyTimeoutInDays)
                     {
                         //прочитаем недостающий параметр из уже существующего дампа
                         //чтобы не дергать счетчик
                         if (ParseDumpFile(latestDumpFileName, ref tmpMi, ref tmpPrms, DELETE_DUMPS_AFTER_PARSING))
                             if (GetParamValueFromParams(tmpPrms, param, tarif, out recordValue))
-                            {
-                                DumpMetaAppendParams(latestDumpFileName, param, tarif);
                                 return true;
-                            }                  
-                    }
-                    //если прошло более N дней
-                    else
-                    {
-                        //удалим дамп, логи и метаданные
-                        DeleteDumpFileAndLogs(latestDumpFileName);
                     }
                 }
             }
+
+            //если мы дошли до сюда, то, либо подошло время обновить дамп, либо проблемы с разбором существующего
+            //если прошло менее N дней, но искомого параметра еще нет
+            DeleteDumpFileAndLogs(latestDumpFileName);
 
             //ниже нельзя просто вызвать чтение суточных, т.к. суточные удаляют дамп сразу 
             //после разбора, поэтому дублируем
@@ -1084,9 +1062,6 @@ namespace Prizmer.Meters
 
             if (!GetParamValueFromParams(tmpPrms, param, tarif, out recordValue))
                 return false;
-
-
-            DumpMetaAppendParams(batchConnList[0].FileNameDump, param, tarif);
 
             return true;
         }
