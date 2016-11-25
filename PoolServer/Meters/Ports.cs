@@ -20,8 +20,9 @@ namespace Prizmer.Ports
     {
         int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0);
         string GetName();
-        /*void Write(byte[] m_cmd, int leng);
-        int Read(ref byte[] data);*/
+
+        string GetConnectionType();
+        bool ReInitialize();
     }
 
     public sealed class TcpipPort : VirtualPort
@@ -56,34 +57,47 @@ namespace Prizmer.Ports
             m_read_timeout = read_timeout;
             m_delay_between_sending = delay_between_sending;
 
-            byte[] ipAddrLocalArr = { 192, 168, 0, 1 };
-            ipLocalAddr = new IPAddress(ipAddrLocalArr);
-            bool bRes = GetLocalEndPointIp(ref ipLocalAddr);
-            ipLocalEndpoint = new IPEndPoint(ipLocalAddr, GetFreeTcpPort());
-            remoteEndPoint = new IPEndPoint(IPAddress.Parse(m_address), (int)m_port);
+            ReInitialize();
+        }
 
-            sender =  new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            //sender.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            sender.ReceiveTimeout = 1000;
-            sender.SendTimeout = 300;
+
+        public bool ReInitialize()
+        {
             try
             {
-                sender.Bind(ipLocalEndpoint);
-                sender.Connect(remoteEndPoint);
+                if (sender != null) sender.Close();
+
+                byte[] ipAddrLocalArr = { 192, 168, 0, 1 };
+                ipLocalAddr = new IPAddress(ipAddrLocalArr);
+
+                bool bRes = GetLocalEndPointIp(ref ipLocalAddr);
+                ipLocalEndpoint = new IPEndPoint(ipLocalAddr, GetFreeTcpPort());
+                remoteEndPoint = new IPEndPoint(IPAddress.Parse(m_address), (int)m_port);
+
+                sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                sender.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+
+                sender.ReceiveTimeout = 800;
+                sender.SendTimeout = 400;
+
+                try
+                {
+                    sender.Bind(ipLocalEndpoint);
+                    sender.Connect(remoteEndPoint);
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    WriteToLog("При создании потока для tcp порта, порт не был инициализирован по причине: " + ex.Message);
+                    return false;
+                }
             }
             catch (Exception ex)
             {
-                WriteToLog("При создании потока для tcp порта, порт не был инициализирован по причине: " + ex.Message);
+                WriteToLog("TCP порт не инициализирован по причине: " + ex.Message);
+                return false;
             }
-        }
-
-        public void Write(byte[] m_cmd, int leng)
-        { 
-        
-        }
-        public int Read(ref byte[] data)
-        {
-            return 0;
         }
 
 
@@ -299,6 +313,13 @@ namespace Prizmer.Ports
             {
             }
         }
+
+
+        public string GetConnectionType()
+        {
+            return "tcp";
+        }
+
     }
 
     public sealed class ComPort : VirtualPort, IDisposable
@@ -687,6 +708,17 @@ namespace Prizmer.Ports
             catch
             {
             }
+        }
+
+
+        public string GetConnectionType()
+        {
+            return "com";
+        }
+
+        public bool ReInitialize()
+        {
+            return false;
         }
     }
 }
