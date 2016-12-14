@@ -289,6 +289,7 @@ namespace Prizmer.Ports
                 dtCreated = DateTime.Now;
                 //ReInitialize();
             }
+            WriteToLog("write read data starts here");
 
             List<byte> readBytesList = new List<byte>(8192);
             int readingSize = 0;
