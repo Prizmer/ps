@@ -86,6 +86,8 @@ namespace Prizmer.Ports
 
                 try
                 {
+                    WriteToLog("IpLocalEndp: " + ipLocalEndpoint.ToString() + ";  Remote: " + remoteEndPoint.ToString() );
+
                     sender.Bind(ipLocalEndpoint);
                     sender.Connect(remoteEndPoint);
 
