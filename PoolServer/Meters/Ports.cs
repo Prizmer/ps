@@ -369,6 +369,7 @@ namespace Prizmer.Ports
             if (ipLocalEndpoint != null)
             {
                 localEp = ipLocalEndpoint;
+                WriteToLog("То что передаю драйверу: " + localEp.Address.ToString());
                 return true;
             }
             else

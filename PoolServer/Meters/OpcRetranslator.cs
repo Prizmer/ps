@@ -62,7 +62,6 @@ namespace Prizmer.Meters
             IPEndPoint localIpEp = null;
             if (!m_vport.GetLocalEndPoint(ref localIpEp))
             {
-                WriteToLog("То что передаю драйверу: " + localIpEp.Address.ToString());
                 return false;
             }
 
