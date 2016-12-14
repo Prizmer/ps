@@ -298,7 +298,7 @@ namespace Prizmer.Ports
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    if (true)//sender.Connected)
+                    if (sender.Connected)
                     {
                         // Send the data through the socket.
                         sender.Send(out_buffer, 0, out_length, SocketFlags.None);
