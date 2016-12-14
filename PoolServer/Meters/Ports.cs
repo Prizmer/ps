@@ -23,6 +23,7 @@ namespace Prizmer.Ports
 
         string GetConnectionType();
         bool ReInitialize();
+        bool GetLocalEndPoint(ref IPEndPoint localEp);
     }
 
     public sealed class TcpipPort : VirtualPort
@@ -49,6 +50,8 @@ namespace Prizmer.Ports
         IPEndPoint remoteEndPoint = null;
         Socket sender = null;
 
+        DateTime dtCreated = DateTime.Now;
+
         public TcpipPort(string address, int port, ushort write_timeout, ushort read_timeout, int delay_between_sending)
         {
             m_address = address;
@@ -57,6 +60,7 @@ namespace Prizmer.Ports
             m_read_timeout = read_timeout;
             m_delay_between_sending = delay_between_sending;
 
+            dtCreated = DateTime.Now;
             ReInitialize();
         }
 
@@ -96,6 +100,35 @@ namespace Prizmer.Ports
             catch (Exception ex)
             {
                 WriteToLog("TCP порт не инициализирован по причине: " + ex.Message);
+                return false;
+            }
+        }
+
+
+        bool GetTCPPortLiveMinutes(out int timeout)
+        {
+            timeout = 60;
+
+            string tmpValStr = "";
+            try
+            {
+                tmpValStr = ConfigurationManager.AppSettings.GetValues("tcpPortLiveMinutes")[0];
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+            bool parsingResult = false;
+            if (tmpValStr.Length > 0)
+                parsingResult = int.TryParse(tmpValStr, out timeout);
+
+            if (parsingResult)
+            {
+                return true;
+            }
+            else
+            {
                 return false;
             }
         }
@@ -246,6 +279,15 @@ namespace Prizmer.Ports
 
         public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
+            TimeSpan ts = DateTime.Now - dtCreated;
+            int tcpAliveMinutes = -1;
+            GetTCPPortLiveMinutes(out tcpAliveMinutes);
+            if (ts.TotalMinutes >= tcpAliveMinutes)
+            {
+                dtCreated = DateTime.Now;
+                ReInitialize();
+            }
+
             List<byte> readBytesList = new List<byte>(8192);
             int readingSize = 0;
 
@@ -322,6 +364,18 @@ namespace Prizmer.Ports
             return "tcp";
         }
 
+        public bool GetLocalEndPoint(ref IPEndPoint localEp)
+        {
+            if (ipLocalEndpoint != null)
+            {
+                localEp = ipLocalEndpoint;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 
     public sealed class ComPort : VirtualPort, IDisposable
@@ -720,6 +774,12 @@ namespace Prizmer.Ports
 
         public bool ReInitialize()
         {
+            return false;
+        }
+
+        public bool GetLocalEndPoint(ref IPEndPoint localEp)
+        {
+            localEp = null;
             return false;
         }
     }

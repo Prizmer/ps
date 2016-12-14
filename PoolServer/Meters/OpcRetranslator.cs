@@ -4,8 +4,14 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.IO.Ports;
+using System.Net;
+using System.Net.Sockets;
+using System.Net.NetworkInformation;
+
 using Prizmer.Ports;
 using Prizmer.Meters.iMeters;
+
+
 
 namespace Prizmer.Meters
 {
@@ -33,6 +39,8 @@ namespace Prizmer.Meters
             this.m_vport = data_vport;
         }
 
+
+
         private bool Connect()
         {
             if (sPrgId == "" || sItemTag == "")
@@ -50,7 +58,15 @@ namespace Prizmer.Meters
             Encoding enc = Encoding.ASCII;
             byte[] prgIdAsciiBytes = enc.GetBytes(sPrgId);
             byte prgIdLength = (byte)prgIdAsciiBytes.Length;
-            byte[] ipAddrArr = { 127, 0, 0, 1 };
+
+            IPEndPoint localIpEp = null;
+            if (!m_vport.GetLocalEndPoint(ref localIpEp))
+            {
+                return false;
+            }
+
+           
+            byte[] ipAddrArr =  localIpEp.Address.GetAddressBytes();   //{ 127, 0, 0, 1 }; - не правильно, нужно внешний 192.168.....
 
             List<byte> dataList = new List<byte>();
             dataList.Add(cmd);
