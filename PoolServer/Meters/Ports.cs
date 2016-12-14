@@ -75,7 +75,7 @@ namespace Prizmer.Ports
                 ipLocalAddr = new IPAddress(ipAddrLocalArr);
 
                 bool bRes = GetLocalEndPointIp(ref ipLocalAddr);
-                ipLocalEndpoint = new IPEndPoint(ipLocalAddr, GetFreeTcpPort());
+                ipLocalEndpoint = new IPEndPoint(ipLocalAddr, 7575);//GetFreeTcpPort());
                 remoteEndPoint = new IPEndPoint(IPAddress.Parse(m_address), (int)m_port);
 
                 sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
