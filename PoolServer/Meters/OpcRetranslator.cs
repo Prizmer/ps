@@ -59,14 +59,7 @@ namespace Prizmer.Meters
             byte[] prgIdAsciiBytes = enc.GetBytes(sPrgId);
             byte prgIdLength = (byte)prgIdAsciiBytes.Length;
 
-            IPEndPoint localIpEp = null;
-            if (!m_vport.GetLocalEndPoint(ref localIpEp))
-            {
-                return false;
-            }
-
-           
-            byte[] ipAddrArr =  localIpEp.Address.GetAddressBytes();   //{ 127, 0, 0, 1 }; - не правильно, нужно внешний 192.168.....
+            byte[] ipAddrArr = { 127, 0, 0, 1 }; //ip по которому обращаться TCP сервер к OPC серверу
 
             List<byte> dataList = new List<byte>();
             dataList.Add(cmd);

@@ -287,7 +287,7 @@ namespace Prizmer.Ports
             if (ts.TotalMinutes >= tcpAliveMinutes)
             {
                 dtCreated = DateTime.Now;
-                ReInitialize();
+                //ReInitialize();
             }
 
             List<byte> readBytesList = new List<byte>(8192);
