@@ -1215,8 +1215,7 @@ namespace Prizmer.PoolServer
                             //читать данные только если прибор ответил
                            if (meter.OpenLinkCanal())
                             {
-                                //WriteToLog("Канал для " + mName + " порт " +
-                                 //   m_vport.ToString() + " адрес " + metersbyport[MetersCounter].address.ToString() + " открыт", portStr, mAddr, LOG_DAILY);
+                                WriteToLog("Канал для " + mName + " порт " + m_vport.ToString() + " адрес " + metersbyport[MetersCounter].address.ToString() + " открыт");
 
                                 Param param = ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
                                 if (param.guid == Guid.Empty) continue;

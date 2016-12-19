@@ -204,10 +204,7 @@ namespace Prizmer.Meters
         }
         public bool ReadDailyValues(DateTime dt, ushort param, ushort tarif, ref float recordValue)
         {
-            if (dt.Date == DateTime.Now.Date)
                 return ReadCurrentValues(param, tarif, ref recordValue);
-            else
-                return false;
         }
 
         #region Unused methods
