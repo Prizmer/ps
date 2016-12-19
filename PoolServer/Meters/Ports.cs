@@ -80,6 +80,8 @@ namespace Prizmer.Ports
 
                 sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 sender.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                LingerOption lingOpt = new LingerOption(true, 0);
+                sender.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, lingOpt);
 
                 sender.ReceiveTimeout = 800;
                 sender.SendTimeout = 400;
@@ -289,7 +291,6 @@ namespace Prizmer.Ports
                 dtCreated = DateTime.Now;
                 //ReInitialize();
             }
-            WriteToLog("write read data starts here");
 
             List<byte> readBytesList = new List<byte>(8192);
             int readingSize = 0;
@@ -329,6 +330,8 @@ namespace Prizmer.Ports
 
                         bool bManageRes = ManageUpWithReceivedBytes(readBytesList, func, target_in_length, out in_buffer, out readingSize,
                             pos_count_data_size, size_data, header_size);
+
+                        if (bManageRes) break;
                     }
                     else
                     {

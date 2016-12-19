@@ -182,7 +182,7 @@ namespace Prizmer.Meters
 
 
             Encoding enc = Encoding.ASCII;
-            byte[] itemTagAsciiBytes = enc.GetBytes(sItemTag);
+            byte[] itemTagAsciiBytes = enc.GetBytes(this.sItemTag);
             byte tagLength = (byte)itemTagAsciiBytes.Length;
 
             List<byte> dataList = new List<byte>();
