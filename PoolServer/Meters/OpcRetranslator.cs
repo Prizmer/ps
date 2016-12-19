@@ -20,7 +20,6 @@ namespace Prizmer.Meters
         private string sPrgId = "";
         private string sItemTag = "";
 
-
         public void Init(uint address, string pass, VirtualPort data_vport)
         {
             try
@@ -38,8 +37,6 @@ namespace Prizmer.Meters
 
             this.m_vport = data_vport;
         }
-
-
 
         private bool Connect()
         {
@@ -92,12 +89,6 @@ namespace Prizmer.Meters
             else
                 return false;
         }
-
-        public bool OpenLinkCanal()
-        {
-            return true;
-        }
-
         private bool GetValue(byte[] msgBytes, out float value)
         {
             value = 0f;
@@ -167,10 +158,12 @@ namespace Prizmer.Meters
             }
         }
 
+        public bool OpenLinkCanal()
+        {
+            return Connect();
+        }
         public bool ReadCurrentValues(ushort param, ushort tarif, ref float recordValue)
         {
-            if (!Connect()) return false;
-
             byte[] bHeader = new byte[4];
             char cCmd = 'R';
             byte cmd = (byte)cCmd;
@@ -179,7 +172,6 @@ namespace Prizmer.Meters
 
             bHeader[0] = 0x68;
             bHeader[3] = 0x68;
-
 
             Encoding enc = Encoding.ASCII;
             byte[] itemTagAsciiBytes = enc.GetBytes(this.sItemTag);
@@ -208,8 +200,14 @@ namespace Prizmer.Meters
             byte[] cmdArr = resultCmdList.ToArray();
             m_vport.WriteReadData(findPackageSign, cmdArr, ref inp, cmdArr.Length, -1);
 
-
             return GetValue(inp, out recordValue);
+        }
+        public bool ReadDailyValues(DateTime dt, ushort param, ushort tarif, ref float recordValue)
+        {
+            if (dt.Date == DateTime.Now.Date)
+                return ReadCurrentValues(param, tarif, ref recordValue);
+            else
+                return false;
         }
 
         #region Unused methods
@@ -223,10 +221,6 @@ namespace Prizmer.Meters
             throw new NotImplementedException();
         }
         public bool ReadMonthlyValues(DateTime dt, ushort param, ushort tarif, ref float recordValue)
-        {
-            return false;
-        }
-        public bool ReadDailyValues(DateTime dt, ushort param, ushort tarif, ref float recordValue)
         {
             return false;
         }

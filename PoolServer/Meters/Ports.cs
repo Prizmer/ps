@@ -238,8 +238,6 @@ namespace Prizmer.Ports
                     //оставшиеся данные преобразуем обратно в массив
                     byte[] temp_buffer = new byte[reading_size = reading_queue.Count];
 
-                    //WriteToLog("reading_queue.Count: " + reading_size.ToString());
-
                     temp_buffer = reading_queue.ToArray();
                     //WriteToLog(BitConverter.ToString(temp_buffer));
 
@@ -255,8 +253,6 @@ namespace Prizmer.Ports
 
                     if (target_in_length == -1)
                     {
-                        try
-                        {
                             target_in_length = reading_queue.Count;
                             reading_size = target_in_length;
                             outDataArr = new byte[reading_size];
@@ -266,16 +262,11 @@ namespace Prizmer.Ports
 
                             outReadingSize = reading_size;
                             return true;
-                        }
-                        catch (Exception ex)
-                        {
-                            WriteToLog("ManageUpWithReceivedBytes: target_in_length == -1, ex: " + ex.Message);
-                        }
-
                     }
 
                     if (target_in_length > 0 && reading_size >= target_in_length)
                     {
+                        outDataArr = new byte[target_in_length];
                         reading_size = target_in_length;
                         for (int i = 0; i < target_in_length && i < outDataArr.Length; i++)
                             outDataArr[i] = temp_buffer[i];
