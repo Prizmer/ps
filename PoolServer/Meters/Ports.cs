@@ -255,15 +255,23 @@ namespace Prizmer.Ports
 
                     if (target_in_length == -1)
                     {
-                        target_in_length = reading_queue.Count;
-                        reading_size = target_in_length;
-                        outDataArr = new byte[reading_size];
+                        try
+                        {
+                            target_in_length = reading_queue.Count;
+                            reading_size = target_in_length;
+                            outDataArr = new byte[reading_size];
 
-                        for (int i = 0; i < outDataArr.Length; i++)
-                            outDataArr[i] = temp_buffer[i];
+                            for (int i = 0; i < outDataArr.Length; i++)
+                                outDataArr[i] = temp_buffer[i];
 
-                        outReadingSize = reading_size;
-                        return true;
+                            outReadingSize = reading_size;
+                            return true;
+                        }
+                        catch (Exception ex)
+                        {
+                            WriteToLog("ManageUpWithReceivedBytes: target_in_length == -1, ex: " + ex.Message);
+                        }
+
                     }
 
                     if (target_in_length > 0 && reading_size >= target_in_length)
@@ -327,6 +335,8 @@ namespace Prizmer.Ports
                             elapsed_time_count += 100;
                             Thread.Sleep(100);
                         }
+
+                        WriteToLog("WriteReadData: before manageupWithBytes, readBytesList.Count: " + readBytesList.Count);
 
                         bool bManageRes = ManageUpWithReceivedBytes(readBytesList, func, target_in_length, out in_buffer, out readingSize,
                             pos_count_data_size, size_data, header_size);
