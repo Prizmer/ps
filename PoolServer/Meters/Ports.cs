@@ -255,7 +255,8 @@ namespace Prizmer.Ports
                     {
                             target_in_length = reading_queue.Count;
                             reading_size = target_in_length;
-                            WriteToLog("ManageUpWithReceivedBytes: targetInLength=" + target_in_length);
+
+                            WriteToLog("ManageUpWithReceivedBytes: targetInLength=" + reading_size);
                             outDataArr = new byte[reading_size];
 
                             for (int i = 0; i < outDataArr.Length; i++)
