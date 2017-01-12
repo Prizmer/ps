@@ -255,6 +255,7 @@ namespace Prizmer.Ports
                     {
                             target_in_length = reading_queue.Count;
                             reading_size = target_in_length;
+                            WriteToLog("ManageUpWithReceivedBytes: targetInLength=" + target_in_length);
                             outDataArr = new byte[reading_size];
 
                             for (int i = 0; i < outDataArr.Length; i++)
@@ -333,7 +334,8 @@ namespace Prizmer.Ports
                             Thread.Sleep(100);
                         }
 
-                        //WriteToLog("WriteReadData: before manageupWithBytes, readBytesList.Count: " + readBytesList.Count);
+                        WriteToLog("WriteReadData: before manageupWithBytes, readBytesList.Count: " + readBytesList.Count);
+                        WriteToLog("WriteReadData: manageupWithBytes args: target_in_length: " + target_in_length + "; " );
 
                         bool bManageRes = ManageUpWithReceivedBytes(readBytesList, func, target_in_length, out in_buffer, out readingSize,
                             pos_count_data_size, size_data, header_size);
