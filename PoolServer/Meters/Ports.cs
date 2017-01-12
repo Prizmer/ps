@@ -242,8 +242,8 @@ namespace Prizmer.Ports
                     temp_buffer = reading_queue.ToArray();
                     //WriteToLog(BitConverter.ToString(temp_buffer));
 
-                    WriteToLog("ManageUpWithReceivedBytes: targetInLength=" + target_in_length);
-                    WriteToLog("ManageUpWithReceivedBytes: readingSize=" + reading_size);
+                    //WriteToLog("ManageUpWithReceivedBytes: targetInLength=" + target_in_length);
+                    //WriteToLog("ManageUpWithReceivedBytes: readingSize=" + reading_size);
 
                     //если длина полезных данных ответа определена как 0, произведем расчет по необязательнм параметрам
                     if (target_in_length == 0)
@@ -290,13 +290,13 @@ namespace Prizmer.Ports
             if (ts.TotalMinutes >= tcpAliveMinutes)
             {
                 //погружаемся в сон на 5 минут, чтобы "дать отдохнуть" принимающим устройствам
-                WriteToLog("WriteReadData: погружаемся в сон на 5 минут, чтобы дать отдохнуть принимающим устройствам");
+                //WriteToLog("WriteReadData: погружаемся в сон на 5 минут, чтобы дать отдохнуть принимающим устройствам");
                 if (sender != null && sender.Connected) sender.Close();
                 Thread.Sleep(1000 * 60 * 5);
                 dtCreated = DateTime.Now;
 
                 ReInitialize();
-                WriteToLog("WriteReadData: открыт новый сокет после сна: " + sender.LocalEndPoint.ToString());
+               // WriteToLog("WriteReadData: открыт новый сокет после сна: " + sender.LocalEndPoint.ToString());
             }
 
             List<byte> readBytesList = new List<byte>(8192);
