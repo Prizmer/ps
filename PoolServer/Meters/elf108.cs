@@ -584,7 +584,7 @@ namespace Prizmer.Meters
             data_arr = new byte[MAX_ANSWER_LENGTH];
 
             //если указать -1 в качестве ожидаемой длины ответа, длина ответа будет = длине принятых данных
-            if (m_vport.WriteReadData(findPackageSign, resCmd, ref data_arr, resCmd.Length, -1) == 0) return false;
+            if (m_vport.WriteReadData(findPackageSign, resCmd, ref data_arr, resCmd.Length, -1) <= 0) return false;
 
             List<byte> data_arr_list = new List<byte>();
             data_arr_list.AddRange(data_arr);
