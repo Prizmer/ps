@@ -212,7 +212,7 @@ namespace Prizmer.Ports
             out byte[] outDataArr, out int outReadingSize,
             uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
-            outDataArr = new byte[readBytesList.Count];
+            outDataArr = new byte[1];
             outDataArr[0] = 0x0;
             outReadingSize = 0;
 
