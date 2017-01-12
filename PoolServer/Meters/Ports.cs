@@ -52,6 +52,7 @@ namespace Prizmer.Ports
 
         DateTime dtCreated = DateTime.Now;
 
+        bool areLogsRestricted = false;
         public TcpipPort(string address, int port, ushort write_timeout, ushort read_timeout, int delay_between_sending)
         {
             m_address = address;
@@ -59,6 +60,13 @@ namespace Prizmer.Ports
             m_write_timeout = write_timeout;
             m_read_timeout = read_timeout;
             m_delay_between_sending = delay_between_sending;
+
+            try
+            {
+                areLogsRestricted = bool.Parse(ConfigurationManager.AppSettings.GetValues("tcpLogsRestricted")[0]);
+            }
+            catch (Exception ex)
+            { }
 
             dtCreated = DateTime.Now;
             ReInitialize();
@@ -369,6 +377,7 @@ namespace Prizmer.Ports
 
         public void WriteToLog(string str)
         {
+            if (areLogsRestricted) return;
             try
             {
                 using (StreamWriter sw = new StreamWriter(@"logs\tcp_ports.log", true, Encoding.Default))
@@ -409,6 +418,8 @@ namespace Prizmer.Ports
             return m_name + " ";
         }
 
+
+        bool areLogsRestricted = false;
         public ComPort(byte number, int baudrate, byte data_bits, byte parity, byte stop_bits, ushort write_timeout, ushort read_timeout, byte attemts)
         {
             m_name = "COM" + Convert.ToString(number);
@@ -419,6 +430,13 @@ namespace Prizmer.Ports
             m_write_timeout = write_timeout;
             m_read_timeout = read_timeout;
             m_attemts = attemts;
+
+            try
+            {
+                areLogsRestricted = bool.Parse(ConfigurationManager.AppSettings.GetValues("comLogsRestricted")[0]);
+            }
+            catch (Exception ex)
+            { }
 
             try
             {
@@ -768,6 +786,8 @@ namespace Prizmer.Ports
 
         public void WriteToLog(string str)
         {
+            if (areLogsRestricted) return;
+
             try
             {
                 using (StreamWriter sw = new StreamWriter(@"logs\com_ports.log", true, Encoding.Default))

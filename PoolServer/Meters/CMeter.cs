@@ -8,6 +8,8 @@ using System.Collections;
 using Prizmer.Ports;
 using Prizmer.PoolServer;
 
+using System.Configuration;
+
 namespace Prizmer.Meters
 {
     public class CMeter
@@ -23,6 +25,17 @@ namespace Prizmer.Meters
         /// <param name="str"></param>
         public void WriteToLog(string str, bool doWrite = true)
         {
+            bool areLogsRestricted = false;
+            try
+            {
+                areLogsRestricted = bool.Parse(ConfigurationManager.AppSettings.GetValues("meterLogsRestricted")[0]);
+            }
+            catch (Exception ex)
+            { }
+
+
+
+            if (areLogsRestricted) return;
             mLogger.Initialize(m_vport.GetName(), m_address.ToString(), String.Empty, "meters");
 
             if (doWrite)
