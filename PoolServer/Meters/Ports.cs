@@ -335,11 +335,17 @@ namespace Prizmer.Ports
                             Thread.Sleep(100);
                         }
 
-                        WriteToLog("WriteReadData: before manageupWithBytes, readBytesList.Count: " + readBytesList.Count);
-                        WriteToLog("WriteReadData: manageupWithBytes args: target_in_length: " + target_in_length + "; " );
+                        bool bManageRes = false;
+                        try
+                        {
+                            bManageRes = ManageUpWithReceivedBytes(readBytesList, func, target_in_length, out in_buffer, out readingSize,
+                                pos_count_data_size, size_data, header_size);
+                        }
+                        catch (Exception ex)
+                        {
+                            WriteToLog("WriteReadData: ManageUpWithReceivedBytes execution error: " + ex.Message);
+                        }
 
-                        bool bManageRes = ManageUpWithReceivedBytes(readBytesList, func, target_in_length, out in_buffer, out readingSize,
-                            pos_count_data_size, size_data, header_size);
 
                         if (bManageRes) break;
                     }
