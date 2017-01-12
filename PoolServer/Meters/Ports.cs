@@ -236,10 +236,14 @@ namespace Prizmer.Ports
                         reading_queue.Dequeue();
 
                     //оставшиеся данные преобразуем обратно в массив
-                    byte[] temp_buffer = new byte[reading_size = reading_queue.Count];
+                    reading_size = reading_queue.Count;
 
+                    byte[] temp_buffer = new byte[reading_size];
                     temp_buffer = reading_queue.ToArray();
                     //WriteToLog(BitConverter.ToString(temp_buffer));
+
+                    WriteToLog("ManageUpWithReceivedBytes: targetInLength=" + target_in_length);
+                    WriteToLog("ManageUpWithReceivedBytes: readingSize=" + reading_size);
 
                     //если длина полезных данных ответа определена как 0, произведем расчет по необязательнм параметрам
                     if (target_in_length == 0)
@@ -253,17 +257,13 @@ namespace Prizmer.Ports
 
                     if (target_in_length == -1)
                     {
-                            target_in_length = reading_queue.Count;
-                            reading_size = target_in_length;
+                        outDataArr = new byte[reading_size];
 
-                            WriteToLog("ManageUpWithReceivedBytes: targetInLength=" + reading_size);
-                            outDataArr = new byte[reading_size];
+                        for (int i = 0; i < outDataArr.Length; i++)
+                            outDataArr[i] = temp_buffer[i];
 
-                            for (int i = 0; i < outDataArr.Length; i++)
-                                outDataArr[i] = temp_buffer[i];
-
-                            outReadingSize = reading_size;
-                            return true;
+                        outReadingSize = reading_size;
+                        return true;
                     }
 
                     if (target_in_length > 0 && reading_size >= target_in_length)
