@@ -292,6 +292,10 @@ namespace Prizmer.Ports
 
         public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
+            //инициализация на случай ошибочного выхода
+            in_buffer = new byte[1];
+            in_buffer[0] = 0x0;
+
             TimeSpan ts = DateTime.Now - dtCreated;
             int tcpAliveMinutes = 60;
             GetTCPPortLiveMinutes(out tcpAliveMinutes);
@@ -352,6 +356,7 @@ namespace Prizmer.Ports
                         catch (Exception ex)
                         {
                             WriteToLog("WriteReadData: ManageUpWithReceivedBytes execution error: " + ex.Message);
+                            return -1;
                         }
 
 

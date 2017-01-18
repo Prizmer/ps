@@ -114,8 +114,10 @@ namespace Prizmer.Meters
 
             int k1 = 4 * 1000;
 
-            EEPROMParamList.Add(new MeterParam(0x1B8, 4, "Q1", "ГДж", k1));
-            EEPROMParamList.Add(new MeterParam(0x1BC, 4, "Q2", "ГДж", k1));
+            //по логике программы SAYANY Wizor, коэффициент 4*1000, однако на экране прибора
+            //значение отображается с коэффициентом 16*1000
+            EEPROMParamList.Add(new MeterParam(0x1B8, 4, "Q1", "ГДж", 16 * 1000));
+            EEPROMParamList.Add(new MeterParam(0x1BC, 4, "Q2", "ГДж", 16 * 1000));
 
             EEPROMParamList.Add(new MeterParam(0x1C0, 4, "M1", "Т", k1));
             EEPROMParamList.Add(new MeterParam(0x1C4, 4, "M2", "Т", k1));

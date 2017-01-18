@@ -534,6 +534,9 @@ namespace Prizmer.Meters
 
         bool SendPT01_CMD(byte[] outCmdBytes, ref byte[] data_arr, byte[] outCmdDataBytes = null)
         {
+            data_arr = new byte[1];
+            data_arr[0] = 0x0;
+
             List<byte> resCmdList = new List<byte>();
 
             bool isThereCmdData = false;
@@ -627,8 +630,15 @@ namespace Prizmer.Meters
                     WriteToLog("SendPT01_CMD: индекс за пределами массива 1");
                     return false;
                 }
+                try
+                {
+                    Array.Copy(data_arr, fi + 2, bCountArr, 0, 2);
+                }
+                catch (Exception ex)
+                {
+                    WriteToLog("SendPT01_CMD: ошибка при коприровании массивов 1: " + ex.Message);
+                }
 
-                Array.Copy(data_arr, fi + 2, bCountArr, 0, 2);
                 DecodeControlBytes(bCountArr, ref bCountArr);
                 if (!BitConverter.IsLittleEndian)
                     Array.Reverse(bCountArr);
@@ -636,7 +646,15 @@ namespace Prizmer.Meters
                 DecryptByteArr(bCountArr, ref bCountArr);
 
                 byte[] bCountArr2 = new byte[4];
-                Array.Copy(bCountArr, bCountArr2, bCountArr.Length);
+                try
+                {
+                    Array.Copy(bCountArr, bCountArr2, bCountArr.Length);
+                }
+                catch (Exception ex)
+                {
+                    WriteToLog("SendPT01_CMD: ошибка при коприровании массивов 2: " + ex.Message);
+                }
+
                 //полезные данные без учета байта crc8
                 int answerBytesCount = BitConverter.ToInt32(bCountArr2, 0);
                 if (answerBytesCount >= data_arr.Length && answerBytesCount == 0)
