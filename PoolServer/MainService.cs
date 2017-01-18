@@ -757,12 +757,19 @@ namespace Prizmer.PoolServer
                                 meter.WriteToLog("RSL: 1. Открыт канал для чтения получасовок", WRITE_LOG);
 
                                 if (common_dt_install.Ticks == 0)
+                                {
                                     logger.LogWarn("Дата установки прибора не задана, критично для ПОЛУЧАСОВЫХ СРЕЗОВ");
+                                    
+                                }
+
                                 if (common_dt_install > common_dt_cur)
                                     logger.LogWarn("Дата установки прибора не может быть больше текущей даты, критично для ПОЛУЧАСОВЫХ СРЕЗОВ");
 
                                 //дата установки счетчика
                                 DateTime dt_install = metersbyport[MetersCounter].dt_install;
+                                if (dt_install == null || dt_install.Ticks == 0)
+                                    dt_install = DateTime.Now.Date.AddDays(-2);
+
                                 DateTime dt_cur = DateTime.Now;
                                 DateTime dt_last_slice_arr_init = new DateTime();
 
