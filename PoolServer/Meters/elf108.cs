@@ -587,7 +587,10 @@ namespace Prizmer.Meters
             data_arr = new byte[MAX_ANSWER_LENGTH];
 
             //если указать -1 в качестве ожидаемой длины ответа, длина ответа будет = длине принятых данных
-            if (m_vport.WriteReadData(findPackageSign, resCmd, ref data_arr, resCmd.Length, -1) <= 0) return false;
+
+            int WRDRes = m_vport.WriteReadData(findPackageSign, resCmd, ref data_arr, resCmd.Length, -1);
+
+            if (WRDRes <= 0 || data_arr == null || (data_arr.Length == 1 && data_arr[0] == 0)) return false;
 
             List<byte> data_arr_list = new List<byte>();
             data_arr_list.AddRange(data_arr);
@@ -637,6 +640,7 @@ namespace Prizmer.Meters
                 catch (Exception ex)
                 {
                     WriteToLog("SendPT01_CMD: ошибка при коприровании массивов 1: " + ex.Message);
+                    return false;
                 }
 
                 DecodeControlBytes(bCountArr, ref bCountArr);
@@ -653,6 +657,7 @@ namespace Prizmer.Meters
                 catch (Exception ex)
                 {
                     WriteToLog("SendPT01_CMD: ошибка при коприровании массивов 2: " + ex.Message);
+                    return false;
                 }
 
                 //полезные данные без учета байта crc8
@@ -892,8 +897,17 @@ namespace Prizmer.Meters
                 return false;
             }
 
-            Array.Copy(data_arr, last_id_index, last_id_bytes_arr, 0, last_id_bytes_arr.Length);
-            Array.Copy(data_arr, val_count_index, val_count_bytes_arr, 0, val_count_bytes_arr.Length);
+            try
+            {
+                Array.Copy(data_arr, last_id_index, last_id_bytes_arr, 0, last_id_bytes_arr.Length);
+                Array.Copy(data_arr, val_count_index, val_count_bytes_arr, 0, val_count_bytes_arr.Length);
+            }
+            catch (Exception ex)
+            {
+                WriteToLog("ReadArchiveValCountId: ошибка ориентации в массивах");
+                return false;
+            }
+
 
             /*Во всех запросах кроме запросов на получение архивов используется формат данных LSB-MSB*/
             if (!BitConverter.IsLittleEndian)

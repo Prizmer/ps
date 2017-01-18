@@ -265,12 +265,13 @@ namespace Prizmer.Ports
 
                     if (target_in_length == -1)
                     {
-                        outDataArr = new byte[reading_size];
+                        outDataArr = new byte[reading_queue.Count];
+                       // outDataArr = new byte[reading_size];
 
                         for (int i = 0; i < outDataArr.Length; i++)
                             outDataArr[i] = temp_buffer[i];
 
-                        outReadingSize = reading_size;
+                        outReadingSize = outDataArr.Length;
                         return true;
                     }
 
@@ -296,6 +297,9 @@ namespace Prizmer.Ports
             in_buffer = new byte[1];
             in_buffer[0] = 0x0;
 
+            int readingSize = 0;
+            List<byte> readBytesList = new List<byte>(8192);
+
             TimeSpan ts = DateTime.Now - dtCreated;
             int tcpAliveMinutes = 60;
             GetTCPPortLiveMinutes(out tcpAliveMinutes);
@@ -311,11 +315,9 @@ namespace Prizmer.Ports
                // WriteToLog("WriteReadData: открыт новый сокет после сна: " + sender.LocalEndPoint.ToString());
             }
 
-            List<byte> readBytesList = new List<byte>(8192);
-            int readingSize = 0;
-
             try
             {
+                //2 попытки соединения или чтения данных
                 for (int i = 0; i < 2; i++)
                 {
                     if (sender.Connected)
@@ -350,8 +352,16 @@ namespace Prizmer.Ports
                         bool bManageRes = false;
                         try
                         {
-                            bManageRes = ManageUpWithReceivedBytes(readBytesList, func, target_in_length, out in_buffer, out readingSize,
-                                pos_count_data_size, size_data, header_size);
+                            bManageRes = ManageUpWithReceivedBytes(
+                                readBytesList, 
+                                func, 
+                                target_in_length, 
+                                out in_buffer, 
+                                out readingSize,
+                                pos_count_data_size, 
+                                size_data, 
+                                header_size
+                            );
                         }
                         catch (Exception ex)
                         {
@@ -360,7 +370,10 @@ namespace Prizmer.Ports
                         }
 
 
-                        if (bManageRes) break;
+                        if (bManageRes)
+                            break;
+                        else
+                            Thread.Sleep(100);
                     }
                     else
                     {
