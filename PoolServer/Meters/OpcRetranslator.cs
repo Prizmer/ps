@@ -132,7 +132,10 @@ namespace Prizmer.Meters
                                 float fTmpVal = 0f;
                                 bool res2 = float.TryParse(stringValue, out fTmpVal);
                                 if (!res2) return res2;
-                                value = fTmpVal;
+
+                                //Женя просил делить значения для текон-автоматика на 1000
+                                float coeff = 1000;
+                                value = fTmpVal / 1000;
 
                                 return true;
                             }

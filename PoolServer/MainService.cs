@@ -384,7 +384,7 @@ namespace Prizmer.PoolServer
             else if (data.GetType().Name == "TCPIPSettings")
             {
                 TCPIPSettings portsettings = (TCPIPSettings)data;
-                m_vport = new Prizmer.Ports.TcpipPort(portsettings.ip_address, (int)portsettings.ip_port, portsettings.write_timeout, portsettings.read_timeout, 50);
+                //m_vport = new Prizmer.Ports.TcpipPort(portsettings.ip_address, (int)portsettings.ip_port, portsettings.write_timeout, portsettings.read_timeout, 50);
                 //читаем список приборов, привязанных к порту
                 PortGUID = portsettings.guid;
                 metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
@@ -425,6 +425,17 @@ namespace Prizmer.PoolServer
                 {
                     goto NetxMeter;
                 }
+
+                /*если соединяться с конечной точкой вначале, то консольная программа rds не сможет с ней соединиться
+                 * поэтому создание пора и подключение к нему осуществляется на первой итерации цикла при условии,
+                 * что счетчик не саяны. Предполагаются что на одном порту будут висеть только саяны, если будут другие приборы,
+                 * создастся порт и саяны не будут читаться снова.
+                 * */
+                if (m_vport == null && (typemeter.driver_name != "sayani_kombik")) {
+                    TCPIPSettings portsettings = (TCPIPSettings)data;
+                    m_vport = new Prizmer.Ports.TcpipPort(portsettings.ip_address, (int)portsettings.ip_port, portsettings.write_timeout, portsettings.read_timeout, 50);
+                }
+ 
 
                 //инициализация прибора
                 meter.Init(metersbyport[MetersCounter].address, metersbyport[MetersCounter].password, m_vport);
