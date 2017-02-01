@@ -390,7 +390,7 @@ namespace Prizmer.PoolServer
                 metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
             }
 
-            if (m_vport == null) goto CloseThreadPoint;
+            //if (m_vport == null) goto CloseThreadPoint;
             if (metersbyport == null) goto CloseThreadPoint;
             if (metersbyport.Length == 0) goto CloseThreadPoint;
                         
@@ -434,6 +434,10 @@ namespace Prizmer.PoolServer
                 if (m_vport == null && (typemeter.driver_name != "sayani_kombik")) {
                     TCPIPSettings portsettings = (TCPIPSettings)data;
                     m_vport = new Prizmer.Ports.TcpipPort(portsettings.ip_address, (int)portsettings.ip_port, portsettings.write_timeout, portsettings.read_timeout, 50);
+                }
+                else if (m_vport == null && (typemeter.driver_name == "sayani_kombik"))
+                {
+                    m_vport = new Prizmer.Ports.ComPort(byte.Parse("250"), 1111, 1, 1, 1, 1, 1, 1);
                 }
  
 
