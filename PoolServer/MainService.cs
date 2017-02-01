@@ -406,7 +406,7 @@ namespace Prizmer.PoolServer
 
                 switch (typemeter.driver_name)
                 {
-                    case "m230": meter = new m230(); break;
+                    //case "m230": meter = new m230(); break;
                     case "pulsar10": meter = new pulsar10(); break;
                     case "pulsar16": meter = new pulsar16(); break;
                     case "tem4": meter = new tem104(); break;
@@ -419,6 +419,7 @@ namespace Prizmer.PoolServer
                     case "m200": meter = new Mercury200(); break;
                     case "opcretranslator": meter = new OpcRetranslator(); break;
                     case "sayani_kombik": meter = new sayani_kombik(); break;
+                    case "m230": meter = new m234(); break;
                 }
 
                 if (meter == null)
