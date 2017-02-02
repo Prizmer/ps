@@ -1426,11 +1426,18 @@ namespace Prizmer.Meters
         }
 
         // Чтение среза мощности по указанному адресу
-        bool ReadSlice(ushort addr_slice, ref RecordPowerSlice record_slice, byte period)
+        bool ReadSlice(ushort addr_slice, ref RecordPowerSlice record_slice, byte period, bool doReload = false)
         {
             byte[] cmnd = new byte[32];
             byte[] answer = new byte[RSLICE_ANSW_SIZE];
-            byte[] command = new byte[] { 0x06, 0x03 };
+
+            //83 - c учетом 17 бита адреса, 03 - когда в формировании адреса участвует лишь 16 бит
+            //предполагаю, что это связано с переполнением массива
+            //TODO: уточнить как понять нужно ли использовать 17бит или нет
+            byte stateByte = 0x03;
+            if (doReload) stateByte = 0x83;
+            byte[] command = new byte[] { 0x06, stateByte };
+
             byte[] addr = new byte[2];
             ushort temp_value = 0;
             float value = 0;
@@ -1682,15 +1689,16 @@ namespace Prizmer.Meters
                 // меняем байты в слове адреса последнего среза местами
                 addr_before = Convert.ToUInt16(((lps.addr & 0xff) << 8) | ((lps.addr & 0xFF00) >> 8));
                 //получаем кол-во байт, которые занимают n записей за требуемый промежуток времени
-                //и вычитаем их из адреса последнего среза
-                addr_before -= Convert.ToUInt16(address_slice * 0x10);
+                int tmpDif = address_slice * 0x10;
+                //получаем реальный адрес последней записи (сдвинутый) пример
+                //17 6e * 10h -> 76 e0
+                int tmpAddr = addr_before * 0x10;
+                //получаем реальный адрес получасовки на требуемую дату начала чтения
+                addr_before = (ushort)(tmpAddr - tmpDif);
                 // возвращаем байты на прежнее положение
                 addr_after = Convert.ToUInt16(((addr_before & 0xff) << 8) | ((addr_before & 0xFF00) >> 8));
 
-                // чтение среза по рассчитанному адресу
-                bool res_read_slice = ReadSlice(addr_after, ref record_slice, period);
-                //  this.Open();
-                //  bool res_read_slice = ReadSlice(0x10f0, ref record_slice, period);
+                bool res_read_slice = ReadSlice(addr_after, ref record_slice, period, lps.reload);
 
                 // Если при чтении не было ошибок
                 if (res_read_slice)
