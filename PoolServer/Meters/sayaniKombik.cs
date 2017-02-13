@@ -579,14 +579,22 @@ namespace Prizmer.Meters
 
         private void WriteToRDSLog(string logFileName, string msg)
         {
-            if (msg.Length > 0)
+            try
             {
-                FileStream fs = new FileStream(logFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
-                StreamWriter sw = new StreamWriter(fs);
-                sw.Write(msg + Environment.NewLine);
-                sw.Flush();
-                sw.Close();
+                if (msg.Length > 0)
+                {
+                    FileStream fs = new FileStream(logFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                    StreamWriter sw = new StreamWriter(fs);
+                    sw.Write(msg + Environment.NewLine);
+                    sw.Flush();
+                    sw.Close();
+                }
             }
+            catch (Exception ex)
+            {
+                WriteToLog("WriteToRDSLog: " + ex.ToString());
+            }
+
         }
 
         private bool ParseDumpFile(string fileName, ref MeterInfo mi, ref Params prms, bool deleteAfterParse = false)
@@ -1073,10 +1081,7 @@ namespace Prizmer.Meters
             return true;
         }
 
-        public void WriteToLog(string str, bool doWrite = true)
-        {
-            return;
-        }
+ 
         
         #endregion
 

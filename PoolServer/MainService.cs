@@ -199,6 +199,7 @@ namespace Prizmer.PoolServer
 
 
         #region Флаги отладки
+        //DEBUG FLAGS
         bool B_DEBUG_MODE_TCP = false;
         string DMTCP_IP = "192.168.10.12";
         ushort DMTCP_PORT = 4001;
