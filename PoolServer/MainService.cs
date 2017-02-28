@@ -459,7 +459,8 @@ namespace Prizmer.PoolServer
                     case "m200": meter = new Mercury200(); break;
                     case "opcretranslator": meter = new OpcRetranslator(); break;
                     case "sayani_kombik": meter = new sayani_kombik(); break;
-                    case "m230": meter = new m234(); break;
+                    case "m230": meter = new m230(); break;
+                    case "m234": meter = new m234(); break;
                 }
 
 
@@ -1581,6 +1582,88 @@ namespace Prizmer.PoolServer
                             }
                         }
                     }
+                    #endregion
+                }
+
+
+                if (typemeter.driver_name == "m230")
+                {
+                    #region ВЫЧИТКА ДАННЫХ ЗА ОКТЯБРЬ НОЯБРЬ для М230
+                    #region НА НАЧАЛО СУТОК
+
+                    string portStr = m_vport.GetName();
+                    string mAddr = metersbyport[MetersCounter].address.ToString();
+                    string mName = metersbyport[MetersCounter].name;
+
+                    logger.LogInfo("ВЫЧИТКА ДАННЫХ ЗА ОКТЯБРЬ НОЯБРЬ для М230"); 
+                    logger.LogInfo("Прибор: " + mName + " порт " + m_vport.ToString() + " адрес " + metersbyport[MetersCounter].address.ToString());
+
+                    DateTime CurTime = DateTime.Now; CurTime.AddHours(-1);
+                    DateTime PrevTime = CurTime;
+
+                    //чтение текущих параметров, подлежащих чтению, относящихся к конкретному прибору
+                    TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid, 1);
+                    logger.LogInfo("Параметры типа СУТОЧНЫЙ: " + takenparams.Length);
+
+                    DateTime dtStart = new DateTime(2016, 10, 1);
+                    DateTime dtEnd = new DateTime(2016, 11, 30);
+                    TimeSpan diff = dtEnd - dtStart;
+
+                    if (takenparams.Length > 0)
+                    {
+                        
+                        for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
+                        {
+                            if (bStopServer) goto CloseThreadPoint;
+
+                            DateTime tmpDateTime = new DateTime(dtStart.Ticks);
+                            int totalD = (int)diff.TotalDays;
+
+                            for (int d = 0; d <= totalD; d++)
+                            {
+                                tmpDateTime = tmpDateTime.AddDays(d);
+                                Value[] lastvalue = ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], tmpDateTime, tmpDateTime);
+                                if (lastvalue.Length > 0) continue;
+
+                                if (meter.OpenLinkCanal())
+                                {                                
+                                    Param param = ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
+                                    if (param.guid == Guid.Empty) continue;
+
+                                    float curvalue = 0;
+
+                                    //чтение суточных параметров
+                                    if (meter.ReadDailyValues(tmpDateTime, param.param_address, param.channel, ref curvalue))
+                                    {
+                                        Value value = new Value();
+                                        value.dt = DateTime.Now;
+                                        value.id_taken_params = takenparams[tpindex].id;
+                                        value.status = false;
+                                        value.value = curvalue;
+                                        ServerStorage.AddDailyValues(value);
+                                        ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
+
+                                        //     WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" +
+                                        //    tpindex.ToString() + ") записан в базу", portStr, mAddr, LOG_DAILY);
+                                    }
+                                    else
+                                    {
+                                        string s_log = String.Format("Суточные для м230: метод драйвера ReadDailyValues вернул false. Параметр {0} с адресом {1} каналом {2} не прочитан",
+                                            param.name, param.param_address, param.channel);
+                                        logger.LogWarn(s_log);
+                                        continue;
+                                    }
+                                }
+                                else
+                                {
+                                        logger.LogWarn(mName + " порт " + m_vport.ToString() + " адрес " + metersbyport[MetersCounter].address.ToString() + " невозможно открыть канал связи");
+                                }
+
+                            }
+                        }
+
+                    }
+                    #endregion
                     #endregion
                 }
 
