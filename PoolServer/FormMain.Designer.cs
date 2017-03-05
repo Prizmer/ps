@@ -112,6 +112,7 @@
             this.btnEndReading.TabIndex = 2;
             this.btnEndReading.Text = "X";
             this.btnEndReading.UseVisualStyleBackColor = true;
+            this.btnEndReading.Click += new System.EventHandler(this.btnEndReading_Click);
             // 
             // dateTimePicker1
             // 
@@ -120,6 +121,7 @@
             this.dateTimePicker1.Name = "dateTimePicker1";
             this.dateTimePicker1.Size = new System.Drawing.Size(109, 20);
             this.dateTimePicker1.TabIndex = 3;
+            this.dateTimePicker1.Value = new System.DateTime(2017, 3, 2, 0, 0, 0, 0);
             // 
             // label1
             // 
@@ -146,6 +148,7 @@
             this.dateTimePicker2.Name = "dateTimePicker2";
             this.dateTimePicker2.Size = new System.Drawing.Size(109, 20);
             this.dateTimePicker2.TabIndex = 6;
+            this.dateTimePicker2.Value = new System.DateTime(2017, 3, 2, 0, 0, 0, 0);
             // 
             // label3
             // 

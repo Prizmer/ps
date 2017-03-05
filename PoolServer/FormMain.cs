@@ -98,6 +98,12 @@ namespace Prizmer.PoolServer
                 tbPort.Enabled = true;
             }
         }
+
+        private void btnEndReading_Click(object sender, EventArgs e)
+        {
+            ms.StopServer();
+            progressBar1.Value = 0;
+        }
     }
 
     public struct MainFormParamsStructure

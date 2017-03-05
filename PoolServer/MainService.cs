@@ -1656,19 +1656,20 @@ namespace Prizmer.PoolServer
                     string mAddr = metersbyport[MetersCounter].address.ToString();
                     string mName = metersbyport[MetersCounter].name;
 
-                    logger.LogInfo("ВЫЧИТКА ДАННЫХ ЗА ОКТЯБРЬ НОЯБРЬ для М230"); 
-                    logger.LogInfo("Прибор: " + mName + " порт " + m_vport.ToString() + " адрес " + metersbyport[MetersCounter].address.ToString());
+                    DateTime dtStart = mfPrms.dtStart.Date;
+                    DateTime dtEnd = mfPrms.dtEnd.Date;
+                    TimeSpan diff = dtEnd - dtStart;
 
-                    DateTime CurTime = DateTime.Now; CurTime.AddHours(-1);
-                    DateTime PrevTime = CurTime;
+                    logger.LogInfo("Вычитка данных за интервал дат для "+ mName);
+                    logger.LogInfo("Дата начала: " + dtStart.ToShortDateString());
+                    logger.LogInfo("Дата конца: " + dtEnd.ToShortDateString());
+                    logger.LogInfo("Прибор: " + mName + " порт " + m_vport.ToString() + " адрес " + metersbyport[MetersCounter].address.ToString());
 
                     //чтение текущих параметров, подлежащих чтению, относящихся к конкретному прибору
                     TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid, 1);
                     logger.LogInfo("Параметры типа СУТОЧНЫЙ: " + takenparams.Length);
 
-                    DateTime dtStart = mfPrms.dtStart.Date;
-                    DateTime dtEnd = mfPrms.dtEnd.Date;
-                    TimeSpan diff = dtEnd - dtStart;
+
 
                     if (takenparams.Length > 0)
                     {
@@ -1703,6 +1704,8 @@ namespace Prizmer.PoolServer
                                         value.value = curvalue;
                                         ServerStorage.AddDailyValues(value);
                                         ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
+
+                                        logger.LogInfo("Параметры типа суточный ЗАПИСАН в БД");
 
                                         //     WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" +
                                         //    tpindex.ToString() + ") записан в базу", portStr, mAddr, LOG_DAILY);
