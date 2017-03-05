@@ -319,6 +319,7 @@ namespace Prizmer.PoolServer
                 }
                             
                 Meter[] metersbyport = ServerStorage.GetMetersByTcpIPGUID(tcpips[i].guid);
+                WriteToLog("mbp: " + metersbyport.Length );
                 if (metersbyport.Length > 0)
                 {
                     Thread portThread = new Thread(new ParameterizedThreadStart(this.pollingPortThread));
