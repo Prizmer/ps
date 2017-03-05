@@ -199,7 +199,7 @@ namespace Prizmer.PoolServer
 
 
         #region Флаги отладки
-        //DEBUG FLAGS
+
         bool B_DEBUG_MODE_TCP = false;
         string DMTCP_IP = "192.168.10.12";
         ushort DMTCP_PORT = 4001;
@@ -214,6 +214,7 @@ namespace Prizmer.PoolServer
         bool DM_POLL_HOUR = true;
         bool DM_POLL_HALFANHOUR = true;
         bool DM_POLL_ARCHIVE = false;
+
         #endregion
 
 
@@ -446,6 +447,7 @@ namespace Prizmer.PoolServer
 
                 switch (tmpDriverName)
                 {
+                    //проблема с 230ми
                     //case "m230": meter = new m230(); break;
                     case "pulsar10": meter = new pulsar10(); break;
                     case "pulsar16": meter = new pulsar16(); break;
@@ -459,7 +461,7 @@ namespace Prizmer.PoolServer
                     case "m200": meter = new Mercury200(); break;
                     case "opcretranslator": meter = new OpcRetranslator(); break;
                     case "sayani_kombik": meter = new sayani_kombik(); break;
-                    case "m230": meter = new m230(); break;
+                    case "m230": meter = new m234(); break;
                     case "m234": meter = new m234(); break;
                 }
 
@@ -1586,7 +1588,7 @@ namespace Prizmer.PoolServer
                 }
 
 
-                if (typemeter.driver_name == "m230")
+                if (false && typemeter.driver_name == "m230")
                 {
                     #region ВЫЧИТКА ДАННЫХ ЗА ОКТЯБРЬ НОЯБРЬ для М230
                     #region НА НАЧАЛО СУТОК
