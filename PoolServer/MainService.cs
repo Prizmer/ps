@@ -312,6 +312,7 @@ namespace Prizmer.PoolServer
                 }
                 else if (prms.mode == 1 && prms.isTcp)
                 {
+                    WriteToLog("addr: " + tcpips[i].ip_address + "; p: " + tcpips[i].ip_port.ToString());
                     if (tcpips[i].ip_address != prms.ip || tcpips[i].ip_port != (ushort)prms.port)
                         continue;
                 }
