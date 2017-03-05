@@ -517,7 +517,7 @@ namespace Prizmer.PoolServer
                     case "m200": meter = new Mercury200(); break;
                     case "opcretranslator": meter = new OpcRetranslator(); break;
                     case "sayani_kombik": meter = new sayani_kombik(); break;
-                    case "m230": meter = new m234(); break;
+                    case "m230": meter = new m230(); break;
                     case "m234": meter = new m234(); break;
                 }
 
@@ -1698,14 +1698,14 @@ namespace Prizmer.PoolServer
                                     if (meter.ReadDailyValues(tmpDateTime, param.param_address, param.channel, ref curvalue))
                                     {
                                         Value value = new Value();
-                                        value.dt = DateTime.Now;
+                                        value.dt = tmpDateTime;
                                         value.id_taken_params = takenparams[tpindex].id;
                                         value.status = false;
                                         value.value = curvalue;
                                         ServerStorage.AddDailyValues(value);
                                         ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
 
-                                        logger.LogInfo("Параметры типа суточный ЗАПИСАН в БД");
+                                        logger.LogInfo("Параметры типа суточный ЗАПИСАН в БД: " + curvalue);
 
                                         //     WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" +
                                         //    tpindex.ToString() + ") записан в базу", portStr, mAddr, LOG_DAILY);

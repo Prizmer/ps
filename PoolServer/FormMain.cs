@@ -25,6 +25,9 @@ namespace Prizmer.PoolServer
             //ms.StartServer();
             //groupBox1 settings
             comboBox1.SelectedIndex = 0;
+                            MainFormParamsStructure prms = new MainFormParamsStructure();
+                prms.mode = 0;
+                if (cbServerStarted.Checked) ms.StartServer(prms);
 
         }
 
