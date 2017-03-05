@@ -171,15 +171,21 @@ namespace Prizmer.PoolServer
     class MainService
     {
 
+        public delegate void MyEventHandler(object sender, MyEventArgs e);
+        public event MyEventHandler pollingStarted;
+        public event MyEventHandler pollingEnded;
+        public event MyEventHandler meterPolled;
+
+        List<Thread> PortsThreads = new List<Thread>();
+
         public void WriteToLog(string str, string port = "", string addr = "", string mName = "", bool doWrite = true)
         {
             //TODO убрать метод, оставлен для поддержки
         }
 
-        //список потоков для опроса приборов - один поток на каждый порт
-        List<Thread> PortsThreads = new List<Thread>();
 
         string ConnectionString = "Server=localhost;Port=5432;User Id=postgres;Password=1;Database=prizmer;";
+
 
         struct PollingParams
         {
@@ -192,11 +198,9 @@ namespace Prizmer.PoolServer
 
             public TimeSpan ts_current_period;
         }
-
         PollingParams pollingParams;
 
         bool bStopServer = true;
-
 
         #region Флаги отладки
 
@@ -264,53 +268,35 @@ namespace Prizmer.PoolServer
                 WriteToLog("Проблеммы с применением файла конфигурации: " + ex.Message);
             }
         }
-        
-        public void StartServer()
-        {
 
+        private List<Thread> getStartComThreadsList(ComPortSettings[] cps)
+        {
+            List<Thread> comPortThreadsList = new List<Thread>();
             PgStorage ServerStorage = new PgStorage();
 
-            #region Блок особых действий
-                sayani_kombik.DeleteDumpDirectory();
-
-            #endregion
-
-            //подключение к БД
-            System.Data.ConnectionState conState = ServerStorage.Open(ConnectionString);
-
-            if (conState == System.Data.ConnectionState.Broken)
-            {
-                MessageBox.Show("Невозможно подключиться к БД, проверьте строку подключения: " + ConnectionString, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.Exit();
-            }
-
-            //чтение всех COM-портов
-            ComPortSettings[] cps = ServerStorage.GetComportSettings();
-
-            //чтение всех TCPIP-портов
-            TCPIPSettings[] tcpips = ServerStorage.GetTCPIPSettings();
-
-            bStopServer = false;
-
-            //обработка всех неотлавливаемых исключений для логгирования
-            AppDomain domain = AppDomain.CurrentDomain;
-            domain.UnhandledException += new UnhandledExceptionEventHandler(UnhandledException_Handler);
-
-            if (!B_DEBUG_MODE_TCP)
             for (int i = 0; i < cps.Length; i++)
             {
-                //если к порту привязаны приборы, то создаем для него поток и записываем в пул потоков
                 Meter[] metersbyport = ServerStorage.GetMetersByComportGUID(cps[i].guid);
                 if (metersbyport.Length > 0)
                 {
                     Thread portThread = new Thread(new ParameterizedThreadStart(this.pollingPortThread));
                     portThread.IsBackground = true;
-                    portThread.Start(cps[i]);
 
-                    PortsThreads.Add(portThread);
+                    List<object> prmsList = new List<object>();
+                    prmsList.Add(cps[i]);
+
+                    portThread.Start(prmsList);
+                    comPortThreadsList.Add(portThread);
                 }
             }
 
+            return comPortThreadsList;
+        }
+
+        private List<Thread> getStartTcpThreadsList(TCPIPSettings[] tcpips, MainFormParamsStructure prms)
+        {
+            List<Thread> tcpPortThreadsList = new List<Thread>();
+            PgStorage ServerStorage = new PgStorage();
 
             for (int i = 0; i < tcpips.Length; i++)
             {
@@ -319,17 +305,67 @@ namespace Prizmer.PoolServer
                     if (tcpips[i].ip_address != DMTCP_IP || tcpips[i].ip_port != DMTCP_PORT)
                         continue;
                 }
-                    //если к порту привязаны приборы, то создаем для него поток и записываем в пул потоков
-                    Meter[] metersbyport = ServerStorage.GetMetersByTcpIPGUID(tcpips[i].guid);
-                    if (metersbyport.Length > 0)
-                    {
-                        Thread portThread = new Thread(new ParameterizedThreadStart(this.pollingPortThread));
-                        portThread.IsBackground = true;
-                        portThread.Start(tcpips[i]);
-
-                        PortsThreads.Add(portThread);
-                    }
+                else if (prms.mode == 1 && prms.isTcp)
+                {
+                    if (tcpips[i].ip_address != prms.ip || tcpips[i].ip_port != (ushort)prms.port)
+                        continue;
                 }
+
+                Meter[] metersbyport = ServerStorage.GetMetersByTcpIPGUID(tcpips[i].guid);
+                if (metersbyport.Length > 0)
+                {
+                    Thread portThread = new Thread(new ParameterizedThreadStart(this.pollingPortThread));
+                    portThread.IsBackground = true;
+
+                    List<object> prmsList = new List<object>();
+                    prmsList.Add(tcpips[i]);
+                    prmsList.Add(prms);
+
+                    portThread.Start(prmsList);                 
+                    tcpPortThreadsList.Add(portThread);
+                }
+            }
+
+            return tcpPortThreadsList;
+        }
+
+        
+        public void StartServer(MainFormParamsStructure mfPrms)
+        {
+
+            PgStorage ServerStorage = new PgStorage();
+            bStopServer = false;
+
+            #region Блок особых действий
+                sayani_kombik.DeleteDumpDirectory();
+            #endregion
+
+            System.Data.ConnectionState conState = ServerStorage.Open(ConnectionString);
+            if (conState == System.Data.ConnectionState.Broken)
+            {
+                MessageBox.Show("Невозможно подключиться к БД, проверьте строку подключения: " + ConnectionString, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+            }
+
+            //обработка всех неотлавливаемых исключений для логгирования
+            AppDomain domain = AppDomain.CurrentDomain;
+            domain.UnhandledException += new UnhandledExceptionEventHandler(UnhandledException_Handler);
+
+            ComPortSettings[] cps = ServerStorage.GetComportSettings();
+            TCPIPSettings[] tcpips = ServerStorage.GetTCPIPSettings();
+
+            List<Thread> comPortThreads = new List<Thread>();
+            List<Thread> tcpPortThreads = new List<Thread>();
+
+            if (!B_DEBUG_MODE_TCP && mfPrms.mode == 0)
+            {
+                comPortThreads = this.getStartComThreadsList(cps);
+                PortsThreads.AddRange(comPortThreads);
+            }
+
+            tcpPortThreads = this.getStartTcpThreadsList(tcpips, mfPrms);
+            PortsThreads.AddRange(tcpPortThreads);
+
 
             object iLogsAreAliveDays = 6;
             //Thread logsEreaserThread = new Thread(new ParameterizedThreadStart(DeleteLogsDirectory));
@@ -340,11 +376,6 @@ namespace Prizmer.PoolServer
             ServerStorage.Close();
         }
 
-        //обработчик необработанных исключений
-        void UnhandledException_Handler(object sender, UnhandledExceptionEventArgs e)
-        {
-            MessageBox.Show(e.ExceptionObject.ToString());
-        }
         public void StopServer()
         {
             bStopServer = true;
@@ -358,6 +389,12 @@ namespace Prizmer.PoolServer
                 }
                 catch { }
             }
+        }
+
+        void UnhandledException_Handler(object sender, UnhandledExceptionEventArgs e)
+        {
+            //TODO: сделать это в лог
+            MessageBox.Show(e.ExceptionObject.ToString());
         }
 
         public void DeleteLogsDirectory(object param)
@@ -393,15 +430,26 @@ namespace Prizmer.PoolServer
         {
             Prizmer.Ports.VirtualPort m_vport = null;
             Meter[] metersbyport = null;
+            MyEventArgs myEventArgs = new MyEventArgs();
+            
+
 
             Logger logger = new Logger();
 
             Guid PortGUID = Guid.Empty;
 
+            
             //подключение к БД
             PgStorage ServerStorage = new PgStorage();
 
             System.Data.ConnectionState conState = ServerStorage.Open(ConnectionString);
+            List<object> prmsList = (List<object>)data;
+            data = prmsList[0];
+            MainFormParamsStructure mfPrms = new MainFormParamsStructure();
+            if (prmsList.Count > 1) 
+                mfPrms = (MainFormParamsStructure)prmsList[1];
+
+            bool POLLING_ACTIVE = mfPrms.mode == 0 ? true : false;
 
             if (data.GetType().Name == "ComPortSettings" && !B_DEBUG_MODE_TCP)
             {
@@ -432,6 +480,8 @@ namespace Prizmer.PoolServer
                         MetersCounter = (uint)i;
             }
 
+            if (pollingStarted != null)
+                pollingStarted(this, myEventArgs);
             while (!bStopServer)
             {
                 //здесь надо выбрать - какой драйвер будет использоваться
@@ -502,7 +552,7 @@ namespace Prizmer.PoolServer
 
                 ////////////////////Блок чтения серийника///////////////////
                 if (bStopServer) goto CloseThreadPoint;
-                if (DM_POLL_ADDR)
+                if (POLLING_ACTIVE && DM_POLL_ADDR)
                 {
                     string serial_number = String.Empty;
                     if (meter.OpenLinkCanal())
@@ -527,7 +577,7 @@ namespace Prizmer.PoolServer
                 }
 
                 if (bStopServer) goto CloseThreadPoint;
-                if (DM_POLL_HOUR && pollingParams.b_poll_hour)
+                if (POLLING_ACTIVE && DM_POLL_HOUR && pollingParams.b_poll_hour)
                 {
                     #region ЧАСОВЫЕ СРЕЗЫ
 
@@ -795,7 +845,7 @@ namespace Prizmer.PoolServer
                 }
 
                 if (bStopServer) goto CloseThreadPoint;
-                if (DM_POLL_HALFANHOUR && pollingParams.b_poll_halfanhour)
+                if (POLLING_ACTIVE && DM_POLL_HALFANHOUR && pollingParams.b_poll_halfanhour)
                 {
                     if (typemeter.driver_name == "set4tm_03" || typemeter.driver_name == "m230")
                     {
@@ -1202,7 +1252,7 @@ namespace Prizmer.PoolServer
                 
                 ////////////////////ТЕКУЩИЕ///////////////////
                 if (bStopServer) goto CloseThreadPoint;
-                if (DM_POLL_CURR && pollingParams.b_poll_current)
+                if (POLLING_ACTIVE && DM_POLL_CURR && pollingParams.b_poll_current)
                 {
                     #region ТЕКУЩИЕ ЗНАЧЕНИЯ
                     //чтение текущих параметров, подлежащих чтению, относящихся к конкретному прибору
@@ -1255,7 +1305,7 @@ namespace Prizmer.PoolServer
                 
                 ////////////////////на начало СУТОК///////////////////
                 if (bStopServer) goto CloseThreadPoint;
-                if (DM_POLL_DAY && pollingParams.b_poll_day)
+                if (POLLING_ACTIVE && DM_POLL_DAY && pollingParams.b_poll_day)
                 {
                     #region НА НАЧАЛО СУТОК
                     DateTime CurTime = DateTime.Now; CurTime.AddHours(-1);
@@ -1328,7 +1378,7 @@ namespace Prizmer.PoolServer
 
                 ////////////////////на начало МЕСЯЦА///////////////////
                 if (bStopServer) goto CloseThreadPoint;
-                if (DM_POLL_MONTH && pollingParams.b_poll_month)
+                if (POLLING_ACTIVE && DM_POLL_MONTH && pollingParams.b_poll_month)
                 {
                     #region НА НАЧАЛО МЕСЯЦА
                     DateTime CurTime = DateTime.Now; 
@@ -1397,7 +1447,7 @@ namespace Prizmer.PoolServer
 
                 ////////////////////АРХИВЫ///////////////////
                 if (bStopServer) goto CloseThreadPoint;
-                if (DM_POLL_ARCHIVE && pollingParams.b_poll_archive)
+                if (POLLING_ACTIVE && DM_POLL_ARCHIVE && pollingParams.b_poll_archive)
                 {
                     #region АРХИВНЫЕ ДАННЫЕ СТАРЫЙ МЕТОД
 
@@ -1491,7 +1541,7 @@ namespace Prizmer.PoolServer
 
                 ////////////////////АРХИВЫ_НОВЫЙ_АКТУАЛЬНЫЙ_АЛГ///////////////////
                 if (bStopServer) goto CloseThreadPoint;
-                if (DM_POLL_ARCHIVE && pollingParams.b_poll_archive)
+                if (POLLING_ACTIVE && DM_POLL_ARCHIVE && pollingParams.b_poll_archive)
                 {
                     #region АРХИВНЫЕ ДАННЫЕ НОВ
                     bool doArchLog = true;
@@ -1587,9 +1637,12 @@ namespace Prizmer.PoolServer
                     #endregion
                 }
 
-
-                if (false && typemeter.driver_name == "m230")
+                //вычитка за определенную дату
+                if (mfPrms.mode == 1 && typemeter.driver_name == mfPrms.driverName)
                 {
+                    myEventArgs.metersCount = metersbyport.Length;
+                    myEventArgs.currentCount = (int)MetersCounter;
+
                     #region ВЫЧИТКА ДАННЫХ ЗА ОКТЯБРЬ НОЯБРЬ для М230
                     #region НА НАЧАЛО СУТОК
 
@@ -1607,8 +1660,8 @@ namespace Prizmer.PoolServer
                     TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid, 1);
                     logger.LogInfo("Параметры типа СУТОЧНЫЙ: " + takenparams.Length);
 
-                    DateTime dtStart = new DateTime(2016, 10, 1);
-                    DateTime dtEnd = new DateTime(2016, 11, 30);
+                    DateTime dtStart = mfPrms.dtStart.Date;
+                    DateTime dtEnd = mfPrms.dtEnd.Date;
                     TimeSpan diff = dtEnd - dtStart;
 
                     if (takenparams.Length > 0)
@@ -1691,6 +1744,16 @@ namespace Prizmer.PoolServer
                         //    m_vport.ReInitialize();
                     }
 
+                    if (mfPrms.mode == 1)
+                    {
+                        if (meterPolled != null)
+                            meterPolled(this, myEventArgs);
+
+                        if (MetersCounter >= metersbyport.Length)
+                            if (pollingEnded != null)
+                                pollingEnded(this, myEventArgs);
+                    }
+
                     Thread.Sleep(1000);
                 }
             }
@@ -1699,5 +1762,12 @@ namespace Prizmer.PoolServer
             CloseThreadPoint:
             ServerStorage.Close();
         }
+    }
+
+    public class MyEventArgs:EventArgs
+    {
+        public int metersCount;
+        public bool success;
+        public int currentCount;
     }
 }
