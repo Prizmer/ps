@@ -180,7 +180,12 @@ namespace Prizmer.PoolServer
 
         public void WriteToLog(string str, string port = "", string addr = "", string mName = "", bool doWrite = true)
         {
-            //TODO убрать метод, оставлен для поддержки
+
+            StreamWriter sw = null;
+            string resMsg = String.Format("{0}: {1}", DateTime.Now.ToString(), str);
+            sw = new StreamWriter(@"commonInfo.txt", true, Encoding.Default);
+            sw.WriteLine(resMsg);
+            sw.Close();
         }
 
 
@@ -310,7 +315,7 @@ namespace Prizmer.PoolServer
                     if (tcpips[i].ip_address != prms.ip || tcpips[i].ip_port != (ushort)prms.port)
                         continue;
                 }
-
+                            
                 Meter[] metersbyport = ServerStorage.GetMetersByTcpIPGUID(tcpips[i].guid);
                 if (metersbyport.Length > 0)
                 {
@@ -331,8 +336,7 @@ namespace Prizmer.PoolServer
 
         
         public void StartServer(MainFormParamsStructure mfPrms)
-        {
-
+        {         
             PgStorage ServerStorage = new PgStorage();
             bStopServer = false;
 
@@ -365,6 +369,8 @@ namespace Prizmer.PoolServer
 
             tcpPortThreads = this.getStartTcpThreadsList(tcpips, mfPrms);
             PortsThreads.AddRange(tcpPortThreads);
+
+            this.WriteToLog(tcpPortThreads.Count.ToString());
 
 
             object iLogsAreAliveDays = 6;
