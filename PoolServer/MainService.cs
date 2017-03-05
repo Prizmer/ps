@@ -277,7 +277,6 @@ namespace Prizmer.PoolServer
         private List<Thread> getStartComThreadsList(ComPortSettings[] cps)
         {
             List<Thread> comPortThreadsList = new List<Thread>();
-            PgStorage ServerStorage = new PgStorage();
 
             for (int i = 0; i < cps.Length; i++)
             {
@@ -301,7 +300,6 @@ namespace Prizmer.PoolServer
         private List<Thread> getStartTcpThreadsList(TCPIPSettings[] tcpips, MainFormParamsStructure prms)
         {
             List<Thread> tcpPortThreadsList = new List<Thread>();
-            PgStorage ServerStorage = new PgStorage();
 
             for (int i = 0; i < tcpips.Length; i++)
             {
@@ -337,10 +335,9 @@ namespace Prizmer.PoolServer
             return tcpPortThreadsList;
         }
 
-        
+        PgStorage ServerStorage = new PgStorage();
         public void StartServer(MainFormParamsStructure mfPrms)
         {         
-            PgStorage ServerStorage = new PgStorage();
             bStopServer = false;
 
             #region Блок особых действий
