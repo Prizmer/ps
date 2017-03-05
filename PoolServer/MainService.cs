@@ -181,11 +181,11 @@ namespace Prizmer.PoolServer
         public void WriteToLog(string str, string port = "", string addr = "", string mName = "", bool doWrite = true)
         {
 
-            StreamWriter sw = null;
-            string resMsg = String.Format("{0}: {1}", DateTime.Now.ToString(), str);
-            sw = new StreamWriter(@"commonInfo.txt", true, Encoding.Default);
-            sw.WriteLine(resMsg);
-            sw.Close();
+            //StreamWriter sw = null;
+           // string resMsg = String.Format("{0}: {1}", DateTime.Now.ToString(), str);
+           // sw = new StreamWriter(@"commonInfo.txt", true, Encoding.Default);
+           // sw.WriteLine(resMsg);
+           // sw.Close();
         }
 
 
