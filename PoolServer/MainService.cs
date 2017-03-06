@@ -538,7 +538,7 @@ namespace Prizmer.PoolServer
                 }
                 else if (m_vport == null && (typemeter.driver_name == "sayani_kombik"))
                 {
-                    m_vport = new Prizmer.Ports.ComPort(byte.Parse("250"), 1111, 1, 1, 1, 1, 1, 1);
+                    m_vport = new Prizmer.Ports.ComPort(byte.Parse("250"), 2400, 8, 1, 1, 1, 1, 1);
                 }
  
 
