@@ -34,6 +34,7 @@ namespace Prizmer.PoolServer
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             ms.StopServer();
+
         }
 
         private void cbServerStarted_CheckedChanged(object sender, EventArgs e)
@@ -95,12 +96,12 @@ namespace Prizmer.PoolServer
             progressBar1.Value += 1;
             progressBar1.Maximum = e.metersCount + 1;
             lblCurCnt.Text = progressBar1.Value.ToString();
-            lblCnt.Text = progressBar1.Maximum.ToString();
+            lblCnt.Text = e.metersCount.ToString();
         }
 
         void ms_pollingStarted(object sender, MyEventArgs e)
         {
-            progressBar1.Value = 1;
+            progressBar1.Value = 0;
             lblCurCnt.Text = "0";
             lblCnt.Text = "0";
         }
@@ -123,6 +124,8 @@ namespace Prizmer.PoolServer
         {
             ms.StopServer();
             progressBar1.Value = 0;
+            lblCnt.Text = "";
+            lblCurCnt.Text = "";
         }
     }
 
