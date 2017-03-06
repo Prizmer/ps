@@ -1666,7 +1666,7 @@ namespace Prizmer.PoolServer
                     logger.LogInfo("Прибор: " + mName + " порт " + m_vport.ToString() + " адрес " + metersbyport[MetersCounter].address.ToString());
 
                     //чтение текущих параметров, подлежащих чтению, относящихся к конкретному прибору
-                    TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid, 1);
+                    TakenParams[] takenparams = ServerStorage.GetTakenParamByMetersGUIDandParamsType(metersbyport[MetersCounter].guid, 2);
                     logger.LogInfo("Параметры типа СУТОЧНЫЙ: " + takenparams.Length);
 
 
