@@ -1695,17 +1695,17 @@ namespace Prizmer.PoolServer
                                     float curvalue = 0;
 
                                     //чтение суточных параметров
-                                    if (meter.ReadDailyValues(tmpDateTime, param.param_address, param.channel, ref curvalue))
+                                    if (meter.ReadMonthlyValues(tmpDateTime, param.param_address, param.channel, ref curvalue))
                                     {
                                         Value value = new Value();
                                         value.dt = tmpDateTime;
                                         value.id_taken_params = takenparams[tpindex].id;
                                         value.status = false;
                                         value.value = curvalue;
-                                        ServerStorage.AddDailyValues(value);
+                                        ServerStorage.AddMonthlyValues(value);
                                         ServerStorage.UpdateMeterLastRead(metersbyport[MetersCounter].guid, DateTime.Now);
 
-                                        logger.LogInfo("Параметры типа суточный ЗАПИСАН в БД: " + curvalue);
+                                        logger.LogInfo("Параметры типа суточный МЕСЯЧНЫЙ в БД: " + curvalue);
 
                                         //     WriteToLog("Addr: " + metersbyport[MetersCounter].address.ToString() + "; параметр (" +
                                         //    tpindex.ToString() + ") записан в базу", portStr, mAddr, LOG_DAILY);
