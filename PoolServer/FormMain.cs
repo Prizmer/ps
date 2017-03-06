@@ -45,47 +45,64 @@ namespace Prizmer.PoolServer
 
                 ms.StartServer(prms);
                 groupBox1.Enabled = false;
+                this.Height = 137; 
             }
             else
             {
                 ms.StopServer();
                 groupBox1.Enabled = true;
+                this.Height = 335;
+
             }
         }
 
         private void btnStartReading_Click(object sender, EventArgs e)
         {
             MainFormParamsStructure prms = new MainFormParamsStructure();
-            prms.driverName = comboBox1.SelectedItem.ToString();
-            prms.dtStart = dateTimePicker1.Value;
-            prms.dtEnd = dateTimePicker2.Value;
-            prms.ip = tbAddress.Text;
-            prms.port = int.Parse(tbPort.Text);
-            prms.mode = 1;
-            prms.isTcp = rbTCP.Checked;
 
-            ms.pollingStarted += new MainService.MyEventHandler(ms_pollingStarted);
-            ms.meterPolled += new MainService.MyEventHandler(ms_meterPolled);
-            ms.pollingEnded += new MainService.MyEventHandler(ms_pollingEnded);
-       
-            ms.StartServer(prms);
+            try
+            {
+                prms.driverName = comboBox1.Text;
+                prms.dtStart = dateTimePicker1.Value;
+                prms.dtEnd = dateTimePicker2.Value;
+                prms.ip = tbAddress.Text;
+                prms.port = int.Parse(tbPort.Text);
+                prms.mode = 1;
+                prms.isTcp = rbTCP.Checked;
+
+                ms.pollingStarted += new MainService.MyEventHandler(ms_pollingStarted);
+                ms.meterPolled += new MainService.MyEventHandler(ms_meterPolled);
+                ms.pollingEnded += new MainService.MyEventHandler(ms_pollingEnded);
+
+                ms.StartServer(prms);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
         }
+
 
         void ms_pollingEnded(object sender, MyEventArgs e)
         {
             ms.StopServer();
-            MessageBox.Show("Polling ended!");
+            MessageBox.Show("Опрос завершен","Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         void ms_meterPolled(object sender, MyEventArgs e)
         {
             progressBar1.Value += 1;
-            progressBar1.Maximum = e.metersCount +1;
+            progressBar1.Maximum = e.metersCount + 1;
+            lblCurCnt.Text = progressBar1.Value.ToString();
+            lblCnt.Text = progressBar1.Maximum.ToString();
         }
 
         void ms_pollingStarted(object sender, MyEventArgs e)
         {
-            progressBar1.Value = 0;
+            progressBar1.Value = 1;
+            lblCurCnt.Text = "0";
+            lblCnt.Text = "0";
         }
      
         private void rbCom_CheckedChanged(object sender, EventArgs e)

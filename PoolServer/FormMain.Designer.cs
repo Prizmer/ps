@@ -30,20 +30,23 @@
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.btnStartReading = new System.Windows.Forms.Button();
-            this.btnEndReading = new System.Windows.Forms.Button();
-            this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.dateTimePicker2 = new System.Windows.Forms.DateTimePicker();
-            this.label3 = new System.Windows.Forms.Label();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.cbServerStarted = new System.Windows.Forms.CheckBox();
-            this.rbCom = new System.Windows.Forms.RadioButton();
-            this.rbTCP = new System.Windows.Forms.RadioButton();
-            this.tbAddress = new System.Windows.Forms.TextBox();
             this.tbPort = new System.Windows.Forms.TextBox();
+            this.tbAddress = new System.Windows.Forms.TextBox();
+            this.rbTCP = new System.Windows.Forms.RadioButton();
+            this.rbCom = new System.Windows.Forms.RadioButton();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.label3 = new System.Windows.Forms.Label();
+            this.dateTimePicker2 = new System.Windows.Forms.DateTimePicker();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
+            this.btnEndReading = new System.Windows.Forms.Button();
+            this.btnStartReading = new System.Windows.Forms.Button();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.cbServerStarted = new System.Windows.Forms.CheckBox();
+            this.lblCurCnt = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.lblCnt = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -55,14 +58,17 @@
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(286, 82);
+            this.pictureBox1.Size = new System.Drawing.Size(278, 82);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.lblCnt);
+            this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.tbPort);
+            this.groupBox1.Controls.Add(this.lblCurCnt);
             this.groupBox1.Controls.Add(this.tbAddress);
             this.groupBox1.Controls.Add(this.rbTCP);
             this.groupBox1.Controls.Add(this.rbCom);
@@ -77,119 +83,26 @@
             this.groupBox1.Controls.Add(this.comboBox1);
             this.groupBox1.Location = new System.Drawing.Point(0, 110);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(274, 177);
+            this.groupBox1.Size = new System.Drawing.Size(274, 191);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Дочитка показаний";
             // 
-            // comboBox1
+            // tbPort
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "m230"});
-            this.comboBox1.Location = new System.Drawing.Point(155, 67);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(109, 21);
-            this.comboBox1.TabIndex = 0;
+            this.tbPort.Location = new System.Drawing.Point(200, 99);
+            this.tbPort.Name = "tbPort";
+            this.tbPort.Size = new System.Drawing.Size(64, 20);
+            this.tbPort.TabIndex = 12;
+            this.tbPort.Text = "3001";
             // 
-            // btnStartReading
+            // tbAddress
             // 
-            this.btnStartReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnStartReading.Location = new System.Drawing.Point(178, 138);
-            this.btnStartReading.Name = "btnStartReading";
-            this.btnStartReading.Size = new System.Drawing.Size(62, 24);
-            this.btnStartReading.TabIndex = 1;
-            this.btnStartReading.Text = "Старт";
-            this.btnStartReading.UseVisualStyleBackColor = true;
-            this.btnStartReading.Click += new System.EventHandler(this.btnStartReading_Click);
-            // 
-            // btnEndReading
-            // 
-            this.btnEndReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnEndReading.Location = new System.Drawing.Point(239, 138);
-            this.btnEndReading.Name = "btnEndReading";
-            this.btnEndReading.Size = new System.Drawing.Size(25, 24);
-            this.btnEndReading.TabIndex = 2;
-            this.btnEndReading.Text = "X";
-            this.btnEndReading.UseVisualStyleBackColor = true;
-            this.btnEndReading.Click += new System.EventHandler(this.btnEndReading_Click);
-            // 
-            // dateTimePicker1
-            // 
-            this.dateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dateTimePicker1.Location = new System.Drawing.Point(155, 19);
-            this.dateTimePicker1.Name = "dateTimePicker1";
-            this.dateTimePicker1.Size = new System.Drawing.Size(109, 20);
-            this.dateTimePicker1.TabIndex = 3;
-            this.dateTimePicker1.Value = new System.DateTime(2017, 3, 2, 0, 0, 0, 0);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 19);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(47, 13);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "Начало:";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 43);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(41, 13);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "Конец:";
-            // 
-            // dateTimePicker2
-            // 
-            this.dateTimePicker2.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dateTimePicker2.Location = new System.Drawing.Point(155, 43);
-            this.dateTimePicker2.Name = "dateTimePicker2";
-            this.dateTimePicker2.Size = new System.Drawing.Size(109, 20);
-            this.dateTimePicker2.TabIndex = 6;
-            this.dateTimePicker2.Value = new System.DateTime(2017, 3, 2, 0, 0, 0, 0);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 67);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(55, 13);
-            this.label3.TabIndex = 7;
-            this.label3.Text = "Драйвер:";
-            // 
-            // progressBar1
-            // 
-            this.progressBar1.Location = new System.Drawing.Point(15, 139);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(154, 23);
-            this.progressBar1.TabIndex = 8;
-            // 
-            // cbServerStarted
-            // 
-            this.cbServerStarted.AutoSize = true;
-            this.cbServerStarted.Checked = true;
-            this.cbServerStarted.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbServerStarted.Location = new System.Drawing.Point(15, 87);
-            this.cbServerStarted.Name = "cbServerStarted";
-            this.cbServerStarted.Size = new System.Drawing.Size(110, 17);
-            this.cbServerStarted.TabIndex = 2;
-            this.cbServerStarted.Text = "Сервер запущен";
-            this.cbServerStarted.UseVisualStyleBackColor = true;
-            this.cbServerStarted.CheckedChanged += new System.EventHandler(this.cbServerStarted_CheckedChanged);
-            // 
-            // rbCom
-            // 
-            this.rbCom.AutoSize = true;
-            this.rbCom.Location = new System.Drawing.Point(15, 92);
-            this.rbCom.Name = "rbCom";
-            this.rbCom.Size = new System.Drawing.Size(49, 17);
-            this.rbCom.TabIndex = 9;
-            this.rbCom.Tag = "com";
-            this.rbCom.Text = "COM";
-            this.rbCom.UseVisualStyleBackColor = true;
-            this.rbCom.CheckedChanged += new System.EventHandler(this.rbCom_CheckedChanged);
+            this.tbAddress.Location = new System.Drawing.Point(82, 99);
+            this.tbAddress.Name = "tbAddress";
+            this.tbAddress.Size = new System.Drawing.Size(112, 20);
+            this.tbAddress.TabIndex = 11;
+            this.tbAddress.Text = "192.168.23.62";
             // 
             // rbTCP
             // 
@@ -205,32 +118,152 @@
             this.rbTCP.UseVisualStyleBackColor = true;
             this.rbTCP.CheckedChanged += new System.EventHandler(this.rbCom_CheckedChanged);
             // 
-            // tbAddress
+            // rbCom
             // 
-            this.tbAddress.Location = new System.Drawing.Point(82, 99);
-            this.tbAddress.Name = "tbAddress";
-            this.tbAddress.Size = new System.Drawing.Size(112, 20);
-            this.tbAddress.TabIndex = 11;
-            this.tbAddress.Text = "192.168.23.62";
+            this.rbCom.AutoSize = true;
+            this.rbCom.Location = new System.Drawing.Point(15, 92);
+            this.rbCom.Name = "rbCom";
+            this.rbCom.Size = new System.Drawing.Size(49, 17);
+            this.rbCom.TabIndex = 9;
+            this.rbCom.Tag = "com";
+            this.rbCom.Text = "COM";
+            this.rbCom.UseVisualStyleBackColor = true;
+            this.rbCom.CheckedChanged += new System.EventHandler(this.rbCom_CheckedChanged);
             // 
-            // tbPort
+            // progressBar1
             // 
-            this.tbPort.Location = new System.Drawing.Point(200, 99);
-            this.tbPort.Name = "tbPort";
-            this.tbPort.Size = new System.Drawing.Size(64, 20);
-            this.tbPort.TabIndex = 12;
-            this.tbPort.Text = "3001";
+            this.progressBar1.Location = new System.Drawing.Point(15, 139);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(154, 23);
+            this.progressBar1.TabIndex = 8;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(12, 67);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(55, 13);
+            this.label3.TabIndex = 7;
+            this.label3.Text = "Драйвер:";
+            // 
+            // dateTimePicker2
+            // 
+            this.dateTimePicker2.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dateTimePicker2.Location = new System.Drawing.Point(155, 43);
+            this.dateTimePicker2.Name = "dateTimePicker2";
+            this.dateTimePicker2.Size = new System.Drawing.Size(109, 20);
+            this.dateTimePicker2.TabIndex = 6;
+            this.dateTimePicker2.Value = new System.DateTime(2017, 3, 2, 0, 0, 0, 0);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 43);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(41, 13);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "Конец:";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 19);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(47, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Начало:";
+            // 
+            // dateTimePicker1
+            // 
+            this.dateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dateTimePicker1.Location = new System.Drawing.Point(155, 19);
+            this.dateTimePicker1.Name = "dateTimePicker1";
+            this.dateTimePicker1.Size = new System.Drawing.Size(109, 20);
+            this.dateTimePicker1.TabIndex = 3;
+            this.dateTimePicker1.Value = new System.DateTime(2017, 3, 2, 0, 0, 0, 0);
+            // 
+            // btnEndReading
+            // 
+            this.btnEndReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnEndReading.Location = new System.Drawing.Point(239, 138);
+            this.btnEndReading.Name = "btnEndReading";
+            this.btnEndReading.Size = new System.Drawing.Size(25, 24);
+            this.btnEndReading.TabIndex = 2;
+            this.btnEndReading.Text = "X";
+            this.btnEndReading.UseVisualStyleBackColor = true;
+            this.btnEndReading.Click += new System.EventHandler(this.btnEndReading_Click);
+            // 
+            // btnStartReading
+            // 
+            this.btnStartReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnStartReading.Location = new System.Drawing.Point(178, 138);
+            this.btnStartReading.Name = "btnStartReading";
+            this.btnStartReading.Size = new System.Drawing.Size(62, 24);
+            this.btnStartReading.TabIndex = 1;
+            this.btnStartReading.Text = "Старт";
+            this.btnStartReading.UseVisualStyleBackColor = true;
+            this.btnStartReading.Click += new System.EventHandler(this.btnStartReading_Click);
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "m230"});
+            this.comboBox1.Location = new System.Drawing.Point(155, 67);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(109, 21);
+            this.comboBox1.TabIndex = 0;
+            // 
+            // cbServerStarted
+            // 
+            this.cbServerStarted.AutoSize = true;
+            this.cbServerStarted.Checked = true;
+            this.cbServerStarted.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbServerStarted.Location = new System.Drawing.Point(12, 87);
+            this.cbServerStarted.Name = "cbServerStarted";
+            this.cbServerStarted.Size = new System.Drawing.Size(110, 17);
+            this.cbServerStarted.TabIndex = 2;
+            this.cbServerStarted.Text = "Сервер запущен";
+            this.cbServerStarted.UseVisualStyleBackColor = true;
+            this.cbServerStarted.CheckedChanged += new System.EventHandler(this.cbServerStarted_CheckedChanged);
+            // 
+            // lblCurCnt
+            // 
+            this.lblCurCnt.AutoSize = true;
+            this.lblCurCnt.Location = new System.Drawing.Point(13, 169);
+            this.lblCurCnt.Name = "lblCurCnt";
+            this.lblCurCnt.Size = new System.Drawing.Size(13, 13);
+            this.lblCurCnt.TabIndex = 3;
+            this.lblCurCnt.Text = "0";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(36, 169);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(19, 13);
+            this.label5.TabIndex = 4;
+            this.label5.Text = "из";
+            // 
+            // lblCnt
+            // 
+            this.lblCnt.AutoSize = true;
+            this.lblCnt.Location = new System.Drawing.Point(61, 169);
+            this.lblCnt.Name = "lblCnt";
+            this.lblCnt.Size = new System.Drawing.Size(13, 13);
+            this.lblCnt.TabIndex = 13;
+            this.lblCnt.Text = "0";
             // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(286, 106);
+            this.ClientSize = new System.Drawing.Size(278, 105);
             this.Controls.Add(this.cbServerStarted);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.MaximizeBox = false;
             this.Name = "FormMain";
             this.ShowIcon = false;
@@ -263,6 +296,9 @@
         private System.Windows.Forms.TextBox tbAddress;
         private System.Windows.Forms.RadioButton rbTCP;
         private System.Windows.Forms.RadioButton rbCom;
+        private System.Windows.Forms.Label lblCnt;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label lblCurCnt;
     }
 }
 

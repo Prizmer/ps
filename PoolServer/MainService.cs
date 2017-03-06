@@ -370,8 +370,12 @@ namespace Prizmer.PoolServer
             tcpPortThreads = this.getStartTcpThreadsList(tcpips, mfPrms);
             PortsThreads.AddRange(tcpPortThreads);
 
-            this.WriteToLog(tcpPortThreads.Count.ToString());
+            if (tcpPortThreads.Count == 0)
+            {
+                if (mfPrms.mode == 1 && pollingEnded != null)
+                    pollingEnded(this, new MyEventArgs());
 
+            }
 
             object iLogsAreAliveDays = 6;
             //Thread logsEreaserThread = new Thread(new ParameterizedThreadStart(DeleteLogsDirectory));
@@ -1755,15 +1759,20 @@ namespace Prizmer.PoolServer
 
                     if (mfPrms.mode == 1)
                     {
-                        if (meterPolled != null)
-                            meterPolled(this, myEventArgs);
-
                         if (MetersCounter >= metersbyport.Length)
+                        {
+                            this.StopServer();
                             if (pollingEnded != null)
                                 pollingEnded(this, myEventArgs);
+
+                            return;
+                        }
+
+                        if (meterPolled != null)
+                            meterPolled(this, myEventArgs);
                     }
 
-                    Thread.Sleep(1000);
+                    Thread.Sleep(300);
                 }
             }
 
