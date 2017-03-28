@@ -30,7 +30,12 @@
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.comboBox2 = new System.Windows.Forms.ComboBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.lblCnt = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.tbPort = new System.Windows.Forms.TextBox();
+            this.lblCurCnt = new System.Windows.Forms.Label();
             this.tbAddress = new System.Windows.Forms.TextBox();
             this.rbTCP = new System.Windows.Forms.RadioButton();
             this.rbCom = new System.Windows.Forms.RadioButton();
@@ -44,9 +49,6 @@
             this.btnStartReading = new System.Windows.Forms.Button();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.cbServerStarted = new System.Windows.Forms.CheckBox();
-            this.lblCurCnt = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.lblCnt = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -65,6 +67,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.comboBox2);
+            this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.lblCnt);
             this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.tbPort);
@@ -83,22 +87,73 @@
             this.groupBox1.Controls.Add(this.comboBox1);
             this.groupBox1.Location = new System.Drawing.Point(0, 110);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(274, 191);
+            this.groupBox1.Size = new System.Drawing.Size(274, 248);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Дочитка показаний";
             // 
+            // comboBox2
+            // 
+            this.comboBox2.FormattingEnabled = true;
+            this.comboBox2.Items.AddRange(new object[] {
+            "Текущий",
+            "Суточный",
+            "Месячный",
+            "Архивный",
+            "Получасовой"});
+            this.comboBox2.Location = new System.Drawing.Point(155, 92);
+            this.comboBox2.Name = "comboBox2";
+            this.comboBox2.Size = new System.Drawing.Size(109, 21);
+            this.comboBox2.TabIndex = 15;
+            this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.comboBox2_SelectedIndexChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(13, 95);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(61, 13);
+            this.label4.TabIndex = 14;
+            this.label4.Text = "Параметр:";
+            // 
+            // lblCnt
+            // 
+            this.lblCnt.AutoSize = true;
+            this.lblCnt.Location = new System.Drawing.Point(61, 216);
+            this.lblCnt.Name = "lblCnt";
+            this.lblCnt.Size = new System.Drawing.Size(13, 13);
+            this.lblCnt.TabIndex = 13;
+            this.lblCnt.Text = "0";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(36, 216);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(19, 13);
+            this.label5.TabIndex = 4;
+            this.label5.Text = "из";
+            // 
             // tbPort
             // 
-            this.tbPort.Location = new System.Drawing.Point(200, 99);
+            this.tbPort.Location = new System.Drawing.Point(200, 145);
             this.tbPort.Name = "tbPort";
             this.tbPort.Size = new System.Drawing.Size(64, 20);
             this.tbPort.TabIndex = 12;
             this.tbPort.Text = "3001";
             // 
+            // lblCurCnt
+            // 
+            this.lblCurCnt.AutoSize = true;
+            this.lblCurCnt.Location = new System.Drawing.Point(13, 216);
+            this.lblCurCnt.Name = "lblCurCnt";
+            this.lblCurCnt.Size = new System.Drawing.Size(13, 13);
+            this.lblCurCnt.TabIndex = 3;
+            this.lblCurCnt.Text = "0";
+            // 
             // tbAddress
             // 
-            this.tbAddress.Location = new System.Drawing.Point(82, 99);
+            this.tbAddress.Location = new System.Drawing.Point(82, 145);
             this.tbAddress.Name = "tbAddress";
             this.tbAddress.Size = new System.Drawing.Size(112, 20);
             this.tbAddress.TabIndex = 11;
@@ -108,7 +163,7 @@
             // 
             this.rbTCP.AutoSize = true;
             this.rbTCP.Checked = true;
-            this.rbTCP.Location = new System.Drawing.Point(15, 111);
+            this.rbTCP.Location = new System.Drawing.Point(15, 157);
             this.rbTCP.Name = "rbTCP";
             this.rbTCP.Size = new System.Drawing.Size(46, 17);
             this.rbTCP.TabIndex = 10;
@@ -121,7 +176,7 @@
             // rbCom
             // 
             this.rbCom.AutoSize = true;
-            this.rbCom.Location = new System.Drawing.Point(15, 92);
+            this.rbCom.Location = new System.Drawing.Point(15, 138);
             this.rbCom.Name = "rbCom";
             this.rbCom.Size = new System.Drawing.Size(49, 17);
             this.rbCom.TabIndex = 9;
@@ -132,7 +187,7 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(15, 139);
+            this.progressBar1.Location = new System.Drawing.Point(15, 185);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(154, 23);
             this.progressBar1.TabIndex = 8;
@@ -185,7 +240,7 @@
             // btnEndReading
             // 
             this.btnEndReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnEndReading.Location = new System.Drawing.Point(239, 138);
+            this.btnEndReading.Location = new System.Drawing.Point(239, 184);
             this.btnEndReading.Name = "btnEndReading";
             this.btnEndReading.Size = new System.Drawing.Size(25, 24);
             this.btnEndReading.TabIndex = 2;
@@ -196,7 +251,7 @@
             // btnStartReading
             // 
             this.btnStartReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnStartReading.Location = new System.Drawing.Point(178, 138);
+            this.btnStartReading.Location = new System.Drawing.Point(178, 184);
             this.btnStartReading.Name = "btnStartReading";
             this.btnStartReading.Size = new System.Drawing.Size(62, 24);
             this.btnStartReading.TabIndex = 1;
@@ -227,39 +282,12 @@
             this.cbServerStarted.UseVisualStyleBackColor = true;
             this.cbServerStarted.CheckedChanged += new System.EventHandler(this.cbServerStarted_CheckedChanged);
             // 
-            // lblCurCnt
-            // 
-            this.lblCurCnt.AutoSize = true;
-            this.lblCurCnt.Location = new System.Drawing.Point(13, 169);
-            this.lblCurCnt.Name = "lblCurCnt";
-            this.lblCurCnt.Size = new System.Drawing.Size(13, 13);
-            this.lblCurCnt.TabIndex = 3;
-            this.lblCurCnt.Text = "0";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(36, 169);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(19, 13);
-            this.label5.TabIndex = 4;
-            this.label5.Text = "из";
-            // 
-            // lblCnt
-            // 
-            this.lblCnt.AutoSize = true;
-            this.lblCnt.Location = new System.Drawing.Point(61, 169);
-            this.lblCnt.Name = "lblCnt";
-            this.lblCnt.Size = new System.Drawing.Size(13, 13);
-            this.lblCnt.TabIndex = 13;
-            this.lblCnt.Text = "0";
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(278, 105);
+            this.ClientSize = new System.Drawing.Size(278, 362);
             this.Controls.Add(this.cbServerStarted);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
@@ -299,6 +327,8 @@
         private System.Windows.Forms.Label lblCnt;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label lblCurCnt;
+        private System.Windows.Forms.ComboBox comboBox2;
+        private System.Windows.Forms.Label label4;
     }
 }
 

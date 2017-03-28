@@ -25,6 +25,7 @@ namespace Prizmer.PoolServer
             //ms.StartServer();
             //groupBox1 settings
             comboBox1.SelectedIndex = 0;
+            comboBox2.SelectedIndex = 4;
                             MainFormParamsStructure prms = new MainFormParamsStructure();
                 prms.mode = 0;
                 if (cbServerStarted.Checked) ms.StartServer(prms);
@@ -70,6 +71,7 @@ namespace Prizmer.PoolServer
                 prms.port = int.Parse(tbPort.Text);
                 prms.mode = 1;
                 prms.isTcp = rbTCP.Checked;
+                prms.paramType = comboBox2.SelectedIndex;
 
                 ms.pollingStarted += new MainService.MyEventHandler(ms_pollingStarted);
                 ms.meterPolled += new MainService.MyEventHandler(ms_meterPolled);
@@ -127,6 +129,16 @@ namespace Prizmer.PoolServer
             lblCnt.Text = "";
             lblCurCnt.Text = "";
         }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ComboBox cb = (ComboBox)sender;
+            if (cb.SelectedIndex == 2 || cb.SelectedIndex == 3)
+            {
+                cb.SelectedIndex = 0;
+                MessageBox.Show("Архивный и месячный временно не поддерживаются");
+            }
+        }
     }
 
     public struct MainFormParamsStructure
@@ -138,5 +150,6 @@ namespace Prizmer.PoolServer
         public string ip;
         public int port;
         public bool isTcp;
+        public int paramType;
     }
 }
