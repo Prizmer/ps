@@ -1253,6 +1253,12 @@ namespace Prizmer.PoolServer
                     DateTime date_to = dateTo;
                     if (date_to > dt_cur) date_to = new DateTime(dt_cur.Ticks);
 
+
+                    //определим возможное кол-во срезов за период
+                    TimeSpan span = date_to - date_from;
+                    int diff_minutes = Convert.ToInt32(span.TotalMinutes);
+                    int slicesNumber = (diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD) + 1;
+
                     for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                     {
                         List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
@@ -1268,7 +1274,7 @@ namespace Prizmer.PoolServer
                         Value[] valuesInDB = ServerStorage.GetExistsVariousValuesDT(takenparams[tpindex], date_from, date_to);
 
                         //если срезы из указанного диапазона дат прочитаны успешно
-                        if (meter.ReadPowerSlice(date_from, date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD))
+                        if (valuesInDB.Count<Value>() < slicesNumber && meter.ReadPowerSlice(date_from, date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD))
                         {
                             logger.LogInfo("RSL: 3. Данные прочитаны, осталось занести в базу " + lrps.Count + " значений");
                             foreach (RecordPowerSlice rps in lrps)
@@ -1282,7 +1288,8 @@ namespace Prizmer.PoolServer
 
                                 if (valuesInDB.Length > 0)
                                 {
-                                    if (valuesInDB.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0){
+                                    if (valuesInDB.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0)
+                                    {
                                         logger.LogInfo("RSL: 3.1. Получасовка за " + val.dt.ToString() + " уже есть в базе");
                                         continue;
                                     }
@@ -1757,7 +1764,7 @@ namespace Prizmer.PoolServer
                     case "m200": meter = new Mercury200(); break;
                     case "opcretranslator": meter = new OpcRetranslator(); break;
                     case "sayani_kombik": meter = new sayani_kombik(); break;
-                    case "m230": meter = new m230(); break;
+                    case "m230": meter = new m234(); break;
                     case "m234": meter = new m234(); break;
                 }
 

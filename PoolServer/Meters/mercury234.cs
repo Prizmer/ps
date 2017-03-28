@@ -1698,23 +1698,41 @@ namespace Prizmer.Meters
                 // возвращаем байты на прежнее положение
                 addr_after = Convert.ToUInt16(((addr_before & 0xff) << 8) | ((addr_before & 0xFF00) >> 8));
 
-                bool res_read_slice = ReadSlice(addr_after, ref record_slice, period, lps.reload);
+                bool reload = lps.reload;
+                bool secondChance = false;
+
+                SECOND_CHANCE:
+
+                bool res_read_slice = ReadSlice(addr_after, ref record_slice, period, reload);
 
                 // Если при чтении не было ошибок
                 if (res_read_slice)
                 {
                     // проверка на то, что прочитанный срез старый
-                    if (dt_begin > record_slice.date_time)
-                        record_slice.status = 0xFE;
-                    else
-                        listRPS.Add(record_slice);
+                    if (dt_begin > record_slice.date_time || record_slice.date_time > dt_lastslice)
+                    {
+                        if (!secondChance)
+                        {
+                            secondChance = true;
+                            reload = !reload;
 
-                    /*
-                    else if (dt_begin == record_slice.date_time)
+                            goto SECOND_CHANCE;
+                        }
+                    }
+                    else
                     {
                         listRPS.Add(record_slice);
                     }
-                    */
+                }
+                else
+                {
+                    if (!secondChance)
+                    {
+                        secondChance = true;
+                        reload = !reload;
+
+                        goto SECOND_CHANCE;
+                    }
                 }
 
                 if (address_slice > 0)
