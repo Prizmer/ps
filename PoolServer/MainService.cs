@@ -1886,6 +1886,8 @@ namespace Prizmer.PoolServer
                             metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
                         }
 
+                        if (metersbyport.Length == 0) goto CloseThreadPoint;
+
                         //if (m_vport.GetConnectionType() == "tcp")
                         //    m_vport.ReInitialize();
                     }

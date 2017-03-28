@@ -53,7 +53,7 @@ namespace Prizmer.PoolServer
             {
                 ms.StopServer();
                 groupBox1.Enabled = true;
-                this.Height = 335;
+                this.Height = 392;
 
             }
         }
