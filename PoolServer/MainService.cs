@@ -177,6 +177,7 @@ namespace Prizmer.PoolServer
         public event MyEventHandler meterPolled;
 
         List<Thread> PortsThreads = new List<Thread>();
+        List<Ports.TcpipPort> tcpPortsGlobal = new List<Ports.TcpipPort>();
 
         public void WriteToLog(string str, string port = "", string addr = "", string mName = "", bool doWrite = true)
         {
@@ -388,7 +389,7 @@ namespace Prizmer.PoolServer
         public void StopServer()
         {
             bStopServer = true;
-            Thread.Sleep(1000);
+            Thread.Sleep(4000);
 
             for (int i = 0; i < PortsThreads.Count; i++)
             {
@@ -1247,6 +1248,8 @@ namespace Prizmer.PoolServer
                
         private int pollHalfsForDates(PollMethodsParams pmPrms, DateTime dateFrom, DateTime dateTo)
         {
+            if (bStopServer) return 1;
+
             const byte SLICE_PER_HALF_AN_HOUR_TYPE = 4;                         //тип значения в БД (получасовой)
             const byte SLICE_PER_HALF_AN_HOUR_PERIOD = 30;                      //интервал записи срезов
             bool successFlag = false;
@@ -1735,6 +1738,8 @@ namespace Prizmer.PoolServer
                 metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
             }
 
+            
+
             //if (m_vport == null) goto CloseThreadPoint;
             if (metersbyport == null) goto CloseThreadPoint;
             if (metersbyport.Length == 0) goto CloseThreadPoint;
@@ -1931,7 +1936,7 @@ namespace Prizmer.PoolServer
                         {
                             if (pollingEnded != null)
                                 pollingEnded(this, myEventArgs);
-
+                         
                             this.StopServer();
                             return;
                         }
@@ -1944,6 +1949,7 @@ namespace Prizmer.PoolServer
             //закрываем соединение с БД
             CloseThreadPoint:
             ServerStorage.Close();
+            m_vport.Close();
         }
     }
 

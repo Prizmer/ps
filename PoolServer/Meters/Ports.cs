@@ -24,6 +24,7 @@ namespace Prizmer.Ports
         string GetConnectionType();
         bool ReInitialize();
         bool GetLocalEndPoint(ref IPEndPoint localEp);
+        void Close();
     }
 
     public sealed class TcpipPort : VirtualPort
@@ -40,6 +41,12 @@ namespace Prizmer.Ports
         }
 
         ~TcpipPort()
+        {
+            if (sender != null)
+                sender.Close();
+        }
+
+        public void Close()
         {
             if (sender != null)
                 sender.Close();
@@ -436,6 +443,11 @@ namespace Prizmer.Ports
             return m_name + " ";
         }
 
+        public void Close()
+        {
+            //if (sender != null)
+            //    sender.Close();
+        }
 
         bool areLogsRestricted = false;
         public ComPort(byte number, int baudrate, byte data_bits, byte parity, byte stop_bits, ushort write_timeout, ushort read_timeout, byte attemts)
