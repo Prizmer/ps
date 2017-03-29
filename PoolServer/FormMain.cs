@@ -86,14 +86,17 @@ namespace Prizmer.PoolServer
 
         }
 
+        public delegate void InvokeDelegate();
+        public delegate void InvokeDelegatePrms(object sender, MyEventArgs e);
 
-        void ms_pollingEnded(object sender, MyEventArgs e)
+        public void pollStarted()
         {
-            ms.StopServer();
-            MessageBox.Show("Опрос завершен","Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            progressBar1.Value = 0;
+            lblCurCnt.Text = "0";
+            lblCnt.Text = "0";
         }
 
-        void ms_meterPolled(object sender, MyEventArgs e)
+        public void meterPolled(object sender, MyEventArgs e)
         {
             progressBar1.Value += 1;
             progressBar1.Maximum = e.metersCount + 1;
@@ -101,12 +104,31 @@ namespace Prizmer.PoolServer
             lblCnt.Text = e.metersCount.ToString();
         }
 
+        public void pollEnded()
+        {
+            ms.StopServer();
+            MessageBox.Show("Опрос завершен","Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+
         void ms_pollingStarted(object sender, MyEventArgs e)
         {
-            progressBar1.Value = 0;
-            lblCurCnt.Text = "0";
-            lblCnt.Text = "0";
+            this.Invoke(new InvokeDelegate(pollStarted));
         }
+
+        void ms_meterPolled(object sender, MyEventArgs e)
+        {
+            this.Invoke(new InvokeDelegatePrms(meterPolled), sender, e);
+        }
+
+        void ms_pollingEnded(object sender, MyEventArgs e)
+        {
+            this.Invoke(new InvokeDelegate(pollEnded));
+        }
+
+
+
+
      
         private void rbCom_CheckedChanged(object sender, EventArgs e)
         {

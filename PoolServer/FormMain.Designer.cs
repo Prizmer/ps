@@ -140,7 +140,7 @@
             this.tbPort.Name = "tbPort";
             this.tbPort.Size = new System.Drawing.Size(64, 20);
             this.tbPort.TabIndex = 12;
-            this.tbPort.Text = "3001";
+            this.tbPort.Text = "5001";
             // 
             // lblCurCnt
             // 
@@ -157,7 +157,7 @@
             this.tbAddress.Name = "tbAddress";
             this.tbAddress.Size = new System.Drawing.Size(112, 20);
             this.tbAddress.TabIndex = 11;
-            this.tbAddress.Text = "192.168.23.62";
+            this.tbAddress.Text = "192.168.23.52";
             // 
             // rbTCP
             // 
