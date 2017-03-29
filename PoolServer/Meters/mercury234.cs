@@ -1652,6 +1652,7 @@ namespace Prizmer.Meters
             {
                 // Время последнего среза из счётчика
                 dt_lastslice = new DateTime(lps.year, lps.month, lps.day, lps.hour, lps.minute, 0);
+                if (dt_end > dt_lastslice) dt_end = dt_lastslice;
             }
             catch
             {
@@ -1662,14 +1663,14 @@ namespace Prizmer.Meters
                 return false;
 
             // Вычисляем разницу в минутах
-            TimeSpan span = dt_lastslice - dt_begin;
+            TimeSpan span = dt_end - dt_begin;
             int diff_minutes = Convert.ToInt32(span.TotalMinutes);
 
             // если разница > max кол-ва хранящихся записей в счётчике, то не вычитываем их из счётчика
             while (diff_minutes >= (4096 * period))
             {
                 dt_begin = dt_begin.AddMinutes(period);
-                span = dt_lastslice - dt_begin;
+                span = dt_end - dt_begin;
                 diff_minutes = span.Minutes;
             }
 
@@ -1698,10 +1699,10 @@ namespace Prizmer.Meters
                 // возвращаем байты на прежнее положение
                 addr_after = Convert.ToUInt16(((addr_before & 0xff) << 8) | ((addr_before & 0xFF00) >> 8));
 
-                bool reload = lps.reload;
+                bool reload = !lps.reload;
                 bool secondChance = false;
 
-                SECOND_CHANCE:
+            SECOND_CHANCE:
 
                 bool res_read_slice = ReadSlice(addr_after, ref record_slice, period, reload);
 
@@ -1709,7 +1710,7 @@ namespace Prizmer.Meters
                 if (res_read_slice)
                 {
                     // проверка на то, что прочитанный срез старый
-                    if (dt_begin > record_slice.date_time || record_slice.date_time > dt_lastslice)
+                    if (dt_begin > record_slice.date_time || record_slice.date_time > dt_end)
                     {
                         if (!secondChance)
                         {

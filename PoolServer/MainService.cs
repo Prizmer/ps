@@ -1276,62 +1276,68 @@ namespace Prizmer.PoolServer
                     //определим возможное кол-во срезов за период
                     TimeSpan span = date_to - date_from;
                     int diff_minutes = Convert.ToInt32(span.TotalMinutes);
-                    int slicesNumber = (diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD) + 1;
+                    int slicesNumber = (diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD);
 
-                    for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
+                    List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
+                    for (int takenPrmsIndex = 0; takenPrmsIndex < takenparams.Length; takenPrmsIndex++)
                     {
-                        List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
-                        pmPrms.logger.LogInfo("RSL: 2. Вошли в цикл перебора считываемых параметров, итерация " + tpindex.ToString() + " из " + takenparams.Length);
-
                         if (bStopServer) return 1;
+                        pmPrms.logger.LogInfo("RSL: 2. Вошли в цикл перебора считываемых параметров, итерация " + takenPrmsIndex.ToString() + " из " + takenparams.Length);
 
-                        //прочие проверки
-                        Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
+                        Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[takenPrmsIndex].guid_params);
                         if (param.guid == Guid.Empty) continue;
-                        pmPrms.logger.LogError("RSL: Параметру присвоен GUID, параметр:" + param.name);
 
-                        Value[] valuesInDB = pmPrms.ServerStorage.GetExistsVariousValuesDT(takenparams[tpindex], date_from, date_to);
+                        Value[] valuesInDB = pmPrms.ServerStorage.GetExistsVariousValuesDT(takenparams[takenPrmsIndex], date_from, date_to);
+                        int valInDbCnt = valuesInDB.Count<Value>();
 
-                        //если срезы из указанного диапазона дат прочитаны успешно
-                        if (valuesInDB.Count<Value>() < slicesNumber && pmPrms.meter.ReadPowerSlice(date_from, date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD))
+                        if (valInDbCnt < slicesNumber)
                         {
-                            pmPrms.logger.LogInfo("RSL: 3. Данные прочитаны, осталось занести в базу " + lrps.Count + " значений");
-                            foreach (RecordPowerSlice rps in lrps)
+                            if (lrps.Count == 0)
                             {
-                                if (bStopServer) return 1;
-
-                                Value val = new Value();
-                                val.dt = rps.date_time;
-                                val.id_taken_params = takenparams[tpindex].id;
-                                val.status = Convert.ToBoolean(rps.status);
-
-                                if (valuesInDB.Length > 0)
-                                {
-                                    if (valuesInDB.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0)
-                                    {
-                                        //pmPrms.logger.LogInfo("RSL: 3.1. Получасовка за " + val.dt.ToString() + " уже есть в базе");
-                                        continue;
-                                    }
-                                }
-
-                                switch (param.param_address)
-                                {
-                                    case 0: { val.value = rps.APlus; break; }
-                                    case 1: { val.value = rps.AMinus; break; }
-                                    case 2: { val.value = rps.RPlus; break; }
-                                    case 3: { val.value = rps.RMinus; break; }
-                                    default: continue;
-                                }
-
-                                pmPrms.ServerStorage.AddVariousValues(val);
-                                pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
+                                bool res = pmPrms.meter.ReadPowerSlice(date_from, date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD);
+                                if (res) pmPrms.logger.LogInfo("RSL: 3. Данные прочитаны, осталось занести в базу " + lrps.Count + " значений");
                             }
-                            if (lrps.Count > 0){
-                                pmPrms.logger.LogInfo("RSL: 4. Данные успешно занесены в БД");
-                                successFlag = true;
+                            else
+                            {
+                                //если срезы из указанного диапазона дат прочитаны успешно
+                                foreach (RecordPowerSlice rps in lrps)
+                                {
+                                    if (bStopServer) return 1;
+
+                                    Value val = new Value();
+                                    val.dt = rps.date_time;
+                                    val.id_taken_params = takenparams[takenPrmsIndex].id;
+                                    val.status = Convert.ToBoolean(rps.status);
+
+                                    if (valuesInDB.Length > 0)
+                                    {
+                                        if (valuesInDB.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0)
+                                        {
+                                            //pmPrms.logger.LogInfo("RSL: 3.1. Получасовка за " + val.dt.ToString() + " уже есть в базе");
+                                            continue;
+                                        }
+                                    }
+
+                                    switch (param.param_address)
+                                    {
+                                        case 0: { val.value = rps.APlus; break; }
+                                        case 1: { val.value = rps.AMinus; break; }
+                                        case 2: { val.value = rps.RPlus; break; }
+                                        case 3: { val.value = rps.RMinus; break; }
+                                        default: continue;
+                                    }
+
+                                    pmPrms.ServerStorage.AddVariousValues(val);
+                                    pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
+                                }
+                                if (lrps.Count > 0)
+                                {
+                                    pmPrms.logger.LogInfo("RSL: 4. Данные успешно занесены в БД");
+                                    successFlag = true;
+                                }
                             }
                         }
-                    }
+                    }              
                 }
                 else
                 {
