@@ -1924,6 +1924,9 @@ namespace Prizmer.PoolServer
                     }
                     else if (mfPrms.mode == 1)
                     {
+                        if (meterPolled != null)
+                            meterPolled(this, myEventArgs);
+
                         if (MetersCounter >= metersbyport.Length)
                         {
                             if (pollingEnded != null)
@@ -1932,9 +1935,6 @@ namespace Prizmer.PoolServer
                             this.StopServer();
                             return;
                         }
-
-                        if (meterPolled != null)
-                            meterPolled(this, myEventArgs);
                     }
 
                     Thread.Sleep(300);

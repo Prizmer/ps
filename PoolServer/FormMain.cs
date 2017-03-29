@@ -16,10 +16,8 @@ namespace Prizmer.PoolServer
         public FormMain()
         {
             InitializeComponent();
-
         }
         
-
         private void FormMain_Load(object sender, EventArgs e)
         {            
             //groupBox1 settings
@@ -38,6 +36,10 @@ namespace Prizmer.PoolServer
             {
                 groupBox1.Enabled = true;
             }
+
+            ms.pollingStarted += new MainService.MyEventHandler(ms_pollingStarted);
+            ms.meterPolled += new MainService.MyEventHandler(ms_meterPolled);
+            ms.pollingEnded += new MainService.MyEventHandler(ms_pollingEnded);
         }
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -60,8 +62,7 @@ namespace Prizmer.PoolServer
             {
                 ms.StopServer();
                 groupBox1.Enabled = true;
-                this.Height = 369;
-
+                this.Height = 384;
             }
         }
 
@@ -79,10 +80,6 @@ namespace Prizmer.PoolServer
                 prms.mode = 1;
                 prms.isTcp = rbTCP.Checked;
                 prms.paramType = comboBox2.SelectedIndex;
-
-                ms.pollingStarted += new MainService.MyEventHandler(ms_pollingStarted);
-                ms.meterPolled += new MainService.MyEventHandler(ms_meterPolled);
-                ms.pollingEnded += new MainService.MyEventHandler(ms_pollingEnded);
 
                 ms.StartServer(prms);
             }
@@ -118,7 +115,6 @@ namespace Prizmer.PoolServer
             MessageBox.Show("Опрос завершен","Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-
         void ms_pollingStarted(object sender, MyEventArgs e)
         {
             this.Invoke(new InvokeDelegate(pollStarted));
@@ -133,11 +129,7 @@ namespace Prizmer.PoolServer
         {
             this.Invoke(new InvokeDelegate(pollEnded));
         }
-
-
-
-
-     
+ 
         private void rbCom_CheckedChanged(object sender, EventArgs e)
         {
             RadioButton rb = (RadioButton)sender;
@@ -168,16 +160,6 @@ namespace Prizmer.PoolServer
                 cb.SelectedIndex = 0;
                 MessageBox.Show("Архивный и месячный временно не поддерживаются");
             }
-        }
-
-        private void progressBar1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void groupBox1_Enter(object sender, EventArgs e)
-        {
-
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
