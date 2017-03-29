@@ -49,6 +49,7 @@
             this.btnStartReading = new System.Windows.Forms.Button();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.cbServerStarted = new System.Windows.Forms.CheckBox();
+            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -67,6 +68,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.linkLabel1);
             this.groupBox1.Controls.Add(this.comboBox2);
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.lblCnt);
@@ -87,10 +89,11 @@
             this.groupBox1.Controls.Add(this.comboBox1);
             this.groupBox1.Location = new System.Drawing.Point(0, 110);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(274, 222);
+            this.groupBox1.Size = new System.Drawing.Size(274, 223);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Дочитка показаний";
+            this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
             // 
             // comboBox2
             // 
@@ -119,7 +122,8 @@
             // lblCnt
             // 
             this.lblCnt.AutoSize = true;
-            this.lblCnt.Location = new System.Drawing.Point(104, 190);
+            this.lblCnt.BackColor = System.Drawing.Color.Transparent;
+            this.lblCnt.Location = new System.Drawing.Point(110, 190);
             this.lblCnt.Name = "lblCnt";
             this.lblCnt.Size = new System.Drawing.Size(13, 13);
             this.lblCnt.TabIndex = 13;
@@ -128,6 +132,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
+            this.label5.BackColor = System.Drawing.Color.Transparent;
             this.label5.Location = new System.Drawing.Point(80, 189);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(19, 13);
@@ -145,7 +150,8 @@
             // lblCurCnt
             // 
             this.lblCurCnt.AutoSize = true;
-            this.lblCurCnt.Location = new System.Drawing.Point(62, 190);
+            this.lblCurCnt.BackColor = System.Drawing.Color.Transparent;
+            this.lblCurCnt.Location = new System.Drawing.Point(56, 190);
             this.lblCurCnt.Name = "lblCurCnt";
             this.lblCurCnt.Size = new System.Drawing.Size(13, 13);
             this.lblCurCnt.TabIndex = 3;
@@ -192,6 +198,7 @@
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(154, 23);
             this.progressBar1.TabIndex = 8;
+            this.progressBar1.Click += new System.EventHandler(this.progressBar1_Click);
             // 
             // label3
             // 
@@ -283,12 +290,23 @@
             this.cbServerStarted.UseVisualStyleBackColor = true;
             this.cbServerStarted.CheckedChanged += new System.EventHandler(this.cbServerStarted_CheckedChanged);
             // 
+            // linkLabel1
+            // 
+            this.linkLabel1.AutoSize = true;
+            this.linkLabel1.Location = new System.Drawing.Point(110, 32);
+            this.linkLabel1.Name = "linkLabel1";
+            this.linkLabel1.Size = new System.Drawing.Size(38, 13);
+            this.linkLabel1.TabIndex = 16;
+            this.linkLabel1.TabStop = true;
+            this.linkLabel1.Text = "Ранее";
+            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(278, 337);
+            this.ClientSize = new System.Drawing.Size(278, 109);
             this.Controls.Add(this.cbServerStarted);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
@@ -330,6 +348,7 @@
         private System.Windows.Forms.Label lblCurCnt;
         private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.LinkLabel linkLabel1;
     }
 }
 

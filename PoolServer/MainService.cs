@@ -1904,7 +1904,7 @@ namespace Prizmer.PoolServer
                 if (!DMTCP_STATIC_METER_NUMBER)
                 {
                     MetersCounter++;
-                    if (MetersCounter >= metersbyport.Length)
+                    if (mfPrms.mode != 1 && MetersCounter >= metersbyport.Length)
                     {
                         MetersCounter = 0;
                         //перечитать список приборов - вдруг что-то добавили или убрали
@@ -1922,15 +1922,14 @@ namespace Prizmer.PoolServer
                         //if (m_vport.GetConnectionType() == "tcp")
                         //    m_vport.ReInitialize();
                     }
-
-                    if (mfPrms.mode == 1)
+                    else if (mfPrms.mode == 1)
                     {
                         if (MetersCounter >= metersbyport.Length)
                         {
-                            this.StopServer();
                             if (pollingEnded != null)
                                 pollingEnded(this, myEventArgs);
 
+                            this.StopServer();
                             return;
                         }
 

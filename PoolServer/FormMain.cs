@@ -29,7 +29,15 @@ namespace Prizmer.PoolServer
             dateTimePicker2.Value = DateTime.Now;
             MainFormParamsStructure prms = new MainFormParamsStructure();
             prms.mode = 0;
-            if (cbServerStarted.Checked) ms.StartServer(prms);
+            if (cbServerStarted.Checked)
+            {
+                ms.StartServer(prms);
+                groupBox1.Enabled = false;
+            }
+            else
+            {
+                groupBox1.Enabled = true;
+            }
         }
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -52,7 +60,7 @@ namespace Prizmer.PoolServer
             {
                 ms.StopServer();
                 groupBox1.Enabled = true;
-                this.Height = 392;
+                this.Height = 369;
 
             }
         }
@@ -160,6 +168,22 @@ namespace Prizmer.PoolServer
                 cb.SelectedIndex = 0;
                 MessageBox.Show("Архивный и месячный временно не поддерживаются");
             }
+        }
+
+        private void progressBar1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            dateTimePicker1.Value = dateTimePicker1.Value.AddDays(-1);
+            dateTimePicker2.Value = dateTimePicker2.Value.AddDays(-1);
         }
     }
 
