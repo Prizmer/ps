@@ -1246,7 +1246,7 @@ namespace Prizmer.PoolServer
 
             return 0;
         }
-               
+
         private int pollHalfsForDates(PollMethodsParams pmPrms, DateTime dateFrom, DateTime dateTo)
         {
             if (bStopServer) return 1;
@@ -1276,7 +1276,7 @@ namespace Prizmer.PoolServer
                     //определим возможное кол-во срезов за период
                     TimeSpan span = date_to - date_from;
                     int diff_minutes = Convert.ToInt32(span.TotalMinutes);
-                    int slicesNumber = (diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD);
+                    int slicesNumber = (diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD) + 1;
 
                     List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
                     for (int takenPrmsIndex = 0; takenPrmsIndex < takenparams.Length; takenPrmsIndex++)
@@ -1297,47 +1297,51 @@ namespace Prizmer.PoolServer
                                 bool res = pmPrms.meter.ReadPowerSlice(date_from, date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD);
                                 if (res) pmPrms.logger.LogInfo("RSL: 3. Данные прочитаны, осталось занести в базу " + lrps.Count + " значений");
                             }
+
+                            if (lrps.Count > 0)
+                            {
+                                pmPrms.logger.LogInfo("RSL: 4. Данные успешно занесены в БД");
+                                successFlag = true;
+                            }
                             else
                             {
-                                //если срезы из указанного диапазона дат прочитаны успешно
-                                foreach (RecordPowerSlice rps in lrps)
-                                {
-                                    if (bStopServer) return 1;
-
-                                    Value val = new Value();
-                                    val.dt = rps.date_time;
-                                    val.id_taken_params = takenparams[takenPrmsIndex].id;
-                                    val.status = Convert.ToBoolean(rps.status);
-
-                                    if (valuesInDB.Length > 0)
-                                    {
-                                        if (valuesInDB.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0)
-                                        {
-                                            //pmPrms.logger.LogInfo("RSL: 3.1. Получасовка за " + val.dt.ToString() + " уже есть в базе");
-                                            continue;
-                                        }
-                                    }
-
-                                    switch (param.param_address)
-                                    {
-                                        case 0: { val.value = rps.APlus; break; }
-                                        case 1: { val.value = rps.AMinus; break; }
-                                        case 2: { val.value = rps.RPlus; break; }
-                                        case 3: { val.value = rps.RMinus; break; }
-                                        default: continue;
-                                    }
-
-                                    pmPrms.ServerStorage.AddVariousValues(val);
-                                    pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
-                                }
-                                if (lrps.Count > 0)
-                                {
-                                    pmPrms.logger.LogInfo("RSL: 4. Данные успешно занесены в БД");
-                                    successFlag = true;
-                                }
+                                continue;
                             }
+
+                            //если срезы из указанного диапазона дат прочитаны успешно
+                            foreach (RecordPowerSlice rps in lrps)
+                            {
+                                if (bStopServer) return 1;
+
+                                Value val = new Value();
+                                val.dt = rps.date_time;
+                                val.id_taken_params = takenparams[takenPrmsIndex].id;
+                                val.status = Convert.ToBoolean(rps.status);
+
+                                if (valuesInDB.Length > 0)
+                                {
+                                    if (valuesInDB.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0)
+                                    {
+                                        //pmPrms.logger.LogInfo("RSL: 3.1. Получасовка за " + val.dt.ToString() + " уже есть в базе");
+                                        continue;
+                                    }
+                                }
+
+                                switch (param.param_address)
+                                {
+                                    case 0: { val.value = rps.APlus; break; }
+                                    case 1: { val.value = rps.AMinus; break; }
+                                    case 2: { val.value = rps.RPlus; break; }
+                                    case 3: { val.value = rps.RMinus; break; }
+                                    default: continue;
+                                }
+
+                                pmPrms.ServerStorage.AddVariousValues(val);
+                                pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
+                            }
+
                         }
-                    }              
+                    }
                 }
                 else
                 {
