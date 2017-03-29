@@ -111,7 +111,6 @@ namespace Prizmer.PoolServer
 
         public void pollEnded()
         {
-            ms.StopServer();
             MessageBox.Show("Опрос завершен","Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 

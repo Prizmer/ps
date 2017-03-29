@@ -1308,7 +1308,7 @@ namespace Prizmer.PoolServer
                                 {
                                     if (valuesInDB.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0)
                                     {
-                                        pmPrms.logger.LogInfo("RSL: 3.1. Получасовка за " + val.dt.ToString() + " уже есть в базе");
+                                        //pmPrms.logger.LogInfo("RSL: 3.1. Получасовка за " + val.dt.ToString() + " уже есть в базе");
                                         continue;
                                     }
                                 }
@@ -1936,9 +1936,8 @@ namespace Prizmer.PoolServer
                         {
                             if (pollingEnded != null)
                                 pollingEnded(this, myEventArgs);
-                         
-                            this.StopServer();
-                            return;
+
+                            break;
                         }
                     }
 
@@ -1947,7 +1946,8 @@ namespace Prizmer.PoolServer
             }
 
             //закрываем соединение с БД
-            CloseThreadPoint:
+        CloseThreadPoint:
+            bStopServer = true;
             ServerStorage.Close();
             m_vport.Close();
         }
