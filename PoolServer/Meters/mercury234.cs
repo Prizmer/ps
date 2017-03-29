@@ -1662,20 +1662,23 @@ namespace Prizmer.Meters
             if (dt_begin >= dt_lastslice)
                 return false;
 
-            // Вычисляем разницу в минутах
-            TimeSpan span = dt_end - dt_begin;
+            // вычисляем разницу в минутах между последним срезом и запрашиваемым
+            TimeSpan span = dt_lastslice - dt_begin;
+            TimeSpan span2 = dt_lastslice - dt_end;
             int diff_minutes = Convert.ToInt32(span.TotalMinutes);
+            int diff_minutes2 = Convert.ToInt32(span2.TotalMinutes);
 
-            // если разница > max кол-ва хранящихся записей в счётчике, то не вычитываем их из счётчика
+            // если разница > max кол-ва хранящихся записей в счётчике, то не вычитываем их из счётчика ??
             while (diff_minutes >= (4096 * period))
             {
                 dt_begin = dt_begin.AddMinutes(period);
-                span = dt_end - dt_begin;
+                span = dt_lastslice - dt_begin;
                 diff_minutes = span.Minutes;
             }
 
             //Вычисляем разницу в срезах
             diff = Convert.ToUInt16(diff_minutes / period);
+            ushort diff2 = Convert.ToUInt16(diff_minutes2 / period);
 
             //кол-во срезов за требуемый промежуток времени
             ushort address_slice = diff;
@@ -1685,7 +1688,7 @@ namespace Prizmer.Meters
             // Уменьшаем адрес среза
             //address_slice--;
 
-            for (ushort i = 0; i <= diff; i++)
+            for (ushort i = diff2; i <= diff; i++)
             {
                 // меняем байты в слове адреса последнего среза местами
                 addr_before = Convert.ToUInt16(((lps.addr & 0xff) << 8) | ((lps.addr & 0xFF00) >> 8));
