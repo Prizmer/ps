@@ -22,20 +22,19 @@ namespace Prizmer.PoolServer
 
         private void FormMain_Load(object sender, EventArgs e)
         {            
-            //ms.StartServer();
             //groupBox1 settings
             comboBox1.SelectedIndex = 0;
             comboBox2.SelectedIndex = 4;
-                            MainFormParamsStructure prms = new MainFormParamsStructure();
-                prms.mode = 0;
-                if (cbServerStarted.Checked) ms.StartServer(prms);
-
+            dateTimePicker1.Value = DateTime.Now;
+            dateTimePicker2.Value = DateTime.Now;
+            MainFormParamsStructure prms = new MainFormParamsStructure();
+            prms.mode = 0;
+            if (cbServerStarted.Checked) ms.StartServer(prms);
         }
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             ms.StopServer();
-
         }
 
         private void cbServerStarted_CheckedChanged(object sender, EventArgs e)
@@ -98,8 +97,9 @@ namespace Prizmer.PoolServer
 
         public void meterPolled(object sender, MyEventArgs e)
         {
-            progressBar1.Value += 1;
-            progressBar1.Maximum = e.metersCount + 1;
+            progressBar1.Maximum = e.metersCount;
+            if (progressBar1.Value < progressBar1.Maximum)
+                progressBar1.Value += 1;
             lblCurCnt.Text = progressBar1.Value.ToString();
             lblCnt.Text = e.metersCount.ToString();
         }

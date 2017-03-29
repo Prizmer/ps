@@ -1249,6 +1249,7 @@ namespace Prizmer.PoolServer
         {
             const byte SLICE_PER_HALF_AN_HOUR_TYPE = 4;                         //тип значения в БД (получасовой)
             const byte SLICE_PER_HALF_AN_HOUR_PERIOD = 30;                      //интервал записи срезов
+            bool successFlag = false;
 
             //чтение получасовых срезов, подлежащих чтению, относящихся к конкретному прибору
             TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, SLICE_PER_HALF_AN_HOUR_TYPE);
@@ -1267,7 +1268,6 @@ namespace Prizmer.PoolServer
 
                     DateTime date_to = dateTo;
                     if (date_to > dt_cur) date_to = new DateTime(dt_cur.Ticks);
-
 
                     //определим возможное кол-во срезов за период
                     TimeSpan span = date_to - date_from;
@@ -1322,14 +1322,24 @@ namespace Prizmer.PoolServer
                                 pmPrms.ServerStorage.AddVariousValues(val);
                                 pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
                             }
+                            if (lrps.Count > 0){
+                                pmPrms.logger.LogInfo("RSL: 4. Данные успешно занесены в БД");
+                                successFlag = true;
+                            }
                         }
-
-                        pmPrms.logger.LogInfo("RSL: 4. Данные успешно занесены в БД");
                     }
                 }
+                else
+                {
+                    return 3;
+                }
+            }
+            else
+            {
+                return 2;
             }
 
-            return 0;
+            return successFlag ? 10 : 0;
         }
         private int pollHalfsM230New(PollMethodsParams pmPrms)
         {
@@ -1636,8 +1646,8 @@ namespace Prizmer.PoolServer
 
             if (takenparams.Length > 0)
             {
-                for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
-                {
+                //for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
+                //{
                     if (bStopServer) return 1;
 
                     DateTime tmpDateTime = new DateTime(dtStart.Ticks);
@@ -1647,45 +1657,39 @@ namespace Prizmer.PoolServer
                     {
                         tmpDateTime = tmpDateTime.AddDays(d);
 
+                        float curvalue = 0;
 
-                        //if (meter.OpenLinkCanal())
-                        //{
-                        Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
-                            if (param.guid == Guid.Empty) continue;
+                        if (mfPrms.paramType == 0)
+                        {
+                            //текущий
+                            pollCurrent(pmPrms, tmpDateTime);
+                        }
+                        else if (mfPrms.paramType == 1)
+                        {
+                            //суточный
+                            pollDaily(pmPrms, tmpDateTime);
+                        }
+                        else if (mfPrms.paramType == 2)
+                        {
+                            //месячный
+                            return 2;
+                        }
+                        else if (mfPrms.paramType == 3)
+                        {
+                            //архивный
+                            return 2;
+                        }
+                        else if (mfPrms.paramType == 4)
+                        {
+                            //получасовой
 
-                            float curvalue = 0;
+                            DateTime dt_start_halfs = new DateTime(dtStart.Year, dtStart.Month, dtStart.Day, 0, 0, 0);
+                            DateTime dt_end_halfs = new DateTime(dtEnd.Year, dtEnd.Month, dtEnd.Day, 23, 59, 59);
 
-                            if (mfPrms.paramType == 0)
-                            {
-                                //текущий
-                                pollCurrent(pmPrms, tmpDateTime);
-                            }
-                            else if (mfPrms.paramType == 1)
-                            {
-                                //суточный
-                                pollDaily(pmPrms, tmpDateTime);
-                            }
-                            else if (mfPrms.paramType == 2)
-                            {
-                                //месячный
-                                return 2;
-                            }
-                            else if (mfPrms.paramType == 3)
-                            {
-                                //архивный
-                                return 2;
-                            }
-                            else if (mfPrms.paramType == 4)
-                            {
-                                //получасовой
-
-                                DateTime dt_start_halfs = new DateTime(dtStart.Year, dtStart.Month, dtStart.Day, 0, 0, 0);
-                                DateTime dt_end_halfs = new DateTime(dtEnd.Year, dtEnd.Month, dtEnd.Day, 23, 59, 59);
-
-                                pollHalfsForDates(pmPrms, dt_start_halfs, dt_end_halfs);
-                            }
+                            pollHalfsForDates(pmPrms, dt_start_halfs, dt_end_halfs);
+                        }
                     }
-                }
+               // }
 
             }
 

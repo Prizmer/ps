@@ -87,7 +87,7 @@
             this.groupBox1.Controls.Add(this.comboBox1);
             this.groupBox1.Location = new System.Drawing.Point(0, 110);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(274, 248);
+            this.groupBox1.Size = new System.Drawing.Size(274, 222);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Дочитка показаний";
@@ -119,7 +119,7 @@
             // lblCnt
             // 
             this.lblCnt.AutoSize = true;
-            this.lblCnt.Location = new System.Drawing.Point(61, 216);
+            this.lblCnt.Location = new System.Drawing.Point(104, 190);
             this.lblCnt.Name = "lblCnt";
             this.lblCnt.Size = new System.Drawing.Size(13, 13);
             this.lblCnt.TabIndex = 13;
@@ -128,7 +128,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(36, 216);
+            this.label5.Location = new System.Drawing.Point(80, 189);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(19, 13);
             this.label5.TabIndex = 4;
@@ -145,7 +145,7 @@
             // lblCurCnt
             // 
             this.lblCurCnt.AutoSize = true;
-            this.lblCurCnt.Location = new System.Drawing.Point(13, 216);
+            this.lblCurCnt.Location = new System.Drawing.Point(62, 190);
             this.lblCurCnt.Name = "lblCurCnt";
             this.lblCurCnt.Size = new System.Drawing.Size(13, 13);
             this.lblCurCnt.TabIndex = 3;
@@ -176,6 +176,7 @@
             // rbCom
             // 
             this.rbCom.AutoSize = true;
+            this.rbCom.Enabled = false;
             this.rbCom.Location = new System.Drawing.Point(15, 138);
             this.rbCom.Name = "rbCom";
             this.rbCom.Size = new System.Drawing.Size(49, 17);
@@ -287,7 +288,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(278, 362);
+            this.ClientSize = new System.Drawing.Size(278, 337);
             this.Controls.Add(this.cbServerStarted);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
