@@ -145,7 +145,7 @@ namespace Prizmer.PoolServer
 
         private void btnEndReading_Click(object sender, EventArgs e)
         {
-            ms.StopServer();
+            ms.StopServer(false);
             progressBar1.Value = 0;
             lblCnt.Text = "";
             lblCurCnt.Text = "";

@@ -386,19 +386,20 @@ namespace Prizmer.PoolServer
             //закрываем соединение с БД
             ServerStorage.Close();
         }
-        public void StopServer()
+        public void StopServer(bool doAbort = true)
         {
             bStopServer = true;
             Thread.Sleep(4000);
 
-            for (int i = 0; i < PortsThreads.Count; i++)
-            {
-                try
+            if (doAbort)
+                for (int i = 0; i < PortsThreads.Count; i++)
                 {
-                    PortsThreads[i].Abort();
+                    try
+                    {
+                        PortsThreads[i].Abort();
+                    }
+                    catch { }
                 }
-                catch { }
-            }
         }
 
         void UnhandledException_Handler(object sender, UnhandledExceptionEventArgs e)
@@ -1686,8 +1687,8 @@ namespace Prizmer.PoolServer
                         {
                             //получасовой
 
-                            DateTime dt_start_halfs = new DateTime(dtStart.Year, dtStart.Month, dtStart.Day, 0, 0, 0);
-                            DateTime dt_end_halfs = new DateTime(dtEnd.Year, dtEnd.Month, dtEnd.Day, 23, 59, 59);
+                            DateTime dt_start_halfs = new DateTime(tmpDateTime.Year, tmpDateTime.Month, tmpDateTime.Day, 0, 0, 0);
+                            DateTime dt_end_halfs = new DateTime(tmpDateTime.Year, tmpDateTime.Month, tmpDateTime.Day, 23, 59, 59);
 
                             pollHalfsForDates(pmPrms, dt_start_halfs, dt_end_halfs);
                         }
