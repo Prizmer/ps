@@ -188,6 +188,7 @@ namespace Prizmer.PoolServer
             }
 
             comboBox3Upd();
+            comboBox3.SelectedIndex = comboBox3.Items.Count - 1; 
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

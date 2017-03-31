@@ -376,9 +376,9 @@ namespace Prizmer.PoolServer.DataBase
 
         public Meter[] GetMetersByTcpIPGUIDAndParams(Guid guid_tcpip, int paramType, string driverName)
         {
-            string query = @"SELECT DISTINCT ON (m.factory_number_manual) m.guid, m.name, m.address, m.password,  m.password_type_hex, m.factory_number_manual,  m.factory_number_readed,  m.is_factory_numbers_equal,  m.dt_install,  m.dt_last_read,  m.guid_types_meters,  m.guid_meters,  m.time_delay_current
+            string query = @"SELECT DISTINCT ON (m.factory_number_manual) *
                     FROM 
-                      public.meters m, 
+                      public.meters, 
                       public.tcpip_settings, 
                       public.link_meters_tcpip_settings, 
                       public.types_params, 
