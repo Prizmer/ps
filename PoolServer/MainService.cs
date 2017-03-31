@@ -1966,7 +1966,8 @@ namespace Prizmer.PoolServer
         CloseThreadPoint:
             bStopServer = true;
             ServerStorage.Close();
-            m_vport.Close();
+            if (m_vport != null)
+                m_vport.Close();
         }
     }
 
