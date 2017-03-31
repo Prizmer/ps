@@ -376,7 +376,7 @@ namespace Prizmer.PoolServer.DataBase
 
         public Meter[] GetMetersByTcpIPGUIDAndParams(Guid guid_tcpip, int paramType, string driverName)
         {
-            string query = @"SELECT DISTINCT ON (factory_number_manual) *
+           string query = @"SELECT DISTINCT ON (factory_number_manual) *
                     FROM 
                       public.meters, 
                       public.tcpip_settings, 
@@ -453,24 +453,27 @@ namespace Prizmer.PoolServer.DataBase
 
         public List<string> GetPortsAvailiableByDriverParamType(int paramType, string driverName)
         {
-            string query = @"SELECT DISTINCT ON (ip_address)
+            string query = @"SELECT DISTINCT ON (tcpip_settings.ip_address)
               tcpip_settings.ip_address, 
               tcpip_settings.ip_port
             FROM 
               public.tcpip_settings, 
-              public.types_meters, 
-              public.link_meters_tcpip_settings, 
               public.meters, 
+              public.taken_params, 
+              public.params, 
               public.types_params, 
-              public.params
+              public.types_meters, 
+              public.link_meters_tcpip_settings
             WHERE 
-              tcpip_settings.guid = link_meters_tcpip_settings.guid_tcpip_settings AND
-              link_meters_tcpip_settings.guid_meters = meters.guid AND
               meters.guid_types_meters = types_meters.guid AND
+              taken_params.guid_meters = meters.guid AND
+              taken_params.guid_params = params.guid AND
               params.guid_types_params = types_params.guid AND
-              params.guid_types_meters = types_meters.guid AND
-              types_meters.driver_name = '" + driverName  + @"' AND 
-              types_params.type = " + paramType + ";";
+              link_meters_tcpip_settings.guid_meters = meters.guid AND
+              link_meters_tcpip_settings.guid_tcpip_settings = tcpip_settings.guid AND
+              types_params.type = " + paramType + @" AND 
+              types_meters.driver_name = '" + driverName + "';";
+
 
             List<string> result = new List<string>();
 
