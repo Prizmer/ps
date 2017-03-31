@@ -1765,8 +1765,9 @@ namespace Prizmer.PoolServer
             if (pollingStarted != null)
                 pollingStarted(this, myEventArgs);
 
+            //!!!
             if (mfPrms.mode == 1)
-                MetersCounter = 100;
+                MetersCounter = 130;
 
             while (!bStopServer)
             {

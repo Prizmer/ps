@@ -1636,6 +1636,13 @@ namespace Prizmer.Meters
             RecordPowerSlice record_slice = new RecordPowerSlice();
             DateTime dt_lastslice;
 
+            bool moveDates = this.m_version == 90000 ? true : false;
+            if (moveDates)
+            {
+                dt_begin = dt_begin.AddMinutes(30);
+                dt_end = dt_end.AddMinutes(30);
+            }
+
             // проверка: данный вариант исполнения счетчика не поддерживает учет срезов
             if (!m_presenceProfile)
             {
@@ -1680,6 +1687,8 @@ namespace Prizmer.Meters
             diff = Convert.ToUInt16(diff_minutes / period);
             ushort diff2 = Convert.ToUInt16(diff_minutes2 / period);
 
+
+
             //кол-во срезов за требуемый промежуток времени
             ushort address_slice = diff;
 
@@ -1713,7 +1722,7 @@ namespace Prizmer.Meters
                 if (res_read_slice)
                 {
                     // проверка на то, что прочитанный срез старый
-                    if (dt_begin > record_slice.date_time || record_slice.date_time > dt_end)
+                    if (record_slice.date_time < dt_begin || record_slice.date_time > dt_end)
                     {
                         if (!secondChance)
                         {
@@ -1725,6 +1734,11 @@ namespace Prizmer.Meters
                     }
                     else
                     {
+                        if (moveDates)
+                        {
+                            if (record_slice.date_time.Ticks == record_slice.date_time.Date.Ticks)
+                                record_slice.date_time = record_slice.date_time.Date.AddDays(-1);
+                        }
                         listRPS.Add(record_slice);
                     }
                 }
