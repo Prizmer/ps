@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using Prizmer.PoolServer.DataBase;
+
 namespace Prizmer.PoolServer
 {
     public partial class FormMain : Form
@@ -17,13 +19,34 @@ namespace Prizmer.PoolServer
         {
             InitializeComponent();
         }
-        
+
+        PgStorage storage = new PgStorage();
+        string connectionStr = "";
         private void FormMain_Load(object sender, EventArgs e)
-        {            
+        {
+            connectionStr = ms.GetConnectionString();
+
             //groupBox1 settings
-            comboBox1.SelectedIndex = 0;
+            ConnectionState conState = storage.Open(connectionStr);
+            List<string> driver_names = storage.GetDriverNames();
+
+            if (driver_names.Count > 0)
+            {
+                comboBox1.Items.Clear();
+                comboBox1.Items.AddRange(driver_names.ToArray());
+                comboBox1.SelectedItem = "m230";
+            }
+            else
+            {
+                comboBox1.SelectedIndex = 0;
+            }
+
             comboBox2.SelectedIndex = 4;
-            dateTimePicker1.Value = DateTime.Now;
+
+            comboBox3Upd();
+            comboBox3.SelectedIndex = 0;
+
+             dateTimePicker1.Value = DateTime.Now;
             dateTimePicker2.Value = DateTime.Now;
             MainFormParamsStructure prms = new MainFormParamsStructure();
             prms.mode = 0;
@@ -44,6 +67,7 @@ namespace Prizmer.PoolServer
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
+            storage.Close();
             ms.StopServer();
         }
 
@@ -93,11 +117,11 @@ namespace Prizmer.PoolServer
         public delegate void InvokeDelegate();
         public delegate void InvokeDelegatePrms(object sender, MyEventArgs e);
 
-        public void pollStarted()
+        public void pollStarted(object sender, MyEventArgs e)
         {
             progressBar1.Value = 0;
             lblCurCnt.Text = "0";
-            lblCnt.Text = "0";
+            lblCnt.Text = e.metersCount.ToString();
         }
 
         public void meterPolled(object sender, MyEventArgs e)
@@ -112,11 +136,14 @@ namespace Prizmer.PoolServer
         public void pollEnded()
         {
             MessageBox.Show("Опрос завершен","Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            progressBar1.Value = 0;
+            lblCnt.Text = "";
+            lblCurCnt.Text = "";
         }
 
         void ms_pollingStarted(object sender, MyEventArgs e)
         {
-            this.Invoke(new InvokeDelegate(pollStarted));
+            this.Invoke(new InvokeDelegatePrms(pollStarted), sender, e);
         }
 
         void ms_meterPolled(object sender, MyEventArgs e)
@@ -159,12 +186,35 @@ namespace Prizmer.PoolServer
                 cb.SelectedIndex = 0;
                 MessageBox.Show("Архивный и месячный временно не поддерживаются");
             }
+
+            comboBox3Upd();
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             dateTimePicker1.Value = dateTimePicker1.Value.AddDays(-1);
             dateTimePicker2.Value = dateTimePicker2.Value.AddDays(-1);
+        }
+
+        void comboBox3Upd()
+        {
+            List<string> availiablePorts = storage.GetPortsAvailiableByDriverParamType(comboBox2.SelectedIndex, comboBox1.Text);
+            comboBox3.Items.Clear();
+            comboBox3.Items.AddRange(availiablePorts.ToArray());
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            comboBox3Upd();
+        }
+
+        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBox3.Text.Length > 0)
+            {
+                tbAddress.Text = comboBox3.Text.Split(':')[0];
+                tbPort.Text = comboBox3.Text.Split(':')[1];
+            }
         }
     }
 

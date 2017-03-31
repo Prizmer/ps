@@ -50,6 +50,7 @@
             this.btnStartReading = new System.Windows.Forms.Button();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.cbServerStarted = new System.Windows.Forms.CheckBox();
+            this.comboBox3 = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -68,6 +69,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.comboBox3);
             this.groupBox1.Controls.Add(this.linkLabel1);
             this.groupBox1.Controls.Add(this.comboBox2);
             this.groupBox1.Controls.Add(this.label4);
@@ -151,7 +153,7 @@
             // 
             // tbPort
             // 
-            this.tbPort.Location = new System.Drawing.Point(200, 145);
+            this.tbPort.Location = new System.Drawing.Point(200, 135);
             this.tbPort.Name = "tbPort";
             this.tbPort.Size = new System.Drawing.Size(64, 20);
             this.tbPort.TabIndex = 12;
@@ -169,7 +171,7 @@
             // 
             // tbAddress
             // 
-            this.tbAddress.Location = new System.Drawing.Point(82, 145);
+            this.tbAddress.Location = new System.Drawing.Point(82, 135);
             this.tbAddress.Name = "tbAddress";
             this.tbAddress.Size = new System.Drawing.Size(112, 20);
             this.tbAddress.TabIndex = 11;
@@ -285,6 +287,7 @@
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(109, 21);
             this.comboBox1.TabIndex = 0;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // cbServerStarted
             // 
@@ -299,12 +302,21 @@
             this.cbServerStarted.UseVisualStyleBackColor = true;
             this.cbServerStarted.CheckedChanged += new System.EventHandler(this.cbServerStarted_CheckedChanged);
             // 
+            // comboBox3
+            // 
+            this.comboBox3.FormattingEnabled = true;
+            this.comboBox3.Location = new System.Drawing.Point(82, 156);
+            this.comboBox3.Name = "comboBox3";
+            this.comboBox3.Size = new System.Drawing.Size(182, 21);
+            this.comboBox3.TabIndex = 17;
+            this.comboBox3.SelectedIndexChanged += new System.EventHandler(this.comboBox3_SelectedIndexChanged);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(278, 108);
+            this.ClientSize = new System.Drawing.Size(278, 106);
             this.Controls.Add(this.cbServerStarted);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
@@ -347,6 +359,7 @@
         private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.LinkLabel linkLabel1;
+        private System.Windows.Forms.ComboBox comboBox3;
     }
 }
 

@@ -372,11 +372,13 @@ namespace Prizmer.PoolServer.DataBase
             return result;
         }
 
+        #region Команды для режима дочики и интерфейса формы
+
         public Meter[] GetMetersByTcpIPGUIDAndParams(Guid guid_tcpip, int paramType, string driverName)
         {
-            string query = @"SELECT DISTINCT ON (factory_number_manual) *
+            string query = @"SELECT DISTINCT ON (m.factory_number_manual) m.guid, m.name, m.address, m.password,  m.password_type_hex, m.factory_number_manual,  m.factory_number_readed,  m.is_factory_numbers_equal,  m.dt_install,  m.dt_last_read,  m.guid_types_meters,  m.guid_meters,  m.time_delay_current
                     FROM 
-                      public.meters, 
+                      public.meters m, 
                       public.tcpip_settings, 
                       public.link_meters_tcpip_settings, 
                       public.types_params, 
@@ -391,7 +393,7 @@ namespace Prizmer.PoolServer.DataBase
                       params.guid_types_meters = types_meters.guid AND
                       taken_params.guid_params = params.guid AND
                       taken_params.guid_meters = meters.guid AND
-                      tcpip_settings.guid = '"+ guid_tcpip.ToString() + @"' AND
+                      tcpip_settings.guid = '" + guid_tcpip.ToString() + @"' AND
                       types_params.type = "+ paramType + @" AND 
                       types_meters.driver_name = '" + driverName + "';";
 
@@ -409,6 +411,106 @@ namespace Prizmer.PoolServer.DataBase
             return result;
         }
 
+        public List<string> GetDriverNames()
+        {
+            string query = @"SELECT driver_name FROM types_meters";
+
+            List<string> result = new List<string>();
+
+            NpgsqlCommand command = new NpgsqlCommand(query, m_pg_con);
+            NpgsqlDataReader dr = null;
+
+            try
+            {
+                dr = command.ExecuteReader();
+
+                if (dr.HasRows)
+                {
+                    while (dr.Read())
+                    {
+                        string tmp = Convert.ToString(dr["driver_name"]);
+                        result.Add(tmp);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+            finally
+            {
+                if (dr != null)
+                {
+                    if (!dr.IsClosed)
+                    {
+                        dr.Close();
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public List<string> GetPortsAvailiableByDriverParamType(int paramType, string driverName)
+        {
+            string query = @"SELECT DISTINCT ON (ip_address)
+              tcpip_settings.ip_address, 
+              tcpip_settings.ip_port
+            FROM 
+              public.tcpip_settings, 
+              public.types_meters, 
+              public.link_meters_tcpip_settings, 
+              public.meters, 
+              public.types_params, 
+              public.params
+            WHERE 
+              tcpip_settings.guid = link_meters_tcpip_settings.guid_tcpip_settings AND
+              link_meters_tcpip_settings.guid_meters = meters.guid AND
+              meters.guid_types_meters = types_meters.guid AND
+              params.guid_types_params = types_params.guid AND
+              params.guid_types_meters = types_meters.guid AND
+              types_meters.driver_name = '" + driverName  + @"' AND 
+              types_params.type = " + paramType + ";";
+
+            List<string> result = new List<string>();
+
+            NpgsqlCommand command = new NpgsqlCommand(query, m_pg_con);
+            NpgsqlDataReader dr = null;
+
+            try
+            {
+                dr = command.ExecuteReader();
+
+                if (dr.HasRows)
+                {
+                    while (dr.Read())
+                    {
+                        string ip = Convert.ToString(dr["ip_address"]);
+                        string port = Convert.ToString(dr["ip_port"]);
+                        string summary = ip + ":" + port;
+                        result.Add(summary);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+            finally
+            {
+                if (dr != null)
+                {
+                    if (!dr.IsClosed)
+                    {
+                        dr.Close();
+                    }
+                }
+            }
+
+            return result;
+        }
+    
+        #endregion
 
         public int UpdateMeterLastRead(Guid guid, DateTime dt)
         {

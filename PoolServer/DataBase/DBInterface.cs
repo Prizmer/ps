@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Data;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Prizmer.PoolServer.DataBase
 {
@@ -155,7 +157,6 @@ namespace Prizmer.PoolServer.DataBase
         /// <param name="guid_comport"></param>
         /// <returns></returns>
         Meter[] GetMetersByTcpIPGUID(Guid guid_tcpip);
-        Meter[] GetMetersByTcpIPGUIDAndParams(Guid guid_tcpip, int paramType, string driverName);
 
         /// <summary>
         /// Метод возвращает массив структур TypeMeter, содержащих информацию обо всех типах приборов
@@ -334,6 +335,13 @@ namespace Prizmer.PoolServer.DataBase
         /// <param name="EndDT"></param>
         /// <returns></returns>
         Value[] GetExistsVariousValuesDT(TakenParams taken_params, DateTime BeginDT, DateTime EndDT);
+
+        #endregion
+
+        #region Для дочитки
+            List<string> GetDriverNames();
+            List<string> GetPortsAvailiableByDriverParamType(int paramType, string driverName);
+            Meter[] GetMetersByTcpIPGUIDAndParams(Guid guid_tcpip, int paramType, string driverName);
 
         #endregion
     }

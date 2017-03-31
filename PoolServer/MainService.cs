@@ -191,7 +191,10 @@ namespace Prizmer.PoolServer
 
 
         string ConnectionString = "Server=localhost;Port=5432;User Id=postgres;Password=1;Database=prizmer;";
-
+        public string GetConnectionString()
+        {
+            return ConnectionString;
+        }
 
         struct PollingParams
         {
@@ -1765,6 +1768,7 @@ namespace Prizmer.PoolServer
                         MetersCounter = (uint)i;
             }
 
+            myEventArgs.metersCount = metersbyport.Length;
             if (pollingStarted != null)
                 pollingStarted(this, myEventArgs);
 
