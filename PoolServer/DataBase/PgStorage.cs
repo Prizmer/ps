@@ -372,6 +372,44 @@ namespace Prizmer.PoolServer.DataBase
             return result;
         }
 
+        public Meter[] GetMetersByTcpIPGUIDAndParams(Guid guid_tcpip, int paramType, string driverName)
+        {
+            string query = @"SELECT DISTINCT ON (factory_number_manual) *
+                    FROM 
+                      public.meters, 
+                      public.tcpip_settings, 
+                      public.link_meters_tcpip_settings, 
+                      public.types_params, 
+                      public.params, 
+                      public.types_meters, 
+                      public.taken_params
+                    WHERE 
+                      meters.guid_types_meters = types_meters.guid AND
+                      link_meters_tcpip_settings.guid_meters = meters.guid AND
+                      link_meters_tcpip_settings.guid_tcpip_settings = tcpip_settings.guid AND
+                      params.guid_types_params = types_params.guid AND
+                      params.guid_types_meters = types_meters.guid AND
+                      taken_params.guid_params = params.guid AND
+                      taken_params.guid_meters = meters.guid AND
+                      tcpip_settings.guid = '"+ guid_tcpip.ToString() + @"' AND
+                      types_params.type = "+ paramType + @" AND 
+                      types_meters.driver_name = '" + driverName + "';";
+
+            List<Object> list = GetRecordsFromReader(query, RetrieveMeter);
+
+            Meter[] result = new Meter[list.Count];
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                result[i] = (Meter)list[i];
+            }
+
+            list.Clear();
+
+            return result;
+        }
+
+
         public int UpdateMeterLastRead(Guid guid, DateTime dt)
         {
             string query = "UPDATE meters SET " +

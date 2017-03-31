@@ -155,6 +155,7 @@ namespace Prizmer.PoolServer.DataBase
         /// <param name="guid_comport"></param>
         /// <returns></returns>
         Meter[] GetMetersByTcpIPGUID(Guid guid_tcpip);
+        Meter[] GetMetersByTcpIPGUIDAndParams(Guid guid_tcpip, int paramType, string driverName);
 
         /// <summary>
         /// Метод возвращает массив структур TypeMeter, содержащих информацию обо всех типах приборов

@@ -1745,7 +1745,10 @@ namespace Prizmer.PoolServer
                 //m_vport = new Prizmer.Ports.TcpipPort(portsettings.ip_address, (int)portsettings.ip_port, portsettings.write_timeout, portsettings.read_timeout, 50);
                 //читаем список приборов, привязанных к порту
                 PortGUID = portsettings.guid;
-                metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
+                if (mfPrms.mode == 1)
+                    metersbyport = ServerStorage.GetMetersByTcpIPGUIDAndParams(PortGUID, mfPrms.paramType, mfPrms.driverName);
+                else
+                    metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
             }
 
             
@@ -1764,10 +1767,6 @@ namespace Prizmer.PoolServer
 
             if (pollingStarted != null)
                 pollingStarted(this, myEventArgs);
-
-            //!!!
-            if (mfPrms.mode == 1)
-                MetersCounter = 130;
 
             while (!bStopServer)
             {
