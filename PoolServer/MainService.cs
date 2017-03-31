@@ -1769,7 +1769,7 @@ namespace Prizmer.PoolServer
             }
 
             myEventArgs.metersCount = metersbyport.Length;
-            if (pollingStarted != null)
+            if (mfPrms.mode == 1 && pollingStarted != null)
                 pollingStarted(this, myEventArgs);
 
             while (!bStopServer)
