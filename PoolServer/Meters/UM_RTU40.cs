@@ -155,6 +155,8 @@ namespace Prizmer.Meters
 
             serial_number = answ.Replace("UM_ID=", "");
 
+            WriteToLog("Serial number readed: " + serial_number);
+
             return true;
         }
 
@@ -745,8 +747,10 @@ namespace Prizmer.Meters
         public bool OpenLinkCanal()
         {
             string serial = "";
-            if (readUMSerial(ref serial)) return true;
-            else WriteToLog("Can't read UM's serial number");
+            for (int i = 0; i < 3; i++)
+            {
+                if (readUMSerial(ref serial)) return true;
+            }
 
             return false;
         }
