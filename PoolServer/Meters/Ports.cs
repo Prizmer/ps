@@ -328,10 +328,14 @@ namespace Prizmer.Ports
                 //2 попытки соединения или чтения данных
                 for (int i = 0; i < 2; i++)
                 {
+                    readBytesList.Clear();
                     if (sender.Connected)
                     {
                         // Send the data through the socket.
                         sender.Send(out_buffer, 0, out_length, SocketFlags.None);
+
+                        WriteToLog("written data: " + BitConverter.ToString(out_buffer));
+
 
                         Thread.Sleep(10);
                         uint elapsed_time_count = 100;
@@ -363,6 +367,8 @@ namespace Prizmer.Ports
                             elapsed_time_count += 100;
                             Thread.Sleep(100);
                         }
+
+                        WriteToLog("received data: " + BitConverter.ToString(readBytesList.ToArray()));
 
                         bool bManageRes = false;
                         try
@@ -914,6 +920,8 @@ namespace Prizmer.Ports
 
            // Thread.Sleep(10);
             serialPort.Write(out_buffer, 0, out_buffer.Length);
+
+            
 
             Thread.Sleep(10);
             if (serialPort.BytesToRead == 0)
