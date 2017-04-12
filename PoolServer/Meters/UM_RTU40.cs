@@ -745,7 +745,7 @@ namespace Prizmer.Meters
         public bool OpenLinkCanal()
         {
             string serial = "";
-            if (ReadSerialNumber(ref serial)) return true;
+            if (readUMSerial(ref serial)) return true;
 
             return false;
         }

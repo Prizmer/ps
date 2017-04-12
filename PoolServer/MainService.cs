@@ -233,8 +233,6 @@ namespace Prizmer.PoolServer
 
         public MainService()
         {
-            //ConnectionString = global::PoolServer.Properties.Settings.Default.ConnectionString;
-
             try
             {
                 ConnectionString = ConfigurationManager.ConnectionStrings["generalConnection"].ConnectionString;
@@ -548,7 +546,9 @@ namespace Prizmer.PoolServer
         }
         private int pollDaily(PollMethodsParams pmPrms, DateTime date)
         {
-            
+
+            pmPrms.logger.LogInfo("Polling daily...");
+
             DateTime curDate = DateTime.Now;
             if (date.Date > curDate.Date) date = curDate.Date;
 
@@ -1829,9 +1829,12 @@ namespace Prizmer.PoolServer
                 {
                     m_vport = new Prizmer.Ports.ComPort(byte.Parse("250"), 2400, 8, 1, 1, 1, 1, 1);
                 }
+
  
                 meter.Init(metersbyport[MetersCounter].address, metersbyport[MetersCounter].password, m_vport);
                 logger.Initialize(m_vport.GetName(), metersbyport[MetersCounter].address.ToString(), typemeter.driver_name, "main");
+
+                logger.LogInfo(String.Format("[{4}] Meter with id {0} and address {1} initialized. Port: {2}; ", metersbyport[MetersCounter].password, metersbyport[MetersCounter].address, m_vport.GetName(), typemeter.driver_name));
 
                 //выведем в лог общие ошибки если таковые есть
                 DateTime common_dt_install = metersbyport[MetersCounter].dt_install;
