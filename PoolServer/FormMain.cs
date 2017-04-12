@@ -47,7 +47,8 @@ namespace Prizmer.PoolServer
             comboBox2.SelectedIndex = 4;
 
             comboBox3Upd();
-            comboBox3.SelectedIndex = 0;
+            if (comboBox3.Items.Count > 0)
+                comboBox3.SelectedIndex = 0;
 
              dateTimePicker1.Value = DateTime.Now;
             dateTimePicker2.Value = DateTime.Now;
@@ -63,9 +64,9 @@ namespace Prizmer.PoolServer
                 groupBox1.Enabled = true;
             }
 
-            ms.pollingStarted += new MainService.MyEventHandler(ms_pollingStarted);
-            ms.meterPolled += new MainService.MyEventHandler(ms_meterPolled);
-            ms.pollingEnded += new MainService.MyEventHandler(ms_pollingEnded);
+           // ms.pollingStarted += new MainService.MyEventHandler(ms_pollingStarted);
+          //  ms.meterPolled += new MainService.MyEventHandler(ms_meterPolled);
+          //  ms.pollingEnded += new MainService.MyEventHandler(ms_pollingEnded);
 
             }
             catch (Exception ex)

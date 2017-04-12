@@ -978,7 +978,15 @@ namespace Prizmer.Ports
 
                 if (!serialPort.IsOpen)
                 {
-                    serialPort.Open();
+                    try
+                    {
+                        serialPort.Open();
+                    }
+                    catch (Exception ex)
+                    {
+                        return false;
+                    }
+
                     serialPort.DiscardOutBuffer();
                     serialPort.DiscardInBuffer();
 
