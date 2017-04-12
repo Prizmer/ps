@@ -1723,7 +1723,7 @@ namespace Prizmer.PoolServer
         private void pollingPortThread(object data)
         {
             //!!!!!
-
+            WriteToLog("Polling thread");
 
             Prizmer.Ports.VirtualPort m_vport = null;
             Meter[] metersbyport = null;
@@ -1763,7 +1763,7 @@ namespace Prizmer.PoolServer
                     metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
             }
 
-            
+            WriteToLog("Meters by port length: " + metersbyport.Length);
 
             //if (m_vport == null) goto CloseThreadPoint;
             if (metersbyport == null) goto CloseThreadPoint;

@@ -746,6 +746,7 @@ namespace Prizmer.Meters
         {
             string serial = "";
             if (readUMSerial(ref serial)) return true;
+            else WriteToLog("Can't read UM's serial number");
 
             return false;
         }
@@ -767,17 +768,27 @@ namespace Prizmer.Meters
         List<ValueUM> listOfDailyValues = new List<ValueUM>();
         public bool ReadDailyValues(DateTime dt, ushort param, ushort tarif, ref float recordValue)
         {
+            WriteToLog("Begin to read daily: ");
             if (listOfDailyValues == null || listOfDailyValues.Count == 0)
             {
-                if (!getDailyValuesForID(meterId, dt, out listOfDailyValues)) return false;
+                if (!getDailyValuesForID(meterId, dt, out listOfDailyValues))
+                {
+                    WriteToLog("getDailyValuesForID returned false ");
+                    return false;
+                } 
             }
 
             string paramName = dailyCorrelationDict[param];
             string fullParamName = paramName + tarif.ToString();
             
             ValueUM val = new ValueUM();
-            if (!findValueInListByName(fullParamName, listOfDailyValues, out val)) return false;
+            if (!findValueInListByName(fullParamName, listOfDailyValues, out val))
+            {
+                WriteToLog("can't findValueInListByName...");
+                return false;
+            }
 
+            WriteToLog("success in reading " + val.name + " = " + val.value);
             recordValue = val.value;
 
             return true;
