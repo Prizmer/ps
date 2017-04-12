@@ -301,8 +301,6 @@
             // cbServerStarted
             // 
             this.cbServerStarted.AutoSize = true;
-            this.cbServerStarted.Checked = true;
-            this.cbServerStarted.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbServerStarted.Location = new System.Drawing.Point(12, 87);
             this.cbServerStarted.Name = "cbServerStarted";
             this.cbServerStarted.Size = new System.Drawing.Size(110, 17);
@@ -316,7 +314,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(278, 296);
+            this.ClientSize = new System.Drawing.Size(278, 356);
             this.Controls.Add(this.cbServerStarted);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
