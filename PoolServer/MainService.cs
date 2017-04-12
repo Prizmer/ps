@@ -1834,7 +1834,7 @@ namespace Prizmer.PoolServer
                 meter.Init(metersbyport[MetersCounter].address, metersbyport[MetersCounter].password, m_vport);
                 logger.Initialize(m_vport.GetName(), metersbyport[MetersCounter].address.ToString(), typemeter.driver_name, "main");
 
-                logger.LogInfo(String.Format("[{4}] Meter with id {0} and address {1} initialized. Port: {2}; ", metersbyport[MetersCounter].password, metersbyport[MetersCounter].address, m_vport.GetName(), typemeter.driver_name));
+                logger.LogInfo(String.Format("[{3}] Meter with id {0} and address {1} initialized. Port: {2}; ", metersbyport[MetersCounter].password, metersbyport[MetersCounter].address, m_vport.GetName(), typemeter.driver_name));
 
                 //выведем в лог общие ошибки если таковые есть
                 DateTime common_dt_install = metersbyport[MetersCounter].dt_install;
