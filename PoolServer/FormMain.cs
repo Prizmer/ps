@@ -24,6 +24,9 @@ namespace Prizmer.PoolServer
         string connectionStr = "";
         private void FormMain_Load(object sender, EventArgs e)
         {
+            try
+            {
+
             connectionStr = ms.GetConnectionString();
 
             //groupBox1 settings
@@ -63,6 +66,12 @@ namespace Prizmer.PoolServer
             ms.pollingStarted += new MainService.MyEventHandler(ms_pollingStarted);
             ms.meterPolled += new MainService.MyEventHandler(ms_meterPolled);
             ms.pollingEnded += new MainService.MyEventHandler(ms_pollingEnded);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
