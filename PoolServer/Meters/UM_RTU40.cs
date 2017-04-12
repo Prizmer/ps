@@ -490,8 +490,11 @@ namespace Prizmer.Meters
             List<string> recordStringsForDates = new List<string>();
 
             int endIndex = answ.IndexOf("\nEND");
-            if (endIndex == -1) return false;
-
+            if (endIndex == -1)
+            {
+                WriteToLog("getDailyValuesForID: No end tag in incomming");
+                return false;
+            }
             string tmpMeterSerial = "";
             getMetersSNFromAnswString(answ, ref tmpMeterSerial);
 
@@ -572,9 +575,14 @@ namespace Prizmer.Meters
             }
 
             if (umVals.Count > 0)
+            {
+                WriteToLog("Successfully readed: " + umVals.Count);
                 return true;
+            }
             else
+            {
                 return false;
+            }
         }
 
         public bool getMonthlyValuesForID(int id, DateTime dt, out List<ValueUM> umVals)
@@ -768,9 +776,14 @@ namespace Prizmer.Meters
             string serial = "";
             for (int i = 0; i < 3; i++)
             {
-                if (readUMSerial(ref serial)) return true;
+                if (readUMSerial(ref serial))
+                {
+                    WriteToLog("OpenLinkCanal true!");
+                    return true;
+                }
             }
 
+            WriteToLog("OpenLinkCanal false!");
             return false;
         }
 
