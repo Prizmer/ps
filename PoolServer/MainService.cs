@@ -1802,6 +1802,7 @@ namespace Prizmer.PoolServer
                     case "sayani_kombik": meter = new sayani_kombik(); break;
                     case "m230": meter = new m234(); break;
                     case "m234": meter = new m234(); break;
+                    case "um40rtu" : meter = new UM_RTU40(); break;
                 }
 
                 if (meter == null) goto NetxMeter;

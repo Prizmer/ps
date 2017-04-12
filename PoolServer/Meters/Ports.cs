@@ -25,6 +25,7 @@ namespace Prizmer.Ports
         bool ReInitialize();
         bool GetLocalEndPoint(ref IPEndPoint localEp);
         void Close();
+        void SetReadTimeout(int timeout = 1200);
     }
 
     public sealed class TcpipPort : VirtualPort
@@ -350,6 +351,13 @@ namespace Prizmer.Ports
                                 {
                                     WriteToLog("WriteReadData: Read from port error: " + ex.Message);
                                 }
+
+                                Queue<byte> tmpQ = new Queue<byte>();
+                                for (int j = readBytesList.Count - 1; j >= 0; j--)
+                                    tmpQ.Enqueue(readBytesList[j]);
+
+                                int packageSign = func(tmpQ);
+                                if (packageSign == 1) break;
                             }
 
                             elapsed_time_count += 100;
@@ -424,9 +432,15 @@ namespace Prizmer.Ports
         {
             return false;
         }
+
+
+        public void SetReadTimeout(int timeout = 1200)
+        {
+           // this.readTimeout = timeout;
+        }
     }
 
-    public sealed class ComPort : VirtualPort, IDisposable
+    public sealed class ComPort2 : VirtualPort, IDisposable
     {
         private SerialPort m_Port;
         private string m_name = "COM1";
@@ -450,7 +464,7 @@ namespace Prizmer.Ports
         }
 
         bool areLogsRestricted = false;
-        public ComPort(byte number, int baudrate, byte data_bits, byte parity, byte stop_bits, ushort write_timeout, ushort read_timeout, byte attemts)
+        public ComPort2(byte number, int baudrate, byte data_bits, byte parity, byte stop_bits, ushort write_timeout, ushort read_timeout, byte attemts)
         {
             m_name = "COM" + Convert.ToString(number);
             m_baudrate = baudrate;
@@ -846,5 +860,186 @@ namespace Prizmer.Ports
             localEp = null;
             return false;
         }
+
+
+        public void SetReadTimeout(int timeout = 1200)
+        {
+            throw new NotImplementedException();
+        }
     }
+
+    public class ComPort : VirtualPort, IDisposable 
+    {
+        SerialPort serialPort;
+        int readTimeout = 600;
+        int writeTimeout = 600;
+
+        public ComPort(byte number, int baudrate, byte data_bits, byte parity, byte stop_bits, ushort write_timeout, ushort read_timeout, byte attemts)
+        {
+            serialPort = new SerialPort("COM" + number);
+
+
+            serialPort.BaudRate = baudrate;
+            serialPort.Parity = (Parity)parity;
+
+            serialPort.DataBits = data_bits;
+            serialPort.StopBits = (StopBits)stop_bits;
+
+            readTimeout = read_timeout;
+            writeTimeout = write_timeout;
+        }
+
+        public ComPort(SerialPort sp, byte attempts, ushort read_timeout, ushort write_timeout)
+        {
+            serialPort = new SerialPort(sp.PortName, sp.BaudRate, sp.Parity, sp.DataBits, sp.StopBits);
+
+            readTimeout = read_timeout;
+            writeTimeout = write_timeout;
+
+            serialPort.ReadTimeout = 5000;
+            serialPort.WriteTimeout = 1000;
+            serialPort.DtrEnable = true;
+            serialPort.RtsEnable = true;
+
+        }
+
+        ~ComPort()
+        {
+            Close();
+        }
+
+        public int  WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
+        {
+            if (!OpenPort()) return 0;
+
+           // Thread.Sleep(10);
+            serialPort.Write(out_buffer, 0, out_buffer.Length);
+
+            Thread.Sleep(10);
+            if (serialPort.BytesToRead == 0)
+                Thread.Sleep(1200);
+
+            int elapsedTime = 0;
+
+            List<byte> inList = new List<byte>();
+
+            while (elapsedTime < readTimeout)
+            {
+                if (serialPort.BytesToRead > 0)
+                {
+                    in_buffer = new byte[serialPort.BytesToRead];
+                    serialPort.Read(in_buffer, 0, in_buffer.Length);
+                    if (in_buffer.Length > 0)
+                        inList.AddRange(in_buffer);
+
+                    Queue<byte> tmpQ = new Queue<byte>();
+                    for (int j = inList.Count - 1; j >= 0; j--)
+                        tmpQ.Enqueue(inList[j]);
+
+                    int packageSign = func(tmpQ);
+                    if (packageSign == 1) break;
+                }
+
+                in_buffer = inList.ToArray();
+
+
+                Thread.Sleep(100);
+                elapsedTime += 100;
+            }
+
+
+            
+            return in_buffer == null ? 0 : in_buffer.Length;
+        }
+
+        public string  GetName()
+        {
+ 	       if (serialPort != null)
+               return serialPort.PortName;
+           else
+               return "";
+        }
+        public bool  isOpened()
+        {
+ 	        if (serialPort != null && serialPort.IsOpen)
+                return true;
+            else
+                return false;
+        }
+        public SerialPort  getSerialPortObject()
+        {
+ 	        return serialPort;
+        }
+
+        public bool  OpenPort()
+        {
+ 	        if (serialPort != null)
+            {
+
+                if (!serialPort.IsOpen)
+                {
+                    serialPort.Open();
+                    serialPort.DiscardOutBuffer();
+                    serialPort.DiscardInBuffer();
+
+                    if (serialPort.IsOpen)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    serialPort.DiscardOutBuffer();
+                    serialPort.DiscardInBuffer();
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    
+        public void  Dispose()
+        {
+ 	        serialPort.Close();
+        }
+
+
+        public string GetConnectionType()
+        {
+            return "com";
+        }
+
+        public bool ReInitialize()
+        {
+            return false;
+        }
+
+        public bool GetLocalEndPoint(ref IPEndPoint localEp)
+        {
+            localEp = null;
+            return false;
+        }
+
+        public void Close()
+        {
+            if (serialPort != null && serialPort.IsOpen)
+            {
+                serialPort.Close();
+            }
+        }
+
+
+        public void SetReadTimeout(int timeout = 1200)
+        {
+            this.readTimeout = timeout;
+        }
+    }
+
+
+
+
 }
