@@ -182,11 +182,11 @@ namespace Prizmer.PoolServer
         public void WriteToLog(string str, string port = "", string addr = "", string mName = "", bool doWrite = true)
         {
 
-            //StreamWriter sw = null;
-           // string resMsg = String.Format("{0}: {1}", DateTime.Now.ToString(), str);
-           // sw = new StreamWriter(@"commonInfo.txt", true, Encoding.Default);
-           // sw.WriteLine(resMsg);
-           // sw.Close();
+            StreamWriter sw = null;
+            string resMsg = String.Format("{0}: {1}", DateTime.Now.ToString(), str);
+            sw = new StreamWriter(@"commonInfo.txt", true, Encoding.Default);
+            sw.WriteLine(resMsg);
+            sw.Close();
         }
 
 
@@ -234,7 +234,6 @@ namespace Prizmer.PoolServer
         public MainService()
         {
             //ConnectionString = global::PoolServer.Properties.Settings.Default.ConnectionString;
-            ConnectionString = ""; 
 
             try
             {
@@ -284,7 +283,7 @@ namespace Prizmer.PoolServer
             }
             catch (Exception ex)
             {
-                WriteToLog("Проблеммы с применением файла конфигурации: " + ex.Message);
+                WriteToLog("Проблемы с применением файла конфигурации: " + ex.Message);
             }
         }
 

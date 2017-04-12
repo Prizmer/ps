@@ -27,46 +27,46 @@ namespace Prizmer.PoolServer
             try
             {
 
-            //connectionStr = ms.GetConnectionString();
+                connectionStr = ms.GetConnectionString();
 
-            ////groupBox1 settings
-            //ConnectionState conState = storage.Open(connectionStr);
-            //List<string> driver_names = storage.GetDriverNames();
+                //groupBox1 settings
+                ConnectionState conState = storage.Open(connectionStr);
+                List<string> driver_names = storage.GetDriverNames();
 
-            //if (driver_names.Count > 0)
-            //{
-            //    comboBox1.Items.Clear();
-            //    comboBox1.Items.AddRange(driver_names.ToArray());
-            //    comboBox1.SelectedItem = "m230";
-            //}
-            //else
-            //{
-            //    comboBox1.SelectedIndex = 0;
-            //}
+                if (driver_names.Count > 0)
+                {
+                    comboBox1.Items.Clear();
+                    comboBox1.Items.AddRange(driver_names.ToArray());
+                    comboBox1.SelectedItem = "m230";
+                }
+                else
+                {
+                    comboBox1.SelectedIndex = 0;
+                }
 
-            //comboBox2.SelectedIndex = 4;
+                comboBox2.SelectedIndex = 4;
 
-            //comboBox3Upd();
-            //if (comboBox3.Items.Count > 0)
-            //    comboBox3.SelectedIndex = 0;
+                comboBox3Upd();
+                if (comboBox3.Items.Count > 0)
+                    comboBox3.SelectedIndex = 0;
 
-            // dateTimePicker1.Value = DateTime.Now;
-            //dateTimePicker2.Value = DateTime.Now;
-            //MainFormParamsStructure prms = new MainFormParamsStructure();
-            //prms.mode = 0;
-            //if (cbServerStarted.Checked)
-            //{
-            //    ms.StartServer(prms);
-            //    groupBox1.Enabled = false;
-            //}
-            //else
-            //{
-            //    groupBox1.Enabled = true;
-            //}
+                dateTimePicker1.Value = DateTime.Now;
+                dateTimePicker2.Value = DateTime.Now;
+                MainFormParamsStructure prms = new MainFormParamsStructure();
+                prms.mode = 0;
+                if (cbServerStarted.Checked)
+                {
+                    ms.StartServer(prms);
+                    groupBox1.Enabled = false;
+                }
+                else
+                {
+                    groupBox1.Enabled = true;
+                }
 
-           // ms.pollingStarted += new MainService.MyEventHandler(ms_pollingStarted);
-          //  ms.meterPolled += new MainService.MyEventHandler(ms_meterPolled);
-          //  ms.pollingEnded += new MainService.MyEventHandler(ms_pollingEnded);
+                ms.pollingStarted += new MainService.MyEventHandler(ms_pollingStarted);
+                ms.meterPolled += new MainService.MyEventHandler(ms_meterPolled);
+                ms.pollingEnded += new MainService.MyEventHandler(ms_pollingEnded);
 
             }
             catch (Exception ex)
