@@ -146,6 +146,8 @@ namespace Prizmer.Meters
             byte[] incommingData = new byte[1];
             m_vport.WriteReadData(FindPacketSignature, cmd.ToArray(), ref incommingData, cmd.Count, -1);
 
+            WriteToLog("readUMSerial, incoming: " + ASCIIEncoding.ASCII.GetString(incommingData));
+
             if (incommingData.Length < MESSAGE_TAIL_SIZE_BYTES + 1) return false;
             byte[] cuttedIncommingData = new byte[incommingData.Length - MESSAGE_TAIL_SIZE_BYTES];
             Array.Copy(incommingData, 0, cuttedIncommingData, 0, cuttedIncommingData.Length);

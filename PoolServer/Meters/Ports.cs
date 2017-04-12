@@ -244,12 +244,12 @@ namespace Prizmer.Ports
                 for (int i = 0; i < readBytesList.Count; i++)
                     reading_queue.Enqueue(readBytesList[i]);
 
-                int pos = func(reading_queue);
-                if (pos >= 0)
+                int pos = 0;
+                if (pos == 0)
                 {
                     //избавимся от лишних данных спереди
-                    for (int i = 0; i < pos; i++)
-                        reading_queue.Dequeue();
+                    //for (int i = 0; i < pos; i++)
+                    //    reading_queue.Dequeue();
 
                     //оставшиеся данные преобразуем обратно в массив
                     reading_size = reading_queue.Count;
