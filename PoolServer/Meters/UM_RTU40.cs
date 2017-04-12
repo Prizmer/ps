@@ -482,7 +482,10 @@ namespace Prizmer.Meters
             byte[] incommingData = new byte[1];
             m_vport.WriteReadData(FindPacketSignature, cmd.ToArray(), ref incommingData, cmd.Count, -1);
 
+
+
             string answ = ASCIIEncoding.ASCII.GetString(incommingData);
+            WriteToLog("getDailyValuesForID: incomming: " + answ);
 
             List<string> recordStringsForDates = new List<string>();
 
@@ -513,11 +516,18 @@ namespace Prizmer.Meters
 
             if (recordStringsForDates.Count > 1)
                 WriteToLog("Суточные: на данную дату пришло несколько значений, возможно расходятся часы");
-            if (recordStringsForDates.Count == 0) return false;
+            if (recordStringsForDates.Count == 0)
+            {
+                WriteToLog("getDailyValuesForID: recordStringsForDates.Count == 0");
+                return false;
+            }
 
             DateTime recordDt = new DateTime();
-            if (!getDateFromAnswString(recordStringsForDates[0], ref recordDt)) return false;
-
+            if (!getDateFromAnswString(recordStringsForDates[0], ref recordDt))
+            {
+                WriteToLog("getDailyValuesForID: getDateFromAnswString returned false");
+                return false;
+            }
             string selectedRecordString = recordStringsForDates[0];
 
             //получим блок TD
@@ -535,10 +545,17 @@ namespace Prizmer.Meters
             string tdString = selectedRecordString.Substring(tdIndex, selectedRecordString.Length - tdIndex - 1);
 
             Dictionary<string, float> recordsDict = new Dictionary<string, float>();
-            if (!getRecordsDictionary(tdString, ref recordsDict)) return false;
+            if (!getRecordsDictionary(tdString, ref recordsDict))
+            {
+                WriteToLog("getRecordsDictionary returned false");
+                return false;
+            }
 
-
-            if (recordsDict.Count != 20) return false;
+            if (recordsDict.Count != 20)
+            {
+                WriteToLog("getRecordsDictionary: число записей не равно 20");
+                //return false;
+            }
 
             int cnt = 0;
             
