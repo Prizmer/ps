@@ -234,7 +234,17 @@ namespace Prizmer.PoolServer
         public MainService()
         {
             //ConnectionString = global::PoolServer.Properties.Settings.Default.ConnectionString;
-            ConnectionString = ConfigurationManager.ConnectionStrings["generalConnection"].ConnectionString;
+            ConnectionString = ""; 
+
+            try
+            {
+                ConnectionString = ConfigurationManager.ConnectionStrings["generalConnection"].ConnectionString;
+            }
+            catch (Exception ex)
+            {
+                WriteToLog("Беда со строкой соединения: " + ex.Message);
+            }
+
 
             List<string> rowValues = new List<string>();
 
