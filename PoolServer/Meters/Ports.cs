@@ -334,7 +334,7 @@ namespace Prizmer.Ports
                         // Send the data through the socket.
                         sender.Send(out_buffer, 0, out_length, SocketFlags.None);
 
-                        WriteToLog("written data: " + BitConverter.ToString(out_buffer));
+                        //WriteToLog("written data: " + BitConverter.ToString(out_buffer));
 
 
                         Thread.Sleep(10);
@@ -368,7 +368,7 @@ namespace Prizmer.Ports
                             Thread.Sleep(100);
                         }
 
-                        WriteToLog("received data: " + BitConverter.ToString(readBytesList.ToArray()));
+                       // WriteToLog("received data: " + BitConverter.ToString(readBytesList.ToArray()));
 
                         bool bManageRes = false;
                         try
