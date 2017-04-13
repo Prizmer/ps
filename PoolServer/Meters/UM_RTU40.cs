@@ -738,19 +738,24 @@ namespace Prizmer.Meters
         byte[] makeCRC(byte[] buf)
         {
             UInt16 crc = 0x40BF;
-
-            string forLog = "CRC input: " + BitConverter.ToString(buf);
-            WriteToLog(forLog);
-
             UInt16 resCrcNumb = crc16_calc_poly(buf, buf.Length, crc);
 
             char[] CRCCharArr = Convert.ToString(resCrcNumb, 16).ToUpper().ToCharArray();
+            int zerosNeeded = 4 - CRCCharArr.Length;
+
+            List<char> charList = new List<char>();
+            for (int i = 0; i < zerosNeeded; i++)
+                charList.Add('0');
+            charList.AddRange(CRCCharArr);
+
+            CRCCharArr = charList.ToArray();
+
             List<byte> CRCByteList = new List<byte>();
             byte[] CRCASCIICharBytes = Encoding.ASCII.GetBytes(CRCCharArr);
             WriteToLog(BitConverter.ToString(CRCASCIICharBytes));
 
             CRCByteList.Add(CRCASCIICharBytes[2]);
-            if (CRCASCIICharBytes.Length < 4) CRCByteList.Add(0); else CRCByteList.Add(CRCASCIICharBytes[3]);
+            CRCByteList.Add(CRCASCIICharBytes[3]);
             CRCByteList.Add(CRCASCIICharBytes[0]);
             CRCByteList.Add(CRCASCIICharBytes[1]);
 
