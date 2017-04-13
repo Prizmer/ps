@@ -25,16 +25,18 @@ namespace Prizmer.PoolServer
 
         struct SenderInfo
         {
-            public SenderInfo(string port, string addr, string dName)
+            public SenderInfo(string port, string addr, string dName, string metersSerial = "")
             {
                 this.port = port;
                 this.addr = addr;
                 this.driverName = dName;
+                this.metersSerial = metersSerial;
             }
 
             public string port;
             public string addr;
             public string driverName;
+            public string metersSerial;
         }
 
         public static volatile bool bRestrict = false;
@@ -49,7 +51,7 @@ namespace Prizmer.PoolServer
         }
 
         SenderInfo si;
-        public void Initialize(string port, string addr, string driverName, string workDirName = "")
+        public void Initialize(string port, string addr, string driverName, string workDirName = "", string metersSerial = "")
         {
             if (workDirName != String.Empty)
                 workDirectory = baseDirectory + "\\" + workDirName;
@@ -113,11 +115,14 @@ namespace Prizmer.PoolServer
                 return;
             }
 
+            int serialNumberLength = senderInfo.metersSerial.Length;
+            string serialNumberPart = serialNumberLength > 3 ? senderInfo.metersSerial.Substring(serialNumberLength - 4) : "";
+
             try
             {
                 string pathToDir = String.Format(workDirectory + "\\{0}", DateTime.Now.Date.ToShortDateString().Replace(".", "_"));
                 Directory.CreateDirectory(pathToDir);
-                string logFileName = String.Format("\\{0}_a{1}_{2}_ms.log", senderInfo.port.Trim(), senderInfo.addr.Trim(), senderInfo.driverName.Trim());
+                string logFileName = String.Format("\\{0}_a{1}_{3}_{2}_ms.log", senderInfo.port.Trim(), senderInfo.addr.Trim(), senderInfo.driverName.Trim(), serialNumberPart);
                 fs = new FileStream(pathToDir + logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
                 string resMsg = String.Format("{1} [{0}]: {2}", messageType.ToString(), DateTime.Now.ToString(), message);
 
@@ -464,14 +469,18 @@ namespace Prizmer.PoolServer
 
         private int pollSerialNumber(PollMethodsParams pmPrms)
         {
+            pmPrms.logger.LogInfo("Чтение серийника открыт");
             string serial_number = String.Empty;
             if (pmPrms.meter.OpenLinkCanal())
             {
+                pmPrms.logger.LogInfo("Канал для чтения серийника открыт");
                 Meter mDb = pmPrms.metersbyport[pmPrms.MetersCounter];
                 string isEqual = "";
 
                 if (pmPrms.meter.ReadSerialNumber(ref serial_number))
                 {
+                    pmPrms.logger.LogInfo("Серийник прочитан: " + serial_number);
+
                     if (mDb.factory_number_manual == serial_number)
                         isEqual = "TRUE";
                     else
@@ -481,6 +490,7 @@ namespace Prizmer.PoolServer
                 }
                 else
                 {
+                    pmPrms.logger.LogInfo("Серийник не прочитан...");
                     //ServerStorage.UpdateMeterFactoryNumber(mDb.guid, String.Empty, String.Empty);
                 }
             }

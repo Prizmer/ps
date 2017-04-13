@@ -738,6 +738,10 @@ namespace Prizmer.Meters
         byte[] makeCRC(byte[] buf)
         {
             UInt16 crc = 0x40BF;
+
+            string forLog = "CRC input: " + BitConverter.ToString(buf);
+            WriteToLog(forLog);
+
             UInt16 resCrcNumb = crc16_calc_poly(buf, buf.Length, crc);
 
             char[] CRCCharArr = Convert.ToString(resCrcNumb, 16).ToUpper().ToCharArray();
