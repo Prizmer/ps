@@ -592,7 +592,7 @@ namespace Prizmer.Meters
         {
             umVals = new List<ValueUM>();
 
-            string cmdStr = "READCENG=" + id;
+            string cmdStr = "READCURR=" + id;
             List<byte> cmd = wrapCmd(cmdStr);
 
             byte[] incommingData = new byte[1];
