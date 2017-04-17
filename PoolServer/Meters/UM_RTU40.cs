@@ -23,6 +23,7 @@ namespace Prizmer.Meters
         const string SEPARATOR = ",";
         const int MESSAGE_TAIL_SIZE_BYTES = 6;
 
+        Dictionary<ushort, string> currCorrelationDict = new Dictionary<ushort, string>();
         Dictionary<ushort, string> dailyCorrelationDict = new Dictionary<ushort, string>();
         Dictionary<ushort, string> monthlyCorrelationDict = new Dictionary<ushort, string>();
         Dictionary<ushort, string> slicesCorrelationDict = new Dictionary<ushort, string>();
@@ -36,6 +37,9 @@ namespace Prizmer.Meters
 
             foreach (ushort k in dailyCorrelationDict.Keys)
                 monthlyCorrelationDict.Add(k, dailyCorrelationDict[k].Replace("d", "M"));
+
+            foreach (ushort k in dailyCorrelationDict.Keys)
+                currCorrelationDict.Add(k, dailyCorrelationDict[k].Replace("d", ""));
 
             slicesCorrelationDict.Add(0, "DPAp");
             slicesCorrelationDict.Add(1, "DPAm");
@@ -584,6 +588,98 @@ namespace Prizmer.Meters
                 return false;
             }
         }
+        public bool getDailyValuesForID(int id, out List<ValueUM> umVals)
+        {
+            umVals = new List<ValueUM>();
+
+            string cmdStr = "READCENG=" + id;
+            List<byte> cmd = wrapCmd(cmdStr);
+
+            byte[] incommingData = new byte[1];
+            m_vport.WriteReadData(FindPacketSignature, cmd.ToArray(), ref incommingData, cmd.Count, -1);
+
+            string answ = ASCIIEncoding.ASCII.GetString(incommingData);
+
+            WriteToLog(answ);
+
+            List<string> recordStringsForDates = new List<string>();
+
+            int endIndex = answ.IndexOf("\nEND");
+            if (endIndex == -1) return false;
+
+            string tmpMeterSerial = "";
+            getMetersSNFromAnswString(answ, ref tmpMeterSerial);
+
+
+            int indexDt = answ.IndexOf("<DT");
+            while (indexDt != -1)
+            {
+                int tmpIndexDt = answ.IndexOf("<DT", indexDt + 1);
+                string tmpVal = "";
+                if (tmpIndexDt == -1)
+                {
+                    tmpVal = answ.Substring(indexDt, endIndex - indexDt + 1);
+                }
+                else
+                {
+                    tmpVal = answ.Substring(indexDt, tmpIndexDt - indexDt + 1);
+                }
+
+                indexDt = tmpIndexDt;
+                recordStringsForDates.Add(tmpVal);
+            }
+
+            if (recordStringsForDates.Count > 1)
+                WriteToLog("Суточные: на данную дату пришло несколько значений, возможно расходятся часы");
+            if (recordStringsForDates.Count == 0) return false;
+
+            DateTime recordDt = new DateTime();
+            if (!getDateFromAnswString(recordStringsForDates[0], ref recordDt)) return false;
+
+            string selectedRecordString = recordStringsForDates[0];
+
+            //получим блок TD
+            string tdStartSign = "<TD\n";
+            int tdIndex = selectedRecordString.IndexOf(tdStartSign);
+
+            int secondIndex = selectedRecordString.IndexOf(tdStartSign, tdIndex + tdStartSign.Length);
+            if (secondIndex == -1)
+            {
+                secondIndex = endIndex;
+            }
+            else
+            {
+                WriteToLog("Внимание, несколько тегов TD!");
+            }
+
+            string tdString = selectedRecordString.Substring(tdIndex, selectedRecordString.Length - tdIndex - 1);
+
+            Dictionary<string, float> recordsDict = new Dictionary<string, float>();
+            if (!getRecordsDictionary(tdString, ref recordsDict)) return false;
+
+
+            if (recordsDict.Count != 20) return false;
+
+            int cnt = 0;
+
+            foreach (string s in recordsDict.Keys)
+            {
+                ValueUM tmpVal = new ValueUM();
+                tmpVal.dt = recordDt;
+                tmpVal.name = s;
+                tmpVal.value = recordsDict[s];
+                tmpVal.meterSN = tmpMeterSerial;
+
+                umVals.Add(tmpVal);
+                cnt++;
+            }
+
+            if (umVals.Count > 0)
+                return true;
+            else
+                return false;
+        }
+
 
         public bool getMonthlyValuesForID(int id, DateTime dt, out List<ValueUM> umVals)
         {
@@ -816,14 +912,16 @@ namespace Prizmer.Meters
             WriteToLog("Begin to read daily: ");
             if (listOfDailyValues == null || listOfDailyValues.Count == 0)
             {
-                if (!getDailyValuesForID(meterId, dt, out listOfDailyValues))
+               // if (!getDailyValuesForID(meterId, dt, out listOfDailyValues))
+                if (!getDailyValuesForID(meterId, out listOfDailyValues))
                 {
                     WriteToLog("getDailyValuesForID returned false ");
                     return false;
                 } 
             }
 
-            string paramName = dailyCorrelationDict[param];
+            //string paramName = dailyCorrelationDict[param];
+            string paramName = currCorrelationDict[param];
             string fullParamName = paramName + tarif.ToString();
             
             ValueUM val = new ValueUM();
