@@ -631,6 +631,8 @@ namespace Prizmer.Meters
 
             if (recordStringsForDates.Count > 1)
                 WriteToLog("Суточные: на данную дату пришло несколько значений, возможно расходятся часы");
+             
+
             if (recordStringsForDates.Count == 0) return false;
 
             DateTime recordDt = new DateTime();
@@ -652,13 +654,17 @@ namespace Prizmer.Meters
                 WriteToLog("Внимание, несколько тегов TD!");
             }
 
+
+
             string tdString = selectedRecordString.Substring(tdIndex, selectedRecordString.Length - tdIndex - 1);
+            WriteToLog("TDSTRING: " + tdString);
+
 
             Dictionary<string, float> recordsDict = new Dictionary<string, float>();
             if (!getRecordsDictionary(tdString, ref recordsDict)) return false;
+            WriteToLog("recordsDictCnt: " + recordsDict.Count);
 
-
-            if (recordsDict.Count != 20) return false;
+           // if (recordsDict.Count != 20) return false;
 
             int cnt = 0;
 
