@@ -600,7 +600,7 @@ namespace Prizmer.Meters
 
             string answ = ASCIIEncoding.ASCII.GetString(incommingData);
 
-            WriteToLog(answ);
+            WriteToLog("getDailyValuesForID: " + answ);
 
             List<string> recordStringsForDates = new List<string>();
 
@@ -918,16 +918,16 @@ namespace Prizmer.Meters
             WriteToLog("Begin to read daily: ");
             if (listOfDailyValues == null || listOfDailyValues.Count == 0)
             {
-               // if (!getDailyValuesForID(meterId, dt, out listOfDailyValues))
-                if (!getDailyValuesForID(meterId, out listOfDailyValues))
+                if (!getDailyValuesForID(meterId, dt, out listOfDailyValues))
+               // if (!getDailyValuesForID(meterId, out listOfDailyValues))
                 {
                     WriteToLog("getDailyValuesForID returned false ");
                     return false;
                 } 
             }
 
-            //string paramName = dailyCorrelationDict[param];
-            string paramName = currCorrelationDict[param];
+            string paramName = dailyCorrelationDict[param];
+            //string paramName = currCorrelationDict[param];
             string fullParamName = paramName + tarif.ToString();
             
             ValueUM val = new ValueUM();
