@@ -631,9 +631,13 @@ namespace Prizmer.Meters
 
             if (recordStringsForDates.Count > 1)
                 WriteToLog("Суточные: на данную дату пришло несколько значений, возможно расходятся часы");
-             
 
-            if (recordStringsForDates.Count == 0) return false;
+
+            if (recordStringsForDates.Count == 0)
+            {
+                WriteToLog("recordStringsForDates == 0");
+                return false;
+            }
 
             DateTime recordDt = new DateTime();
             if (!getDateFromAnswString(recordStringsForDates[0], ref recordDt)) return false;
@@ -661,8 +665,12 @@ namespace Prizmer.Meters
 
 
             Dictionary<string, float> recordsDict = new Dictionary<string, float>();
-            if (!getRecordsDictionary(tdString, ref recordsDict)) return false;
-            WriteToLog("recordsDictCnt: " + recordsDict.Count);
+            if (!getRecordsDictionary(tdString, ref recordsDict))
+            {
+                WriteToLog("getRecordsDictionary == false");
+                return false;
+            }
+                WriteToLog("recordsDictCnt: " + recordsDict.Count);
 
            // if (recordsDict.Count != 20) return false;
 
@@ -679,6 +687,8 @@ namespace Prizmer.Meters
                 umVals.Add(tmpVal);
                 cnt++;
             }
+
+            WriteToLog("umVals.Count == " + umVals.Count);
 
             if (umVals.Count > 0)
                 return true;
@@ -918,16 +928,16 @@ namespace Prizmer.Meters
             WriteToLog("Begin to read daily: ");
             if (listOfDailyValues == null || listOfDailyValues.Count == 0)
             {
-                if (!getDailyValuesForID(meterId, dt, out listOfDailyValues))
-               // if (!getDailyValuesForID(meterId, out listOfDailyValues))
+               // if (!getDailyValuesForID(meterId, dt, out listOfDailyValues))
+                if (!getDailyValuesForID(meterId, out listOfDailyValues))
                 {
                     WriteToLog("getDailyValuesForID returned false ");
                     return false;
                 } 
             }
 
-            string paramName = dailyCorrelationDict[param];
-            //string paramName = currCorrelationDict[param];
+            //string paramName = dailyCorrelationDict[param];
+            string paramName = currCorrelationDict[param];
             string fullParamName = paramName + tarif.ToString();
             
             ValueUM val = new ValueUM();
