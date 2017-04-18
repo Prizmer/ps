@@ -145,6 +145,7 @@ namespace Prizmer.Meters
 
         public bool readUMSerial(ref string serial_number)
         {
+            WriteToLog("readUMSerial start");
             List<byte> cmd = wrapCmd("UM_READ_ID");
 
             byte[] incommingData = new byte[1];
@@ -590,6 +591,8 @@ namespace Prizmer.Meters
         }
         public bool getDailyValuesForID(int id, out List<ValueUM> umVals)
         {
+            WriteToLog("getDailyValuesForID METHOD START");
+
             umVals = new List<ValueUM>();
 
             string cmdStr = "READCURR=" + id;
@@ -600,7 +603,7 @@ namespace Prizmer.Meters
 
             string answ = ASCIIEncoding.ASCII.GetString(incommingData);
 
-            WriteToLog("getDailyValuesForID: " + answ);
+            WriteToLog("getDailyValuesForID, answer: " + answ);
 
             List<string> recordStringsForDates = new List<string>();
 
