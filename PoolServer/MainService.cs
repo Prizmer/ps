@@ -236,6 +236,9 @@ namespace Prizmer.PoolServer
         #endregion
 
 
+        public bool SO_AUTO_START = false;
+
+
         public MainService()
         {
             try
@@ -283,6 +286,9 @@ namespace Prizmer.PoolServer
 
                 strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_archive")[0];
                 bool.TryParse(strTmpVal, out pollingParams.b_poll_archive);
+
+                strTmpVal = ConfigurationManager.AppSettings.GetValues("b_auto_start")[0];
+                bool.TryParse(strTmpVal, out SO_AUTO_START);
             }
             catch (Exception ex)
             {
@@ -420,7 +426,7 @@ namespace Prizmer.PoolServer
         void UnhandledException_Handler(object sender, UnhandledExceptionEventArgs e)
         {
             //TODO: сделать это в лог
-            MessageBox.Show(e.ExceptionObject.ToString());
+            WriteToLog("Глобальное исключение: " + e.ExceptionObject.ToString());
         }
 
         public void DeleteLogsDirectory(object param)

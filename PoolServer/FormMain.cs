@@ -29,6 +29,8 @@ namespace Prizmer.PoolServer
 
                 connectionStr = ms.GetConnectionString();
 
+                cbServerStarted.Checked = ms.SO_AUTO_START;
+
                 //groupBox1 settings
                 ConnectionState conState = storage.Open(connectionStr);
                 List<string> driver_names = storage.GetDriverNames();
