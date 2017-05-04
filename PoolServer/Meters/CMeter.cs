@@ -19,6 +19,7 @@ namespace Prizmer.Meters
         public uint m_address = 0;
 
         Logger mLogger = new Logger();
+
         /// <summary>
         /// Запись в ЛОГ-файл
         /// </summary>
@@ -36,7 +37,7 @@ namespace Prizmer.Meters
 
 
             if (areLogsRestricted) return;
-            mLogger.Initialize(m_vport.GetName(), m_address.ToString(), String.Empty, "meters");
+            mLogger.Initialize(m_vport.GetName(), m_address.ToString(), "", "", "meters");
 
             if (doWrite)
             {

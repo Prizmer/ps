@@ -122,6 +122,9 @@ namespace Prizmer.Meters
                 password[j] -= 0x30;
             }
 
+          
+            
+
             //if (address > 239) this.m_address = address - 239;
             //else this.m_address = address;
 

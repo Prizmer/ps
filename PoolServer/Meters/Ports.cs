@@ -368,7 +368,7 @@ namespace Prizmer.Ports
                             Thread.Sleep(100);
                         }
 
-                       // WriteToLog("received data: " + BitConverter.ToString(readBytesList.ToArray()));
+                        WriteToLog("received data: " + BitConverter.ToString(readBytesList.ToArray()));
 
                         bool bManageRes = false;
                         try
