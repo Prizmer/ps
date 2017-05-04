@@ -453,7 +453,8 @@ namespace Prizmer.PoolServer.DataBase
 
         public List<string> GetPortsAvailiableByDriverParamType(int paramType, string driverName)
         {
-            string query = @"SELECT DISTINCT ON (tcpip_settings.ip_address)
+
+           string query = @"SELECT DISTINCT 
               tcpip_settings.ip_address, 
               tcpip_settings.ip_port
             FROM 

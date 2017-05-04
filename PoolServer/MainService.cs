@@ -606,6 +606,10 @@ namespace Prizmer.PoolServer
                             pmPrms.logger.LogWarn(s_log);
                         }
                     }
+                    else 
+                    {
+                        pmPrms.logger.LogInfo("Не удалось открыть канал связи...");
+                    }
                 }
             }
             else
