@@ -1285,7 +1285,7 @@ namespace Prizmer.PoolServer
                 //читать данные только если прибор ответил
                 if (pmPrms.meter.OpenLinkCanal())
                 {
-                    pmPrms.logger.LogInfo("RSL: 1. Открыт канал для чтения получасовок ПО ДАТАМ (метод 3)");
+                   // pmPrms.logger.LogInfo("RSL: 1. Открыт канал для чтения получасовок ПО ДАТАМ (метод 3)");
 
                     DateTime dt_cur = DateTime.Now;
 
@@ -1304,7 +1304,7 @@ namespace Prizmer.PoolServer
                     for (int takenPrmsIndex = 0; takenPrmsIndex < takenparams.Length; takenPrmsIndex++)
                     {
                         if (bStopServer) return 1;
-                        pmPrms.logger.LogInfo("RSL: 2. Вошли в цикл перебора считываемых параметров, итерация " + takenPrmsIndex.ToString() + " из " + takenparams.Length);
+                       // pmPrms.logger.LogInfo("RSL: 2. Вошли в цикл перебора считываемых параметров, итерация " + takenPrmsIndex.ToString() + " из " + takenparams.Length);
 
                         Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[takenPrmsIndex].guid_params);
                         if (param.guid == Guid.Empty) continue;
@@ -1317,12 +1317,12 @@ namespace Prizmer.PoolServer
                             if (lrps.Count == 0)
                             {
                                 bool res = pmPrms.meter.ReadPowerSlice(date_from, date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD);
-                                if (res) pmPrms.logger.LogInfo("RSL: 3. Данные прочитаны, осталось занести в базу " + lrps.Count + " значений");
+                               // if (res) pmPrms.logger.LogInfo("RSL: 3. Данные прочитаны, осталось занести в базу " + lrps.Count + " значений");
                             }
 
                             if (lrps.Count > 0)
                             {
-                                pmPrms.logger.LogInfo("RSL: 4. Данные успешно занесены в БД");
+                               // pmPrms.logger.LogInfo("RSL: 4. Данные успешно занесены в БД");
                                 successFlag = true;
                             }
                             else
