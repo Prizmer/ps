@@ -26,6 +26,8 @@ namespace Prizmer.Ports
         bool GetLocalEndPoint(ref IPEndPoint localEp);
         void Close();
         void SetReadTimeout(int timeout = 1200);
+
+        object GetPortObject();
     }
 
     public sealed class TcpipPort : VirtualPort
@@ -76,9 +78,9 @@ namespace Prizmer.Ports
             catch (Exception ex)
             { }
 
-            dtCreated = DateTime.Now;
             ReInitialize();
         }
+
 
 
         public bool ReInitialize()
@@ -96,7 +98,7 @@ namespace Prizmer.Ports
 
                 sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 sender.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                LingerOption lingOpt = new LingerOption(true, 0);
+                LingerOption lingOpt = new LingerOption(true, 1);
                 sender.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, lingOpt);
 
                 sender.ReceiveTimeout = 800;
@@ -109,17 +111,19 @@ namespace Prizmer.Ports
                     sender.Bind(ipLocalEndpoint);
                     sender.Connect(remoteEndPoint);
 
+                    dtCreated = DateTime.Now;
+
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    WriteToLog("При создании потока для tcp порта, порт не был инициализирован по причине: " + ex.Message);
+                    WriteToLog("ReInitialize: не удалось установить соединение: " + ex.Message);
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                WriteToLog("TCP порт не инициализирован по причине: " + ex.Message);
+                WriteToLog("ReInitialize: TCP порт НЕ ре-инициализирован по причине: " + ex.Message);
                 return false;
             }
         }
@@ -403,7 +407,7 @@ namespace Prizmer.Ports
                         if (i == 0)
                             ReInitialize();
                         else
-                            WriteToLog("WriteReadData: ошибка соединения");
+                            WriteToLog("WriteReadData: 2 попытки приема/передачи безуспешны");
                     }
                 }
             }
@@ -445,6 +449,12 @@ namespace Prizmer.Ports
         public void SetReadTimeout(int timeout = 1200)
         {
            // this.readTimeout = timeout;
+        }
+
+
+        public object GetPortObject()
+        {
+            return sender;
         }
     }
 
@@ -874,6 +884,12 @@ namespace Prizmer.Ports
         {
             throw new NotImplementedException();
         }
+
+
+        public object GetPortObject()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ComPort : VirtualPort, IDisposable 
@@ -1054,6 +1070,11 @@ namespace Prizmer.Ports
         public void SetReadTimeout(int timeout = 1200)
         {
             this.readTimeout = timeout;
+        }
+
+        public object GetPortObject()
+        {
+            return serialPort;
         }
     }
 

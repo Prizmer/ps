@@ -16,6 +16,8 @@ using System.Windows.Forms;
 using System.Configuration;
 using System.IO;
 
+using System.Net.Sockets;
+using System.IO.Ports;
 
 namespace Prizmer.PoolServer
 {
@@ -247,7 +249,7 @@ namespace Prizmer.PoolServer
             }
             catch (Exception ex)
             {
-                WriteToLog("Беда со строкой соединения: " + ex.Message);
+                WriteToLog("Строка подключения к БД generalConnection не найдена в файле конфигурации: " + ex.Message);
             }
 
 
@@ -292,7 +294,7 @@ namespace Prizmer.PoolServer
             }
             catch (Exception ex)
             {
-                WriteToLog("Проблемы с применением файла конфигурации: " + ex.Message);
+                WriteToLog("Проблемы с разбором файла конфигурации: " + ex.Message);
             }
         }
 
@@ -332,14 +334,14 @@ namespace Prizmer.PoolServer
                 }
                 else if (prms.mode == 1 && prms.isTcp)
                 {
-                    WriteToLog("addr: " + tcpips[i].ip_address + "; p: " + tcpips[i].ip_port.ToString());
-                    WriteToLog("addr: " + prms.ip + "; p: " + ((ushort)prms.port).ToString());
+                    //WriteToLog("addr: " + tcpips[i].ip_address + "; p: " + tcpips[i].ip_port.ToString());
+                    //WriteToLog("addr: " + prms.ip + "; p: " + ((ushort)prms.port).ToString());
                     if (tcpips[i].ip_address != prms.ip || tcpips[i].ip_port != (ushort)prms.port)
                         continue;
                 }
                             
                 Meter[] metersbyport = ServerStorage.GetMetersByTcpIPGUID(tcpips[i].guid);
-                WriteToLog("mbp: " + metersbyport.Length );
+                //WriteToLog("mbp: " + metersbyport.Length );
                 if (metersbyport.Length > 0)
                 {
                     Thread portThread = new Thread(new ParameterizedThreadStart(this.pollingPortThread));
@@ -1740,8 +1742,12 @@ namespace Prizmer.PoolServer
 
         #endregion
 
+
+        public volatile int threadsCnt = 0;
+
         private void pollingPortThread(object data)
         {
+            threadsCnt++;
             //!!!!!
             //WriteToLog("Polling thread");
 
@@ -1985,7 +1991,10 @@ namespace Prizmer.PoolServer
                         if (MetersCounter >= metersbyport.Length)
                         {
                             if (pollingEnded != null)
+                            {
                                 pollingEnded(this, myEventArgs);
+                                bStopServer = true;
+                            }
 
                             break;
                         }
@@ -1997,7 +2006,25 @@ namespace Prizmer.PoolServer
 
             //закрываем соединение с БД
         CloseThreadPoint:
-            bStopServer = true;
+
+            threadsCnt--;
+
+            //если вдруг поток закроется отразить для какого порта
+            string curThreadPortStr = "";
+            try
+            {
+                Socket s = (Socket)m_vport.GetPortObject();
+                curThreadPortStr = s.RemoteEndPoint.ToString();
+            }catch (Exception ex){}
+
+            try
+            {
+                SerialPort s = (SerialPort)m_vport.GetPortObject();
+                curThreadPortStr = s.PortName;
+            }catch (Exception ex){}
+            WriteToLog("CloseThreadPoint: достигнута точка завершения потока для: " + curThreadPortStr);
+            WriteToLog("CloseThreadPoint: осталось рабочих потоков: " + threadsCnt);
+
             ServerStorage.Close();
             if (m_vport != null)
                 m_vport.Close();
