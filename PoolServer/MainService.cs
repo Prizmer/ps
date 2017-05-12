@@ -183,6 +183,10 @@ namespace Prizmer.PoolServer
         public event MyEventHandler pollingEnded;
         public event MyEventHandler meterPolled;
 
+        public event MyEventHandler stoppingStarted;
+        public event MyEventHandler stoppingEnded;
+
+
         List<Thread> PortsThreads = new List<Thread>();
         List<Ports.TcpipPort> tcpPortsGlobal = new List<Ports.TcpipPort>();
 
@@ -216,14 +220,14 @@ namespace Prizmer.PoolServer
         }
         PollingParams pollingParams;
 
-        bool bStopServer = true;
+        volatile bool bStopServer = true;
 
         #region Флаги отладки
 
         bool B_DEBUG_MODE_TCP = false;
-        string DMTCP_IP = "192.168.23.52";
-        ushort DMTCP_PORT = 5001;
-        string DMTCP_DRIVER_NAME = "m230";
+        string DMTCP_IP = "172.40.40.28";
+        ushort DMTCP_PORT = 4013;
+        string DMTCP_DRIVER_NAME = "tem4";
         uint DMTCP_METER_ADDR = 187;
         bool DMTCP_STATIC_METER_NUMBER = false;
 
@@ -298,24 +302,31 @@ namespace Prizmer.PoolServer
             }
         }
 
-        private List<Thread> getStartComThreadsList(ComPortSettings[] cps)
+        private List<Thread> getStartComThreadsList(ComPortSettings[] cps, MainFormParamsStructure prms)
         {
             List<Thread> comPortThreadsList = new List<Thread>();
+
+            //нам не нужны ком порты если отлаживаем tcp
+            if (B_DEBUG_MODE_TCP) return comPortThreadsList;
+
 
             for (int i = 0; i < cps.Length; i++)
             {
                 Meter[] metersbyport = ServerStorage.GetMetersByComportGUID(cps[i].guid);
-                if (metersbyport.Length > 0)
-                {
+                //if (metersbyport.Length > 0)
+              //  {
                     Thread portThread = new Thread(new ParameterizedThreadStart(this.pollingPortThread));
                     portThread.IsBackground = true;
 
                     List<object> prmsList = new List<object>();
+
                     prmsList.Add(cps[i]);
+                    prmsList.Add(portThread);
+                    prmsList.Add(prms);                  
 
                     portThread.Start(prmsList);
                     comPortThreadsList.Add(portThread);
-                }
+             //   }
             }
 
             return comPortThreadsList;
@@ -342,27 +353,33 @@ namespace Prizmer.PoolServer
                             
                 Meter[] metersbyport = ServerStorage.GetMetersByTcpIPGUID(tcpips[i].guid);
                 //WriteToLog("mbp: " + metersbyport.Length );
-                if (metersbyport.Length > 0)
-                {
+             //   if (metersbyport.Length > 0)
+              //  {
+
+
                     Thread portThread = new Thread(new ParameterizedThreadStart(this.pollingPortThread));
                     portThread.IsBackground = true;
 
                     List<object> prmsList = new List<object>();
                     prmsList.Add(tcpips[i]);
+                    prmsList.Add(portThread);
                     prmsList.Add(prms);
 
                     portThread.Start(prmsList);                 
                     tcpPortThreadsList.Add(portThread);
-                }
+               // }
             }
 
             return tcpPortThreadsList;
         }
 
         PgStorage ServerStorage = new PgStorage();
+        Analizator frmAnalizator = null;
         public void StartServer(MainFormParamsStructure mfPrms)
         {         
             bStopServer = false;
+
+            frmAnalizator = mfPrms.frmAnalizator;
 
             #region Блок особых действий
                 sayani_kombik.DeleteDumpDirectory();
@@ -384,10 +401,11 @@ namespace Prizmer.PoolServer
 
             List<Thread> comPortThreads = new List<Thread>();
             List<Thread> tcpPortThreads = new List<Thread>();
+            PortsThreads = new List<Thread>();
 
             if (!B_DEBUG_MODE_TCP && mfPrms.mode == 0)
             {
-                comPortThreads = this.getStartComThreadsList(cps);
+                comPortThreads = this.getStartComThreadsList(cps, mfPrms);
                 PortsThreads.AddRange(comPortThreads);
             }
 
@@ -409,20 +427,78 @@ namespace Prizmer.PoolServer
             //закрываем соединение с БД
             ServerStorage.Close();
         }
-        public void StopServer(bool doAbort = true)
-        {
-            bStopServer = true;
-            Thread.Sleep(4000);
 
-            if (doAbort)
-                for (int i = 0; i < PortsThreads.Count; i++)
+
+        Thread stopServerThread;
+
+        public void StopServerThreadProc(object prms)
+        {
+            bool doAbort = (bool)prms;
+            bStopServer = true;
+
+            MyEventArgs mea = new MyEventArgs();
+            if (stoppingStarted != null)
+                stoppingStarted(this, mea);
+
+
+            int periods = 120;
+
+            bool bAborted = false;
+
+            for (int j = 0; j < periods; j++)
+            {
+                if (frmAnalizator != null && frmAnalizator.deadThreads.Count == PortsThreads.Count)
                 {
-                    try
+                    if (stoppingEnded != null)
                     {
-                        PortsThreads[i].Abort();
+                        mea.success = true;
+                        stoppingEnded(this, mea);
                     }
-                    catch { }
+
+                    return;
                 }
+                else
+                {
+                    if (doAbort)
+                    {
+                        if (!bAborted)
+                        {
+                            for (int i = 0; i < PortsThreads.Count; i++)
+                            {
+                                try
+                                {
+                                    PortsThreads[i].Abort();
+                                }
+                                catch (Exception ex) { }
+                            }
+
+                            bAborted = true;
+
+                            Thread.Sleep(1000);
+                            continue;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+                    Thread.Sleep(1000);
+                }
+            }
+
+            if (stoppingEnded != null)
+            {
+                mea.success = false;
+                stoppingEnded(this, mea);
+            }
+
+        }
+
+        public void StopServer(bool doAbort = false)
+        {           
+            stopServerThread = new Thread(new ParameterizedThreadStart(StopServerThreadProc));
+            stopServerThread.Start((object)doAbort);
         }
 
         void UnhandledException_Handler(object sender, UnhandledExceptionEventArgs e)
@@ -477,6 +553,8 @@ namespace Prizmer.PoolServer
 
         private int pollSerialNumber(PollMethodsParams pmPrms)
         {
+            if (bStopServer) return 1;
+
             pmPrms.logger.LogInfo("Чтение серийника открыт");
             string serial_number = String.Empty;
             if (pmPrms.meter.OpenLinkCanal())
@@ -513,6 +591,8 @@ namespace Prizmer.PoolServer
 
         private int pollCurrent(PollMethodsParams pmPrms, DateTime currentDT)
         {
+            if (bStopServer) return 1;
+
             //чтение текущих параметров, подлежащих чтению, относящихся к конкретному прибору
             TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, 0);
 
@@ -564,6 +644,7 @@ namespace Prizmer.PoolServer
         }
         private int pollDaily(PollMethodsParams pmPrms, DateTime date)
         {
+            if (bStopServer) return 1;
 
             pmPrms.logger.LogInfo("Polling daily...");
 
@@ -629,8 +710,7 @@ namespace Prizmer.PoolServer
         }
         private int pollMonthly(PollMethodsParams pmPrms)
         {
-
-            
+            if (bStopServer) return 1;
 
             DateTime CurTime = DateTime.Now; 
             DateTime PrevTime = new DateTime(CurTime.Year, CurTime.Month, 1);
@@ -702,6 +782,8 @@ namespace Prizmer.PoolServer
 
         private int pollArchivesOld(PollMethodsParams pmPrms)
         {
+            if (bStopServer) return 1;
+
             DateTime cur_date = DateTime.Now.Date;
             DateTime dt_install = pmPrms.metersbyport[pmPrms.MetersCounter].dt_install.Date;
 
@@ -790,7 +872,9 @@ namespace Prizmer.PoolServer
             return 0;
         }
         private int pollArchivesNewActual(PollMethodsParams pmPrms)
-        {            
+        {
+            if (bStopServer) return 1;
+
             bool doArchLog = true;
 
             DateTime cur_date = new DateTime(DateTime.Now.Date.Ticks);
@@ -886,6 +970,8 @@ namespace Prizmer.PoolServer
 
         private int pollHalfsSet4M230(PollMethodsParams pmPrms)
         {
+            if (bStopServer) return 1;
+
             const byte SLICE_PER_HALF_AN_HOUR_TYPE = 4;                         //тип значения в БД (получасовой)
             const byte SLICE_PER_HALF_AN_HOUR_PERIOD = 30;                      //интервал записи срезов
 
@@ -1041,7 +1127,9 @@ namespace Prizmer.PoolServer
             return 0;
         }
         private int pollHalfsNew(PollMethodsParams pmPrms)
-        {           
+        {
+            if (bStopServer) return 1;
+
             const byte SLICE_TYPE = 4;                         //тип значения в БД (получасовой/часовой)
             const SlicePeriod SLICE_PERIOD = SlicePeriod.HalfAnHour;
 
@@ -1401,6 +1489,7 @@ namespace Prizmer.PoolServer
         private int pollHours(PollMethodsParams pmPrms)
         {
             #region ЧАСОВЫЕ СРЕЗЫ
+            if (bStopServer) return 1;
 
             const bool LOG_SLICES = false;
             const bool LOG_HOURSLICES_ERRORS = true;
@@ -1418,6 +1507,8 @@ namespace Prizmer.PoolServer
                  * блока чтения срезов в случае ошибки*/
                 while (true)
                 {
+                    if (bStopServer) return 1;
+
                     //чтение 'дескрипторов' считываемых параметров указанного типа
                     TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid,
                         SLICE_TYPE);
@@ -1456,6 +1547,8 @@ namespace Prizmer.PoolServer
                     Dictionary<DateTime, List<TakenParams>> dt_param_dict = new Dictionary<DateTime, List<TakenParams>>();
                     for (int i = 0; i < takenparams.Length; i++)
                     {
+                        if (bStopServer) return 1;
+
                         string paramName = pmPrms.ServerStorage.GetParamByGUID(takenparams[i].guid_params).name;
                         if (bStopServer) return 1;
                         //получим последний (по дате) срез для читаемого параметра i
@@ -1571,6 +1664,8 @@ namespace Prizmer.PoolServer
 
                     foreach (KeyValuePair<DateTime, List<TakenParams>> pair in dt_param_dict)
                     {
+                        if (bStopServer) return 1;
+
                         DateTime tmpDate = pair.Key;
                         List<TakenParams> tmpTpList = pair.Value;
 
@@ -1742,15 +1837,8 @@ namespace Prizmer.PoolServer
 
         #endregion
 
-
-        public volatile int threadsCnt = 0;
-
         private void pollingPortThread(object data)
         {
-            threadsCnt++;
-            //!!!!!
-            //WriteToLog("Polling thread");
-
             Prizmer.Ports.VirtualPort m_vport = null;
             Meter[] metersbyport = null;
             MyEventArgs myEventArgs = new MyEventArgs();      
@@ -1764,15 +1852,17 @@ namespace Prizmer.PoolServer
             List<object> prmsList = (List<object>)data;
             data = prmsList[0];
             MainFormParamsStructure mfPrms = new MainFormParamsStructure();
-            if (prmsList.Count > 1) 
-                mfPrms = (MainFormParamsStructure)prmsList[1];
+            mfPrms = (MainFormParamsStructure)prmsList[prmsList.Count - 1];
 
             bool POLLING_ACTIVE = mfPrms.mode == 0 ? true : false;
 
+            string portFullName = "";
             if (data.GetType().Name == "ComPortSettings" && !B_DEBUG_MODE_TCP)
             {
                 ComPortSettings portsettings = (ComPortSettings)data;
                 m_vport = new Prizmer.Ports.ComPort(byte.Parse(portsettings.name), (int)portsettings.baudrate, portsettings.data_bits, portsettings.parity, portsettings.stop_bits, portsettings.write_timeout, portsettings.read_timeout, (byte)portsettings.attempts);
+
+                portFullName = m_vport.GetFullName();
                 //читаем список приборов, привязанных к порту
                 PortGUID = portsettings.guid;
                 metersbyport = ServerStorage.GetMetersByComportGUID(PortGUID);
@@ -1782,6 +1872,9 @@ namespace Prizmer.PoolServer
                 TCPIPSettings portsettings = (TCPIPSettings)data;
                 //m_vport = new Prizmer.Ports.TcpipPort(portsettings.ip_address, (int)portsettings.ip_port, portsettings.write_timeout, portsettings.read_timeout, 50);
                 //читаем список приборов, привязанных к порту
+
+                portFullName = portsettings.ip_address + ":" + portsettings.ip_port;
+                //здесь мы не создаем порт сразу (это сделано для поддержки RDS, порт создается дальше               
                 PortGUID = portsettings.guid;
                 if (mfPrms.mode == 1)
                     metersbyport = ServerStorage.GetMetersByTcpIPGUIDAndParams(PortGUID, mfPrms.paramType, mfPrms.driverName);
@@ -1789,11 +1882,21 @@ namespace Prizmer.PoolServer
                     metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
             }
 
+            AnalizatorPollThreadInfo apti = new AnalizatorPollThreadInfo(portFullName);
+            apti.metersByPort = metersbyport.Length;
+            apti.thread = (Thread)prmsList[1];
+            mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
+
            // WriteToLog("Meters by port length: " + metersbyport.Length);
 
             //if (m_vport == null) goto CloseThreadPoint;
-            if (metersbyport == null) goto CloseThreadPoint;
-            if (metersbyport.Length == 0) goto CloseThreadPoint;
+            if (metersbyport == null || metersbyport.Length == 0)
+            {
+                apti.metersByPort = 0;
+                apti.commentList.Add("Остановка: к порту не привязаны приборы");
+                goto CloseThreadPoint;
+            }
+
 
             uint MetersCounter = 0;
             if (B_DEBUG_MODE_TCP) { 
@@ -1843,18 +1946,28 @@ namespace Prizmer.PoolServer
                 if (meter == null) goto NetxMeter;
 
                 /*если соединяться с конечной точкой вначале, то консольная программа rds не сможет с ней соединиться
-                 * поэтому создание пора и подключение к нему осуществляется на первой итерации цикла при условии,
+                 * поэтому создание порта и подключение к нему осуществляется на первой итерации цикла при условии,
                  * что счетчик не саяны. Предполагаются что на одном порту будут висеть только саяны, если будут другие приборы,
                  * создастся порт и саяны не будут читаться снова.
                  * */
+
                 if (m_vport == null && (typemeter.driver_name != "sayani_kombik")) {
                     TCPIPSettings portsettings = (TCPIPSettings)data;
                     m_vport = new Prizmer.Ports.TcpipPort(portsettings.ip_address, (int)portsettings.ip_port, portsettings.write_timeout, portsettings.read_timeout, 50);
+
+                    apti.vp = m_vport;
+                    mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
                 }
                 else if (m_vport == null && (typemeter.driver_name == "sayani_kombik"))
                 {
                     m_vport = new Prizmer.Ports.ComPort(byte.Parse("250"), 2400, 8, 1, 1, 1, 1, 1);
+
+                    apti = new AnalizatorPollThreadInfo(m_vport);
+                    apti.vp = m_vport;
+                    apti.commentList.Add("Порт для поддержки RDS");
+                    mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
                 }
+
 
  
                 meter.Init(metersbyport[MetersCounter].address, metersbyport[MetersCounter].password, m_vport);
@@ -1881,7 +1994,8 @@ namespace Prizmer.PoolServer
                 if (bStopServer) goto CloseThreadPoint;
                 if (POLLING_ACTIVE && DM_POLL_ADDR)
                 {
-                    pollSerialNumber(pmPrms);
+                    int status = pollSerialNumber(pmPrms);
+                    if (status == 1) goto CloseThreadPoint;
                 }
 
 
@@ -1978,13 +2092,19 @@ namespace Prizmer.PoolServer
                             metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
                         }
 
-                        if (metersbyport.Length == 0) goto CloseThreadPoint;
+                        if (metersbyport.Length == 0)
+                        {
+                            apti.metersByPort = 0;
+                            apti.commentList.Add("Остановка: приборы были привязаны к порту, но сейчас их нет");
+                            goto CloseThreadPoint;
+                        }
 
                         //if (m_vport.GetConnectionType() == "tcp")
                         //    m_vport.ReInitialize();
                     }
                     else if (mfPrms.mode == 1)
                     {
+                        // РЕЖИМ РУЧНОЙ ДОЧИТКИ
                         if (meterPolled != null)
                             meterPolled(this, myEventArgs);
 
@@ -2006,28 +2126,18 @@ namespace Prizmer.PoolServer
 
             //закрываем соединение с БД
         CloseThreadPoint:
-
-            threadsCnt--;
-
-            //если вдруг поток закроется отразить для какого порта
-            string curThreadPortStr = "";
-            try
+            if (bStopServer)
             {
-                Socket s = (Socket)m_vport.GetPortObject();
-                curThreadPortStr = s.RemoteEndPoint.ToString();
-            }catch (Exception ex){}
+                apti.commentList.Add("Остановка, по требованию пользователя");
+            }
 
-            try
-            {
-                SerialPort s = (SerialPort)m_vport.GetPortObject();
-                curThreadPortStr = s.PortName;
-            }catch (Exception ex){}
-            WriteToLog("CloseThreadPoint: достигнута точка завершения потока для: " + curThreadPortStr);
-            WriteToLog("CloseThreadPoint: осталось рабочих потоков: " + threadsCnt);
+            mfPrms.frmAnalizator.moveThreadToDeadList(apti);
 
             ServerStorage.Close();
             if (m_vport != null)
                 m_vport.Close();
+
+
         }
     }
 

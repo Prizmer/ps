@@ -9,14 +9,17 @@ using System.Windows.Forms;
 
 using Prizmer.PoolServer.DataBase;
 
+
 namespace Prizmer.PoolServer
 {
     public partial class FormMain : Form
     {
         MainService ms = new MainService();
-
+        Analizator frmAnalizator = new Analizator();
+        
         public FormMain()
         {
+            frmAnalizator = new Analizator();
             InitializeComponent();
         }
 
@@ -26,10 +29,7 @@ namespace Prizmer.PoolServer
         {
             try
             {
-
                 connectionStr = ms.GetConnectionString();
-
-                cbServerStarted.Checked = ms.SO_AUTO_START;
 
                 //groupBox1 settings
                 ConnectionState conState = storage.Open(connectionStr);
@@ -52,23 +52,22 @@ namespace Prizmer.PoolServer
                 if (comboBox3.Items.Count > 0)
                     comboBox3.SelectedIndex = 0;
 
+                pbPreloader.Hide();
+
                 dateTimePicker1.Value = DateTime.Now;
                 dateTimePicker2.Value = DateTime.Now;
                 MainFormParamsStructure prms = new MainFormParamsStructure();
+                prms.frmAnalizator = this.frmAnalizator;
                 prms.mode = 0;
-                if (cbServerStarted.Checked)
-                {
-                    ms.StartServer(prms);
-                    groupBox1.Enabled = false;
-                }
-                else
-                {
-                    groupBox1.Enabled = true;
-                }
 
                 ms.pollingStarted += new MainService.MyEventHandler(ms_pollingStarted);
                 ms.meterPolled += new MainService.MyEventHandler(ms_meterPolled);
                 ms.pollingEnded += new MainService.MyEventHandler(ms_pollingEnded);
+
+                ms.stoppingStarted += new MainService.MyEventHandler(ms_threadClosingStart);
+                ms.stoppingEnded += new MainService.MyEventHandler(ms_threadClosingEnd);
+
+                cbServerStarted.Checked = ms.SO_AUTO_START;
 
             }
             catch (Exception ex)
@@ -77,10 +76,56 @@ namespace Prizmer.PoolServer
             }
         }
 
+        bool _bThreadsAreClosing = false;
+        bool ThreadsAreClosing
+        {
+            get { return _bThreadsAreClosing; }
+            set
+            {
+                _bThreadsAreClosing = value;
+                if (value)
+                {
+                    tsLabel1.Text = "Дождитесь закрытия портов... (макс 2 мин.)";
+                    groupBox1.Enabled = false;
+                    pbPreloader.Show();
+
+                    cbServerStarted.Enabled = false;
+                }
+                else
+                {
+                    tsLabel1.Text = "Режим: полностью остановлен";
+                    groupBox1.Enabled = true;
+                    pbPreloader.Hide();
+
+                    cbServerStarted.Enabled = true;
+                }
+
+
+            }
+
+        }
+
+
+        bool bReadyToExit = false;
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            storage.Close();
-            ms.StopServer();
+
+            if (!bReadyToExit)
+            {
+                e.Cancel = true;
+
+                if (cbServerStarted.Checked)
+                {
+                    cbServerStarted.Checked = false;
+                }
+                else
+                {
+                    ms.StopServer();
+                }
+            }
+
+            storage.Close();           
+            bReadyToExit = true;
         }
 
         private void cbServerStarted_CheckedChanged(object sender, EventArgs e)
@@ -88,23 +133,31 @@ namespace Prizmer.PoolServer
             if (cbServerStarted.Checked)
             {
                 MainFormParamsStructure prms = new MainFormParamsStructure();
+                prms.frmAnalizator = this.frmAnalizator;
                 prms.mode = 0;
 
-                ms.StartServer(prms);
                 groupBox1.Enabled = false;
-                this.Height = 137; 
+                this.Height = 164;
+
+                tsLabel1.Text = "Режим: автоматический опрос";
+
+                ms.StartServer(prms);
             }
             else
             {
-                ms.StopServer();
                 groupBox1.Enabled = true;
-                this.Height = 384;
+                this.Height = 408;
+
+                tsLabel1.Text = "Дождитесь закрытия портов...";
+
+                ms.StopServer();
             }
         }
 
         private void btnStartReading_Click(object sender, EventArgs e)
         {
             MainFormParamsStructure prms = new MainFormParamsStructure();
+            prms.frmAnalizator = this.frmAnalizator;
 
             try
             {
@@ -153,6 +206,24 @@ namespace Prizmer.PoolServer
             lblCurCnt.Text = "";
         }
 
+        public void threadClosingStart(object sender, MyEventArgs e)
+        {
+            ThreadsAreClosing = true;
+        }
+
+        public void threadClosingEnd(object sender, MyEventArgs e)
+        {
+            ThreadsAreClosing = false;
+            if (e.success)
+                tsLabel1.Text = "Режим: полностью остановлен";
+            else
+                tsLabel1.Text = "Не удалось закрыть порты, перезапустите";
+
+            if (bReadyToExit)
+                System.Windows.Forms.Application.Exit();
+                   
+        }
+
         void ms_pollingStarted(object sender, MyEventArgs e)
         {
             this.Invoke(new InvokeDelegatePrms(pollStarted), sender, e);
@@ -166,6 +237,16 @@ namespace Prizmer.PoolServer
         void ms_pollingEnded(object sender, MyEventArgs e)
         {
             this.Invoke(new InvokeDelegate(pollEnded));
+        }
+
+        void ms_threadClosingStart(object sender, MyEventArgs e)
+        {
+            this.Invoke(new InvokeDelegatePrms(threadClosingStart), sender, e);
+        }
+
+        void ms_threadClosingEnd(object sender, MyEventArgs e)
+        {
+            this.Invoke(new InvokeDelegatePrms(threadClosingEnd), sender, e);
         }
  
         private void rbCom_CheckedChanged(object sender, EventArgs e)
@@ -229,6 +310,22 @@ namespace Prizmer.PoolServer
                 tbPort.Text = comboBox3.Text.Split(':')[1];
             }
         }
+
+        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        private void contextMenuStrip1_Opening_1(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        private void ctxMenuAnalizator_Click(object sender, EventArgs e)
+        {
+            this.frmAnalizator.Show();
+            this.frmAnalizator.Focus();
+        }
     }
 
     public struct MainFormParamsStructure
@@ -241,5 +338,7 @@ namespace Prizmer.PoolServer
         public int port;
         public bool isTcp;
         public int paramType;
+
+        public Analizator frmAnalizator;
     }
 }

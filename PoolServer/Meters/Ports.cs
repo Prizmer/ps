@@ -20,6 +20,7 @@ namespace Prizmer.Ports
     {
         int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0);
         string GetName();
+        string GetFullName();
 
         string GetConnectionType();
         bool ReInitialize();
@@ -109,11 +110,24 @@ namespace Prizmer.Ports
                     //WriteToLog("IpLocalEndp: " + ipLocalEndpoint.ToString() + ";  Remote: " + remoteEndPoint.ToString() );
 
                     sender.Bind(ipLocalEndpoint);
-                    sender.Connect(remoteEndPoint);
+                    
+                    //old version of connection 
+                    //sender.Connect(remoteEndPoint);
 
-                    dtCreated = DateTime.Now;
+                    // Connect using a timeout (5 seconds)
+                    IAsyncResult result = sender.BeginConnect(remoteEndPoint, null, null);
+                    bool success = result.AsyncWaitHandle.WaitOne(2000, true);
 
-                    return true;
+                    if (sender.Connected)
+                    {
+                        dtCreated = DateTime.Now;
+                        return true;
+                    }
+                    else
+                    {
+                        WriteToLog("ReInitialize: не удалось установить соединение");
+                        return false;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -319,6 +333,7 @@ namespace Prizmer.Ports
             {
                 //погружаемся в сон на 5 минут, чтобы "дать отдохнуть" принимающим устройствам
                 //WriteToLog("WriteReadData: погружаемся в сон на 5 минут, чтобы дать отдохнуть принимающим устройствам");
+                
                 if (sender != null && sender.Connected) sender.Close();
                 Thread.Sleep(1000 * 60 * 5);
                 dtCreated = DateTime.Now;
@@ -455,6 +470,14 @@ namespace Prizmer.Ports
         public object GetPortObject()
         {
             return sender;
+        }
+
+        public string GetFullName()
+        {
+            if (sender != null)
+                return m_address.ToString() + ":" + m_port;
+            else
+                return "";
         }
     }
 
@@ -890,6 +913,12 @@ namespace Prizmer.Ports
         {
             throw new NotImplementedException();
         }
+
+
+        public string GetFullName()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ComPort : VirtualPort, IDisposable 
@@ -1075,6 +1104,15 @@ namespace Prizmer.Ports
         public object GetPortObject()
         {
             return serialPort;
+        }
+
+
+        public string GetFullName()
+        {
+            if (serialPort != null)
+                return serialPort.PortName;
+            else
+                return "";
         }
     }
 
