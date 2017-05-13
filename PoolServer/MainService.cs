@@ -1912,6 +1912,9 @@ namespace Prizmer.PoolServer
 
             while (!bStopServer)
             {
+                apti.currentMeterNumber = (int)MetersCounter + 1;
+                mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
+
                 //здесь надо выбрать - какой драйвер будет использоваться
                 TypeMeter typemeter = ServerStorage.GetMetersTypeByGUID(metersbyport[MetersCounter].guid_types_meters);
                 IMeter meter = null;
@@ -1945,6 +1948,7 @@ namespace Prizmer.PoolServer
 
                 if (meter == null) goto NetxMeter;
 
+
                 /*если соединяться с конечной точкой вначале, то консольная программа rds не сможет с ней соединиться
                  * поэтому создание порта и подключение к нему осуществляется на первой итерации цикла при условии,
                  * что счетчик не саяны. Предполагаются что на одном порту будут висеть только саяны, если будут другие приборы,
@@ -1962,13 +1966,13 @@ namespace Prizmer.PoolServer
                 {
                     m_vport = new Prizmer.Ports.ComPort(byte.Parse("250"), 2400, 8, 1, 1, 1, 1, 1);
 
-                    apti = new AnalizatorPollThreadInfo(m_vport);
                     apti.vp = m_vport;
                     apti.commentList.Add("Порт для поддержки RDS");
                     mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
                 }
 
-
+                apti.currentMeterName = metersbyport[MetersCounter].name + ": a: " + metersbyport[MetersCounter].address + "; s/n: " + metersbyport[MetersCounter].factory_number_manual;
+                mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
  
                 meter.Init(metersbyport[MetersCounter].address, metersbyport[MetersCounter].password, m_vport);
                 logger.Initialize(m_vport.GetName(), metersbyport[MetersCounter].address.ToString(), typemeter.driver_name, metersbyport[MetersCounter].factory_number_manual, "main");
@@ -2128,7 +2132,7 @@ namespace Prizmer.PoolServer
         CloseThreadPoint:
             if (bStopServer)
             {
-                apti.commentList.Add("Остановка, по требованию пользователя");
+                apti.commentList.Add("Остановка: по требованию пользователя");
             }
 
             mfPrms.frmAnalizator.moveThreadToDeadList(apti);

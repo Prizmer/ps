@@ -137,7 +137,11 @@ namespace Prizmer.PoolServer
                 prms.mode = 0;
 
                 groupBox1.Enabled = false;
-                this.Height = 164;
+
+                Rectangle screenRectangle = RectangleToScreen(this.ClientRectangle);
+                int titleHeight = screenRectangle.Top - this.Top;
+
+                this.Height = titleHeight + cbServerStarted.Location.Y + cbServerStarted.Height + statusStrip1.Height + 5;
 
                 tsLabel1.Text = "Режим: автоматический опрос";
 
@@ -146,7 +150,7 @@ namespace Prizmer.PoolServer
             else
             {
                 groupBox1.Enabled = true;
-                this.Height = 408;
+                this.Height = 412;
 
                 tsLabel1.Text = "Дождитесь закрытия портов...";
 
