@@ -99,10 +99,7 @@ namespace Prizmer.PoolServer
 
                     cbServerStarted.Enabled = true;
                 }
-
-
             }
-
         }
 
 
@@ -123,6 +120,12 @@ namespace Prizmer.PoolServer
                     {
                         ms.StopServer();
                     }
+                }
+                else
+                {
+                    ms.StopServer(true);
+                   // bReadyToExit = true;
+                   // Application.Exit();
                 }
             }
             else

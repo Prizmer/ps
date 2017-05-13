@@ -443,7 +443,28 @@ namespace Prizmer.PoolServer
 
             int periods = 120;
 
-            bool bAborted = false;
+
+            if (doAbort)
+            {
+                for (int i = 0; i < PortsThreads.Count; i++)
+                {
+                    try
+                    {
+                        PortsThreads[i].Abort();
+                    }
+                    catch (Exception ex) { }
+                }         
+
+                    Thread.Sleep(2000);
+
+                    if (stoppingEnded != null)
+                    {
+                        mea.success = true;
+                        stoppingEnded(this, mea);
+                    }
+
+                    return;
+            }
 
             for (int j = 0; j < periods; j++)
             {
@@ -459,30 +480,6 @@ namespace Prizmer.PoolServer
                 }
                 else
                 {
-                    if (doAbort)
-                    {
-                        if (!bAborted)
-                        {
-                            for (int i = 0; i < PortsThreads.Count; i++)
-                            {
-                                try
-                                {
-                                    PortsThreads[i].Abort();
-                                }
-                                catch (Exception ex) { }
-                            }
-
-                            bAborted = true;
-
-                            Thread.Sleep(1000);
-                            continue;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
                     Thread.Sleep(1000);
                 }
             }
@@ -496,7 +493,9 @@ namespace Prizmer.PoolServer
         }
 
         public void StopServer(bool doAbort = false)
-        {           
+        {
+            if (stopServerThread != null) stopServerThread.Abort();
+
             stopServerThread = new Thread(new ParameterizedThreadStart(StopServerThreadProc));
             stopServerThread.Start((object)doAbort);
         }
@@ -1912,8 +1911,9 @@ namespace Prizmer.PoolServer
 
             while (!bStopServer)
             {
-                apti.currentMeterNumber = (int)MetersCounter + 1;
-                mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
+                //с этим тоже проблемы
+                //apti.currentMeterNumber = (int)MetersCounter + 1;
+                //mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
 
                 //здесь надо выбрать - какой драйвер будет использоваться
                 TypeMeter typemeter = ServerStorage.GetMetersTypeByGUID(metersbyport[MetersCounter].guid_types_meters);
@@ -1971,8 +1971,9 @@ namespace Prizmer.PoolServer
                     mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
                 }
 
-                apti.currentMeterName = metersbyport[MetersCounter].name + ": a: " + metersbyport[MetersCounter].address + "; s/n: " + metersbyport[MetersCounter].factory_number_manual;
-                mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
+                //возникают проблемы с этим
+               // apti.currentMeterName = metersbyport[MetersCounter].name + ": a: " + metersbyport[MetersCounter].address + "; s/n: " + metersbyport[MetersCounter].factory_number_manual;
+              //  mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
  
                 meter.Init(metersbyport[MetersCounter].address, metersbyport[MetersCounter].password, m_vport);
                 logger.Initialize(m_vport.GetName(), metersbyport[MetersCounter].address.ToString(), typemeter.driver_name, metersbyport[MetersCounter].factory_number_manual, "main");
