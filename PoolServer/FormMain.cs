@@ -109,23 +109,26 @@ namespace Prizmer.PoolServer
         bool bReadyToExit = false;
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-
             if (!bReadyToExit)
             {
                 e.Cancel = true;
 
-                if (cbServerStarted.Checked)
+                if (!ThreadsAreClosing)
                 {
-                    cbServerStarted.Checked = false;
-                }
-                else
-                {
-                    ms.StopServer();
+                    if (cbServerStarted.Checked)
+                    {
+                        cbServerStarted.Checked = false;
+                    }
+                    else
+                    {
+                        ms.StopServer();
+                    }
                 }
             }
-
-            storage.Close();           
-            bReadyToExit = true;
+            else
+            {
+                storage.Close();  
+            }
         }
 
         private void cbServerStarted_CheckedChanged(object sender, EventArgs e)
@@ -218,14 +221,25 @@ namespace Prizmer.PoolServer
         public void threadClosingEnd(object sender, MyEventArgs e)
         {
             ThreadsAreClosing = false;
-            if (e.success)
-                tsLabel1.Text = "Режим: полностью остановлен";
-            else
-                tsLabel1.Text = "Не удалось закрыть порты, перезапустите";
 
-            if (bReadyToExit)
-                System.Windows.Forms.Application.Exit();
-                   
+            bReadyToExit = false;
+            
+            if (e.success)
+            {
+                tsLabel1.Text = "Режим: полностью остановлен";
+            }
+            else
+            {
+                tsLabel1.Text = "Не удалось закрыть все порты, перезапустите";
+            }
+
+            if (!e.success)
+            {
+                ms.StopServer(true);
+                return;
+            }
+
+            bReadyToExit = true;
         }
 
         void ms_pollingStarted(object sender, MyEventArgs e)
