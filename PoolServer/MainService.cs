@@ -1368,6 +1368,8 @@ namespace Prizmer.PoolServer
             return 0;
         }
 
+
+
         private int pollHalfsForDates(PollMethodsParams pmPrms, DateTime dateFrom, DateTime dateTo)
         {
             if (bStopServer) return 1;
@@ -1410,6 +1412,7 @@ namespace Prizmer.PoolServer
 
                         Value[] valuesInDB = pmPrms.ServerStorage.GetExistsVariousValuesDT(takenparams[takenPrmsIndex], date_from, date_to);
                         int valInDbCnt = valuesInDB.Count<Value>();
+
 
                         if (valInDbCnt < slicesNumber)
                         {
@@ -1461,6 +1464,10 @@ namespace Prizmer.PoolServer
                                 pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
                             }
 
+                        }
+                        else
+                        {
+                            //для данного параметра все получасовки в базе
                         }
                     }
                 }
@@ -2050,7 +2057,15 @@ namespace Prizmer.PoolServer
                     }
                     else if (typemeter.driver_name == "m230")
                     {
-                        int status = pollHalfsM230New(pmPrms);
+                        //дочитка за вчера
+                        DateTime dtCur = DateTime.Now;
+                        DateTime dtStartY = new DateTime(dtCur.Year, dtCur.Month, dtCur.Day, 0, 0, 0).AddDays(-1);
+                        DateTime dtEndY = new DateTime(dtCur.Year, dtCur.Month, dtCur.Day, 23, 59, 59).AddDays(-1);
+
+                        int status = pollHalfsForDates(pmPrms, dtStartY, dtEndY);
+                        if (status == 1) goto CloseThreadPoint;
+
+                        status = pollHalfsM230New(pmPrms);
                         if (status == 1) goto CloseThreadPoint;
                     }
                     else
