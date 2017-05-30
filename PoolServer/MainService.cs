@@ -1398,6 +1398,7 @@ namespace Prizmer.PoolServer
             const byte SLICE_PER_HALF_AN_HOUR_TYPE = 4;                         //тип значения в БД (получасовой)
             const byte SLICE_PER_HALF_AN_HOUR_PERIOD = 30;                      //интервал записи срезов
             bool successFlag = false;
+            bool lFlag = true;
 
             //чтение получасовых срезов, подлежащих чтению, относящихся к конкретному прибору
             TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, SLICE_PER_HALF_AN_HOUR_TYPE);
@@ -1407,7 +1408,7 @@ namespace Prizmer.PoolServer
                 //читать данные только если прибор ответил
                 if (pmPrms.meter.OpenLinkCanal())
                 {
-                   // pmPrms.logger.LogInfo("RSL: 1. Открыт канал для чтения получасовок ПО ДАТАМ (метод 3)");
+                    if (lFlag) pmPrms.logger.LogInfo("RSL: 1. Открыт канал для чтения получасовок ПО ДАТАМ (метод 3)");
 
                     DateTime dt_cur = DateTime.Now;
 
@@ -1426,7 +1427,7 @@ namespace Prizmer.PoolServer
                     for (int takenPrmsIndex = 0; takenPrmsIndex < takenparams.Length; takenPrmsIndex++)
                     {
                         if (bStopServer) return 1;
-                       // pmPrms.logger.LogInfo("RSL: 2. Вошли в цикл перебора считываемых параметров, итерация " + takenPrmsIndex.ToString() + " из " + takenparams.Length);
+                        if (lFlag) pmPrms.logger.LogInfo("RSL: 2. Вошли в цикл перебора считываемых параметров, итерация " + takenPrmsIndex.ToString() + " из " + takenparams.Length);
 
                         Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[takenPrmsIndex].guid_params);
                         if (param.guid == Guid.Empty) continue;
@@ -1440,16 +1441,17 @@ namespace Prizmer.PoolServer
                             if (lrps.Count == 0)
                             {
                                 bool res = pmPrms.meter.ReadPowerSlice(date_from, date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD);
-                               // if (res) pmPrms.logger.LogInfo("RSL: 3. Данные прочитаны, осталось занести в базу " + lrps.Count + " значений");
+                                if (lFlag) if (res) pmPrms.logger.LogInfo("RSL: 3. Метод ReadPowerSlice завершен, получено " + lrps.Count + " значений");
                             }
 
                             if (lrps.Count > 0)
                             {
-                               // pmPrms.logger.LogInfo("RSL: 4. Данные успешно занесены в БД");
+                                if (lFlag) pmPrms.logger.LogInfo("RSL: 4. Данные успешно занесены в БД");
                                 successFlag = true;
                             }
                             else
                             {
+                                if (lFlag) pmPrms.logger.LogInfo("RSL: 4. переход к след.параметру");
                                 continue;
                             }
 
@@ -1467,7 +1469,7 @@ namespace Prizmer.PoolServer
                                 {
                                     if (valuesInDB.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0)
                                     {
-                                        //pmPrms.logger.LogInfo("RSL: 3.1. Получасовка за " + val.dt.ToString() + " уже есть в базе");
+                                        if (lFlag) pmPrms.logger.LogInfo("RSL: 3.1. Получасовка за " + val.dt.ToString() + " уже есть в базе");
                                         continue;
                                     }
                                 }
@@ -1489,11 +1491,13 @@ namespace Prizmer.PoolServer
                         else
                         {
                             //для данного параметра все получасовки в базе
+                            if (lFlag) pmPrms.logger.LogInfo("RSL: 3: для данного параметра собраны все получасовки на текущий момент");
                         }
                     }
                 }
                 else
                 {
+                    if (lFlag) pmPrms.logger.LogInfo("RSL: 0: не удалось открыть канал...");
                     return 3;
                 }
             }
@@ -1970,6 +1974,7 @@ namespace Prizmer.PoolServer
                     case "sayani_kombik": meter = new sayani_kombik(); break;
                     case "m230": meter = new m234(); break;
                     case "m234": meter = new m234(); break;
+                    case "m230_stable": meter = new m230(); break;
                     case "um40rtu" : meter = new UM_RTU40(); break;
                 }
 
