@@ -1498,7 +1498,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                                     }
                                 }
 
-                                if (val.dt > date_from)
+                                if (val.dt > date_to)
                                 {
                                     continue;
                                 }
