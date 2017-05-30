@@ -1498,6 +1498,11 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                                     }
                                 }
 
+                                if (val.dt > date_from)
+                                {
+                                    continue;
+                                }
+
                                 switch (param.param_address)
                                 {
                                     case 0: { val.value = rps.APlus; break; }
