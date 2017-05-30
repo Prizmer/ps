@@ -1434,16 +1434,25 @@ namespace Prizmer.PoolServer
                         if (param.guid == Guid.Empty) continue;
 
                         Value[] valuesInDB = pmPrms.ServerStorage.GetExistsVariousValuesDT(takenparams[takenPrmsIndex], date_from, date_to);
+                        //для поддержки драйвера 230, который выдает значения с заданного момента до настоящщего времени
+                        Value[] valuesInDBToCurrentTime = pmPrms.ServerStorage.GetExistsVariousValuesDT(takenparams[takenPrmsIndex], date_from, DateTime.Now);
+                        
                         int valInDbCnt = valuesInDB.Count<Value>();
-                       
+                        int valInDbCntToCurTime = valuesInDBToCurrentTime.Count<Value>();
+
                         if (lFlag) pmPrms.logger.LogInfo("RSL: 2.1. Число значений в базе за даты (" + date_from.ToShortDateString() + "; " +
     date_to.ToShortDateString() + "): " + valInDbCnt);
-                        if (lFlag) pmPrms.logger.LogInfo("RSL: 2.2. Должно быть срезов сейчас: " + slicesNumber);
-
+                        if (lFlag) pmPrms.logger.LogInfo("RSL: 2.2. Число значений в базе за даты (" + date_from.ToShortDateString() + "; " +
+DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
+                        if (lFlag) pmPrms.logger.LogInfo("RSL: 2.3. Должно быть срезов сейчас: " + slicesNumber);
+                 
 
                         if (valInDbCnt < slicesNumber)
                         {
   
+                             //в случае с классическим драйвером M230 - по боку date_to. Он ищет с date_from до последней записи
+                             //но в целом такая ситуация устраивает, в базу записывается сразу на несколько дней
+                             //когда опрашивается следующая дата, нужное количество записей в БД уже имеется
                              bool res = pmPrms.meter.ReadPowerSlice(date_from, date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD);
                              if (lFlag) if (res) pmPrms.logger.LogInfo("RSL: 3. Метод ReadPowerSlice завершен, получено " + lrps.Count + " значений");
      
@@ -1467,9 +1476,9 @@ namespace Prizmer.PoolServer
                                 val.id_taken_params = takenparams[takenPrmsIndex].id;
                                 val.status = Convert.ToBoolean(rps.status);
 
-                                if (valuesInDB.Length > 0)
+                                if (valuesInDBToCurrentTime.Length > 0)
                                 {
-                                    if (valuesInDB.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0)
+                                    if (valuesInDBToCurrentTime.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0)
                                     {
                                         //if (lFlag) pmPrms.logger.LogInfo("RSL: 4. Получасовка за " + val.dt.ToString() + " уже есть в базе");
                                         alreadyExistInDbValueCnt++;
