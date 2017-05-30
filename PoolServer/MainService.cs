@@ -1423,10 +1423,9 @@ namespace Prizmer.PoolServer
                     int diff_minutes = (int)Math.Ceiling(span.TotalMinutes);
                     int slicesNumber = diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD;
 
+                    List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
                     for (int takenPrmsIndex = 0; takenPrmsIndex < takenparams.Length; takenPrmsIndex++)
                     {
-                        List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
-
                         if (bStopServer) return 1;
                         if (lFlag) pmPrms.logger.LogInfo("RSL: 2. Вошли в цикл перебора считываемых параметров, итерация " + (takenPrmsIndex+1).ToString() + " из " + takenparams.Length);
 
@@ -1453,15 +1452,28 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                              //в случае с классическим драйвером M230 - по боку date_to. Он ищет с date_from до последней записи
                              //но в целом такая ситуация устраивает, в базу записывается сразу на несколько дней
                              //когда опрашивается следующая дата, нужное количество записей в БД уже имеется
-                             bool res = pmPrms.meter.ReadPowerSlice(date_from, date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD);
-                             if (lFlag) if (res) pmPrms.logger.LogInfo("RSL: 3. Метод ReadPowerSlice завершен, получено " + lrps.Count + " значений");
-     
+
+                            bool res = false;
 
                             if (lrps.Count == 0)
-                            {                  
-                                if (lFlag) pmPrms.logger.LogInfo("RSL: 4. Драйвер не вернул срезы, переход к след.параметру");
+                            {
+                                res = pmPrms.meter.ReadPowerSlice(date_from, date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD);
+                                if (lFlag) if (res) pmPrms.logger.LogInfo("RSL: 3. Метод ReadPowerSlice завершен, получено " + lrps.Count + " значений");
+                            }
+
+                            if (lrps.Count > 0)
+                            {
+                                if (lFlag) pmPrms.logger.LogInfo("RSL: 4. Данные для параметра " + (takenPrmsIndex + 1) + " из " + takenparams.Length + " уже получены");
+                                successFlag = true;
+                            }
+                            else
+                            {
+                                if (lFlag) pmPrms.logger.LogInfo("RSL: 4.  Данные для параметра " + (takenPrmsIndex + 1) + " из " + takenparams.Length + " НЕ получены, переход к след. параметру");
                                 continue;
                             }
+
+
+
 
                             //счетчик уже имеющихся в БД записей
                             int alreadyExistInDbValueCnt = 0;
