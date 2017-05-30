@@ -1498,10 +1498,6 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                                     }
                                 }
 
-                                if (val.dt > date_to)
-                                {
-                                    continue;
-                                }
 
                                 switch (param.param_address)
                                 {
