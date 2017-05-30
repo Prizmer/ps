@@ -1428,7 +1428,7 @@ namespace Prizmer.PoolServer
                         List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
 
                         if (bStopServer) return 1;
-                        if (lFlag) pmPrms.logger.LogInfo("RSL: 2. Вошли в цикл перебора считываемых параметров, итерация " + takenPrmsIndex.ToString() + " из " + takenparams.Length);
+                        if (lFlag) pmPrms.logger.LogInfo("RSL: 2. Вошли в цикл перебора считываемых параметров, итерация " + (takenPrmsIndex+1).ToString() + " из " + takenparams.Length);
 
                         Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[takenPrmsIndex].guid_params);
                         if (param.guid == Guid.Empty) continue;
@@ -1454,6 +1454,9 @@ namespace Prizmer.PoolServer
                                 continue;
                             }
 
+                            //счетчик уже имеющихся в БД записей
+                            int alreadyExistInDbValueCnt = 0;
+
                             //если срезы из указанного диапазона дат прочитаны успешно
                             foreach (RecordPowerSlice rps in lrps)
                             {
@@ -1468,7 +1471,8 @@ namespace Prizmer.PoolServer
                                 {
                                     if (valuesInDB.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0)
                                     {
-                                        if (lFlag) pmPrms.logger.LogInfo("RSL: 4. Получасовка за " + val.dt.ToString() + " уже есть в базе");
+                                        //if (lFlag) pmPrms.logger.LogInfo("RSL: 4. Получасовка за " + val.dt.ToString() + " уже есть в базе");
+                                        alreadyExistInDbValueCnt++;
                                         continue;
                                     }
                                 }
@@ -1486,7 +1490,7 @@ namespace Prizmer.PoolServer
                                 pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
                             }
 
-                            if (lFlag) pmPrms.logger.LogInfo("RSL: 5. Значения успешно занесены в VariousValues");
+                            if (lFlag) pmPrms.logger.LogInfo("RSL: 5. Значения успешно занесены в VariousValues, " + alreadyExistInDbValueCnt + " пропущены, так как уже существуют");
 
                         }
                         else
