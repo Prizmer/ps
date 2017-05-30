@@ -1903,7 +1903,6 @@ namespace Prizmer.PoolServer
                 goto CloseThreadPoint;
             }
 
-
             uint MetersCounter = 0;
             if (B_DEBUG_MODE_TCP) { 
                 //в режиме отладки найдем # счетчика по его адресу

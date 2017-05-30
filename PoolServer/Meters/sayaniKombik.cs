@@ -35,9 +35,18 @@ namespace Prizmer.Meters
         public int[] NC;     //NC1-NC2
         public float VoltsBattery;
     };
+
+    public enum SayaniMeterTypes
+    {
+        RMDImpulse2Channel = 0x72,
+        RMDCombic = 0x9A
+    }
+
     public struct MeterInfo
     {
         public string serialNumber;
+        public int sayaniMeterTypeInt;
+        
     };
 
     [Serializable]
@@ -45,6 +54,7 @@ namespace Prizmer.Meters
     {
         public List<string> paramList;
     }
+
 
     public class sayani_kombik : CMeter, IMeter
     {
@@ -89,6 +99,7 @@ namespace Prizmer.Meters
    
         }
 
+
         int readDailyTimeoutInDays = 3;
 
         //если прибор не ответил один раз, он блокируется на это время
@@ -108,60 +119,74 @@ namespace Prizmer.Meters
         XmlSerializer formatter = new XmlSerializer(typeof(DumpMeta));
 
         List<MeterParam> EEPROMParamList = null;
-        public void CreateEEPROMParamList(ref List<MeterParam> paramsList)
+        public void CreateEEPROMParamList(ref List<MeterParam> paramsList, SayaniMeterTypes sMeterType = SayaniMeterTypes.RMDCombic)
         {
             EEPROMParamList = new List<MeterParam>();
 
             int k1 = 4 * 1000;
 
-            //по логике программы SAYANY Wizor, коэффициент 4*1000, однако на экране прибора
-            //значение отображается с коэффициентом 16*1000
-            EEPROMParamList.Add(new MeterParam(0x1B8, 4, "Q1", "ГДж", 16 * 1000));
-            EEPROMParamList.Add(new MeterParam(0x1BC, 4, "Q2", "ГДж", 16 * 1000));
+            if (sMeterType == SayaniMeterTypes.RMDImpulse2Channel)
+            {
+                EEPROMParamList.Add(new MeterParam(0x1B0, 4, "V1", "м3", k1));
+                EEPROMParamList.Add(new MeterParam(0x1B4, 4, "V2", "м3", k1));
+            }
+            else
+            {
+                //по логике программы SAYANY Wizor, коэффициент 4*1000, однако на экране прибора
+                //значение отображается с коэффициентом 16*1000
+                EEPROMParamList.Add(new MeterParam(0x1B8, 4, "Q1", "ГДж", 16 * 1000));
+                EEPROMParamList.Add(new MeterParam(0x1BC, 4, "Q2", "ГДж", 16 * 1000));
 
-            EEPROMParamList.Add(new MeterParam(0x1C0, 4, "M1", "Т", k1));
-            EEPROMParamList.Add(new MeterParam(0x1C4, 4, "M2", "Т", k1));
-            EEPROMParamList.Add(new MeterParam(0x1C8, 4, "M3", "Т", k1));
-            EEPROMParamList.Add(new MeterParam(0x1CC, 4, "M4", "Т", k1));
+                EEPROMParamList.Add(new MeterParam(0x1C0, 4, "M1", "Т", k1));
+                EEPROMParamList.Add(new MeterParam(0x1C4, 4, "M2", "Т", k1));
+                EEPROMParamList.Add(new MeterParam(0x1C8, 4, "M3", "Т", k1));
+                EEPROMParamList.Add(new MeterParam(0x1CC, 4, "M4", "Т", k1));
 
-            EEPROMParamList.Add(new MeterParam(0x1D0, 4, "V1", "м3", k1));
-            EEPROMParamList.Add(new MeterParam(0x1D4, 4, "V2", "м3", k1));
-            EEPROMParamList.Add(new MeterParam(0x1D8, 4, "V3", "м3", k1));
-            EEPROMParamList.Add(new MeterParam(0x1DC, 4, "V4", "м3", k1));
+                EEPROMParamList.Add(new MeterParam(0x1D0, 4, "V1", "м3", k1));
+                EEPROMParamList.Add(new MeterParam(0x1D4, 4, "V2", "м3", k1));
+                EEPROMParamList.Add(new MeterParam(0x1D8, 4, "V3", "м3", k1));
+                EEPROMParamList.Add(new MeterParam(0x1DC, 4, "V4", "м3", k1));
+            }
         }
 
         List<MeterParam> HourRecordParamList = null;
-        public void CreateHourRecordParamList(ref List<MeterParam> paramsList)
+        public void CreateHourRecordParamList(ref List<MeterParam> paramsList, SayaniMeterTypes sMeterType = SayaniMeterTypes.RMDCombic)
         {
             HourRecordParamList = new List<MeterParam>();
 
-            HourRecordParamList.Add(new MeterParam(0, 2, "Q1", "ГДж", 4*1000));
-            HourRecordParamList.Add(new MeterParam(2, 2, "Q2", "ГДж", 4*1000));
+            if (sMeterType == SayaniMeterTypes.RMDImpulse2Channel)
+            {
+                return;
+            }
+            else
+            {
+                HourRecordParamList.Add(new MeterParam(0, 2, "Q1", "ГДж", 4 * 1000));
+                HourRecordParamList.Add(new MeterParam(2, 2, "Q2", "ГДж", 4 * 1000));
 
-            HourRecordParamList.Add(new MeterParam(4, 2, "T1", "C", -56, 256));
-            HourRecordParamList.Add(new MeterParam(6, 2, "T2", "C", -56, 256));
-            HourRecordParamList.Add(new MeterParam(8, 2, "T3", "C", -56, 256));
-            HourRecordParamList.Add(new MeterParam(10, 2, "T4", "C", -56, 256));
+                HourRecordParamList.Add(new MeterParam(4, 2, "T1", "C", -56, 256));
+                HourRecordParamList.Add(new MeterParam(6, 2, "T2", "C", -56, 256));
+                HourRecordParamList.Add(new MeterParam(8, 2, "T3", "C", -56, 256));
+                HourRecordParamList.Add(new MeterParam(10, 2, "T4", "C", -56, 256));
 
-            HourRecordParamList.Add(new MeterParam(12, 2, "М1", "Л", 4 * 1000));
-            HourRecordParamList.Add(new MeterParam(14, 2, "М2", "Л", 4 * 1000));
-            HourRecordParamList.Add(new MeterParam(16, 2, "М3", "Л", 4 * 1000));
-            HourRecordParamList.Add(new MeterParam(18, 2, "М4", "Л", 4 * 1000));
+                HourRecordParamList.Add(new MeterParam(12, 2, "М1", "Л", 4 * 1000));
+                HourRecordParamList.Add(new MeterParam(14, 2, "М2", "Л", 4 * 1000));
+                HourRecordParamList.Add(new MeterParam(16, 2, "М3", "Л", 4 * 1000));
+                HourRecordParamList.Add(new MeterParam(18, 2, "М4", "Л", 4 * 1000));
 
-            HourRecordParamList.Add(new MeterParam(20, 2, "V5", "м3", 4));
+                HourRecordParamList.Add(new MeterParam(20, 2, "V5", "м3", 4));
 
-            HourRecordParamList.Add(new MeterParam(22, 1, "P1", "0.1*атм", 4));
-            HourRecordParamList.Add(new MeterParam(23, 1, "P2", "0.1*атм", 4));
-            HourRecordParamList.Add(new MeterParam(24, 1, "P3", "0.1*атм", 4));
-            HourRecordParamList.Add(new MeterParam(25, 1, "P4", "0.1*атм", 4));
+                HourRecordParamList.Add(new MeterParam(22, 1, "P1", "0.1*атм", 4));
+                HourRecordParamList.Add(new MeterParam(23, 1, "P2", "0.1*атм", 4));
+                HourRecordParamList.Add(new MeterParam(24, 1, "P3", "0.1*атм", 4));
+                HourRecordParamList.Add(new MeterParam(25, 1, "P4", "0.1*атм", 4));
 
-            HourRecordParamList.Add(new MeterParam(26, 1, "НС1"));
-            HourRecordParamList.Add(new MeterParam(27, 1, "НС2"));
+                HourRecordParamList.Add(new MeterParam(26, 1, "НС1"));
+                HourRecordParamList.Add(new MeterParam(27, 1, "НС2"));
 
-            HourRecordParamList.Add(new MeterParam(28, 1, "Tвыч1", "мин"));
-            HourRecordParamList.Add(new MeterParam(29, 1, "Uбат", "В", 100));
-            HourRecordParamList.Add(new MeterParam(30, 1, "Tвыч2", "мин"));
-
+                HourRecordParamList.Add(new MeterParam(28, 1, "Tвыч1", "мин"));
+                HourRecordParamList.Add(new MeterParam(29, 1, "Uбат", "В", 100));
+                HourRecordParamList.Add(new MeterParam(30, 1, "Tвыч2", "мин"));
+            }
 
         }
 
@@ -369,6 +394,53 @@ namespace Prizmer.Meters
             return false;
         }
 
+        public bool FillParamsStructureImpulse(FileStream fsDump, out Params structParams, out string strRepresentation)
+        {
+            structParams = new Params();
+            strRepresentation = "";
+            byte[] sourceBytes = null;
+
+            if (fsDump != null)
+            {
+                try
+                {
+                    //СНАЧАЛА ВСЕ ПАРАМЕТРЫ ИЗ EEPROM
+
+
+
+                    //V
+                    structParams.V = new float[2];
+                    MeterParam V1 = EEPROMParamList.Find((x) => { return x.PName == "V1"; });
+
+                    fsDump.Position = V1.PIndex;
+
+                    V1.PValue = GiveMeNextValue(fsDump, V1.PLength, ref sourceBytes);
+                    V1.PValue /= V1.Coefficient;
+                    structParams.V[0] = RoundFloat(V1.PValue);
+
+                    MeterParam V2 = EEPROMParamList.Find((x) => { return x.PName == "V2"; });
+                    V2.PValue = GiveMeNextValue(fsDump, V2.PLength, ref sourceBytes);
+                    V2.PValue /= V2.Coefficient;
+                    structParams.V[1] = RoundFloat(V2.PValue);
+
+                    for (int i = 0; i < structParams.V.Length; i++)
+                        strRepresentation += String.Format("V{0}: {1}{2}; ", i + 1, structParams.V[i], " " + V1.PUnit);
+
+                }
+                catch (Exception ex)
+                {
+                    fsDump.Close();
+                    return false;
+                }
+
+
+                fsDump.Close();
+                return true;
+            }
+
+            return false;
+        }
+
         private int GiveMeNextValue(FileStream fs, int valBytesCount, ref byte[] sourceBytes)
         {      
             try
@@ -400,24 +472,40 @@ namespace Prizmer.Meters
             }
         }
 
-        private bool GetMeterInfo(FileStream fs, ref MeterInfo mInfo)
+        public bool GetMeterInfo(FileStream fs, ref MeterInfo mInfo)
         {
-            int meterInfoFirstByte = 0x0123;
+            int meterTypeByteIndex = 0x0120;
+            int meterSerialFirstByte = 0x0123;
             mInfo = new MeterInfo();
-            fs.Seek(meterInfoFirstByte, SeekOrigin.Begin);
 
             try
             {
+                fs.Seek(meterTypeByteIndex, SeekOrigin.Begin);
+                mInfo.sayaniMeterTypeInt = (int)fs.ReadByte();
+
+                try
+                {
+                    SayaniMeterTypes smt = (SayaniMeterTypes)mInfo.sayaniMeterTypeInt;
+
+                    CreateEEPROMParamList(ref EEPROMParamList, smt);
+                    CreateHourRecordParamList(ref HourRecordParamList, smt);
+
+                }catch (Exception ex)
+                {
+                    WriteToLog("Исключение при попытке преобразования типа счетчика");
+                }
+
+                fs.Seek(meterSerialFirstByte, SeekOrigin.Begin);
                 int fsPosition = (int)fs.Position;
                 byte[] buffer = new byte[fs.Length];
 
                 int bytesRead = fs.Read(buffer, fsPosition, 3);
 
                 byte[] tmpSerialBuffer1 = new byte[1];
-                byte[] tmpSerialBuffer2 = new byte[2];
+                byte[] tmpSerialBuffer2 = new byte[4];
                 Array.Copy(buffer, fsPosition + 2, tmpSerialBuffer1, 0, 1);
                 Array.Copy(buffer, fsPosition, tmpSerialBuffer2, 0, 2);
-                Int16 serial2 = BitConverter.ToInt16(tmpSerialBuffer2, 0);
+                int serial2 = BitConverter.ToInt32(tmpSerialBuffer2, 0);
 
                 mInfo.serialNumber = BitConverter.ToString(tmpSerialBuffer1) + "-" + serial2.ToString();
 
@@ -613,8 +701,18 @@ namespace Prizmer.Meters
 
                 bool tmpRes = false;
                 if (GetMeterInfo(dumpFileStream, ref mi))
-                    if (FillParamsStructure(dumpFileStream, out prms, out strValues))
-                        tmpRes = true;
+                {
+                    if (mi.sayaniMeterTypeInt == (int)SayaniMeterTypes.RMDImpulse2Channel)
+                    {
+                        if (FillParamsStructureImpulse(dumpFileStream, out prms, out strValues))
+                            tmpRes = true;
+                    }
+                    else
+                    {
+                        if (FillParamsStructure(dumpFileStream, out prms, out strValues))
+                            tmpRes = true;
+                    }
+                }
 
                 dumpFileStream.Close();
 
@@ -630,45 +728,65 @@ namespace Prizmer.Meters
             }
         }
 
-        private bool GetParamValueFromParams(Params prms, ushort param, ushort tarif, out float recordValue)
+        private bool GetParamValueFromParams(Params prms, ushort param, ushort tarif, MeterInfo mi, out float recordValue)
         {
             recordValue = -1;
 
-            switch (param)
+            if (mi.sayaniMeterTypeInt == (int)SayaniMeterTypes.RMDImpulse2Channel)
             {
-                case 0:
-                    {
-                        //тепловая энергия
-                        float k = 1;
-                        if (tarif > 0 && tarif < 3)
+                switch (param)
+                {
+                    case 4:
                         {
-                            recordValue = prms.Q[tarif - 1] * k;
-                            return true;
+                            //объем энергия
+                            float k = 1;
+                            if (tarif > 0 && tarif < 3)
+                            {
+                                recordValue = prms.V[tarif - 1] * k;
+                                return true;
+                            }
+                            return false;
                         }
-                        return false;
-                    }
-                case 1:
-                    {
-                        //температура
-                        float k = 1;
-                        if (tarif > 0 && tarif < 5)
+                }
+            }
+            else
+            {
+                switch (param)
+                {
+                    case 0:
                         {
-                            recordValue = prms.T[tarif - 1] * k;
-                            return true;
+                            //тепловая энергия
+                            float k = 1;
+                            if (tarif > 0 && tarif < 3)
+                            {
+                                recordValue = prms.Q[tarif - 1] * k;
+                                return true;
+                            }
+                            return false;
                         }
-                        return false;
-                    }
-                case 2:
-                    {
-                        //масса
-                        float k = 1;
-                        if (tarif > 0 && tarif < 5)
+                    case 1:
                         {
-                            recordValue = prms.M[tarif - 1] * k;
-                            return true;
+                            //температура
+                            float k = 1;
+                            if (tarif > 0 && tarif < 5)
+                            {
+                                recordValue = prms.T[tarif - 1] * k;
+                                return true;
+                            }
+                            return false;
                         }
-                        return false;
-                    }
+                    case 2:
+                        {
+                            //масса
+                            float k = 1;
+                            if (tarif > 0 && tarif < 5)
+                            {
+                                recordValue = prms.M[tarif - 1] * k;
+                                return true;
+                            }
+                            return false;
+                        }
+                }
             }
 
             return false;
@@ -910,10 +1028,11 @@ namespace Prizmer.Meters
             MeterInfo tmpMi = new MeterInfo();
             Params tmpPrms = new Params();
 
-            if (!ParseDumpFile(batchConnList[0].FileNameDump, ref tmpMi, ref tmpPrms, true))
+             if (!ParseDumpFile(batchConnList[0].FileNameDump, ref tmpMi, ref tmpPrms, true))
+            //if (!ParseDumpFile(@"C:\Users\ikhromov\Desktop\2RMD\58831_retr.dat", ref tmpMi, ref tmpPrms, true))
                 return false;
 
-            if (!GetParamValueFromParams(tmpPrms, param, tarif, out recordValue))
+            if (!GetParamValueFromParams(tmpPrms, param, tarif, tmpMi, out recordValue))
                 return false;
 
             DeleteDumpFileAndLogs(batchConnList[0].FileNameDump);
@@ -1039,7 +1158,7 @@ namespace Prizmer.Meters
                         //прочитаем недостающий параметр из уже существующего дампа
                         //чтобы не дергать счетчик
                         if (ParseDumpFile(latestDumpFileName, ref tmpMi, ref tmpPrms, DELETE_DUMPS_AFTER_PARSING))
-                            if (GetParamValueFromParams(tmpPrms, param, tarif, out recordValue))
+                            if (GetParamValueFromParams(tmpPrms, param, tarif, tmpMi, out recordValue))
                                 return true;
                     }
                 }
@@ -1075,7 +1194,7 @@ namespace Prizmer.Meters
             if (!ParseDumpFile(batchConnList[0].FileNameDump, ref tmpMi, ref tmpPrms, DELETE_DUMPS_AFTER_PARSING))
                 return false;
 
-            if (!GetParamValueFromParams(tmpPrms, param, tarif, out recordValue))
+            if (!GetParamValueFromParams(tmpPrms, param, tarif, tmpMi, out recordValue))
                 return false;
 
             return true;
