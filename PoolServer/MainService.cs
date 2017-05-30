@@ -1423,9 +1423,10 @@ namespace Prizmer.PoolServer
                     int diff_minutes = (int)Math.Ceiling(span.TotalMinutes);
                     int slicesNumber = diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD;
 
-                    List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
                     for (int takenPrmsIndex = 0; takenPrmsIndex < takenparams.Length; takenPrmsIndex++)
                     {
+                        List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
+
                         if (bStopServer) return 1;
                         if (lFlag) pmPrms.logger.LogInfo("RSL: 2. Вошли в цикл перебора считываемых параметров, итерация " + takenPrmsIndex.ToString() + " из " + takenparams.Length);
 
@@ -1434,24 +1435,22 @@ namespace Prizmer.PoolServer
 
                         Value[] valuesInDB = pmPrms.ServerStorage.GetExistsVariousValuesDT(takenparams[takenPrmsIndex], date_from, date_to);
                         int valInDbCnt = valuesInDB.Count<Value>();
+                       
+                        if (lFlag) pmPrms.logger.LogInfo("RSL: 2.1. Число значений в базе за даты (" + date_from.ToShortDateString() + "; " +
+    date_to.ToShortDateString() + "): " + valInDbCnt);
+                        if (lFlag) pmPrms.logger.LogInfo("RSL: 2.2. Должно быть срезов сейчас: " + slicesNumber);
 
 
                         if (valInDbCnt < slicesNumber)
                         {
-                            if (lrps.Count == 0)
-                            {
-                                bool res = pmPrms.meter.ReadPowerSlice(date_from, date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD);
-                                if (lFlag) if (res) pmPrms.logger.LogInfo("RSL: 3. Метод ReadPowerSlice завершен, получено " + lrps.Count + " значений");
-                            }
+  
+                             bool res = pmPrms.meter.ReadPowerSlice(date_from, date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD);
+                             if (lFlag) if (res) pmPrms.logger.LogInfo("RSL: 3. Метод ReadPowerSlice завершен, получено " + lrps.Count + " значений");
+     
 
-                            if (lrps.Count > 0)
-                            {
-                                if (lFlag) pmPrms.logger.LogInfo("RSL: 4. Данные успешно занесены в БД");
-                                successFlag = true;
-                            }
-                            else
-                            {
-                                if (lFlag) pmPrms.logger.LogInfo("RSL: 4. переход к след.параметру");
+                            if (lrps.Count == 0)
+                            {                  
+                                if (lFlag) pmPrms.logger.LogInfo("RSL: 4. Драйвер не вернул срезы, переход к след.параметру");
                                 continue;
                             }
 
@@ -1469,7 +1468,7 @@ namespace Prizmer.PoolServer
                                 {
                                     if (valuesInDB.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0)
                                     {
-                                        if (lFlag) pmPrms.logger.LogInfo("RSL: 3.1. Получасовка за " + val.dt.ToString() + " уже есть в базе");
+                                        if (lFlag) pmPrms.logger.LogInfo("RSL: 4. Получасовка за " + val.dt.ToString() + " уже есть в базе");
                                         continue;
                                     }
                                 }
@@ -1486,6 +1485,8 @@ namespace Prizmer.PoolServer
                                 pmPrms.ServerStorage.AddVariousValues(val);
                                 pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
                             }
+
+                            if (lFlag) pmPrms.logger.LogInfo("RSL: 5. Значения успешно занесены в VariousValues");
 
                         }
                         else
@@ -1827,6 +1828,7 @@ namespace Prizmer.PoolServer
 
                 for (int d = 0; d <= totalD; d++)
                 {
+                    pmPrms.logger.LogInfo("Дата, за которую идет считывание: " + tmpDateTime.ToShortDateString());
                     float curvalue = 0;
 
                     if (mfPrms.paramType == 0)
