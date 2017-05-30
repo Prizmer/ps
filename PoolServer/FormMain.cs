@@ -180,11 +180,59 @@ namespace Prizmer.PoolServer
                 prms.isTcp = rbTCP.Checked;
                 prms.paramType = comboBox2.SelectedIndex;
 
+                ManualStartInProcess = true;
                 ms.StartServer(prms);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+            }
+
+        }
+
+
+        bool _manualStartInProcess = false;
+        bool ManualStartInProcess
+        {
+            get { return _manualStartInProcess; }
+            set
+            {
+                if (value == true)
+                {
+                    cbServerStarted.Enabled = !value;
+                    dateTimePicker1.Enabled = !value;
+                    dateTimePicker2.Enabled = !value;
+                    comboBox1.Enabled = !value;
+                    comboBox2.Enabled = !value;
+                    comboBox3.Enabled = !value;
+
+                    tbAddress.Enabled = !value;
+                    tbPort.Enabled = !value;
+
+                    btnStartReading.Enabled = !value;
+                    btnEndReading.Enabled = value;
+
+                    pbPreloader.Show();
+
+                }
+                else
+                {
+                    cbServerStarted.Enabled = !value;
+                    dateTimePicker1.Enabled = !value;
+                    dateTimePicker2.Enabled = !value;
+                    comboBox1.Enabled = !value;
+                    comboBox2.Enabled = !value;
+                    comboBox3.Enabled = !value;
+
+                    tbAddress.Enabled = !value;
+                    tbPort.Enabled = !value;
+
+                    btnStartReading.Enabled = !value;
+                    btnEndReading.Enabled = value;
+
+                    pbPreloader.Hide();
+
+                }
             }
 
         }
@@ -214,6 +262,8 @@ namespace Prizmer.PoolServer
             progressBar1.Value = 0;
             lblCnt.Text = "";
             lblCurCnt.Text = "";
+
+            ManualStartInProcess = false;
         }
 
         public void threadClosingStart(object sender, MyEventArgs e)

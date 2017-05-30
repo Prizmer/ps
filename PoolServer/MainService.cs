@@ -428,6 +428,27 @@ namespace Prizmer.PoolServer
             ServerStorage.Close();
         }
 
+        bool _manualStartInProcess = false;
+        bool ManualStartInProcess
+        {
+            get { return _manualStartInProcess; }
+            set
+            {
+                if (value)
+                {
+
+
+                }
+                else
+                {
+
+
+
+                }
+            }
+
+        }
+
 
         Thread stopServerThread;
 
