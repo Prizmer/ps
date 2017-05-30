@@ -54,11 +54,11 @@
             this.cbServerStarted = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ctxMenuAnalizator = new System.Windows.Forms.ToolStripMenuItem();
+            this.конфигураторToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pbPreloader = new System.Windows.Forms.PictureBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tsLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.конфигураторToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -266,6 +266,7 @@
             // 
             // btnEndReading
             // 
+            this.btnEndReading.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnEndReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEndReading.Location = new System.Drawing.Point(239, 184);
             this.btnEndReading.Name = "btnEndReading";
@@ -277,6 +278,7 @@
             // 
             // btnStartReading
             // 
+            this.btnStartReading.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnStartReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnStartReading.Location = new System.Drawing.Point(178, 184);
             this.btnStartReading.Name = "btnStartReading";
@@ -326,6 +328,13 @@
             this.ctxMenuAnalizator.Text = "Анализатор";
             this.ctxMenuAnalizator.Click += new System.EventHandler(this.ctxMenuAnalizator_Click);
             // 
+            // конфигураторToolStripMenuItem
+            // 
+            this.конфигураторToolStripMenuItem.Name = "конфигураторToolStripMenuItem";
+            this.конфигураторToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.K)));
+            this.конфигураторToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.конфигураторToolStripMenuItem.Text = "Конфигуратор";
+            // 
             // pictureBox1
             // 
             this.pictureBox1.ContextMenuStrip = this.contextMenuStrip1;
@@ -363,13 +372,6 @@
             // 
             this.tsLabel1.Name = "tsLabel1";
             this.tsLabel1.Size = new System.Drawing.Size(0, 17);
-            // 
-            // конфигураторToolStripMenuItem
-            // 
-            this.конфигураторToolStripMenuItem.Name = "конфигураторToolStripMenuItem";
-            this.конфигураторToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.K)));
-            this.конфигураторToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
-            this.конфигураторToolStripMenuItem.Text = "Конфигуратор";
             // 
             // FormMain
             // 

@@ -197,41 +197,32 @@ namespace Prizmer.PoolServer
             get { return _manualStartInProcess; }
             set
             {
+                cbServerStarted.Enabled = !value;
+                dateTimePicker1.Enabled = !value;
+                dateTimePicker2.Enabled = !value;
+                comboBox1.Enabled = !value;
+                comboBox2.Enabled = !value;
+                comboBox3.Enabled = !value;
+
+                tbAddress.Enabled = !value;
+                tbPort.Enabled = !value;
+                rbTCP.Enabled = !value;
+                linkLabel1.Enabled = !value;
+
                 if (value == true)
                 {
-                    cbServerStarted.Enabled = !value;
-                    dateTimePicker1.Enabled = !value;
-                    dateTimePicker2.Enabled = !value;
-                    comboBox1.Enabled = !value;
-                    comboBox2.Enabled = !value;
-                    comboBox3.Enabled = !value;
-
-                    tbAddress.Enabled = !value;
-                    tbPort.Enabled = !value;
-
                     btnStartReading.Enabled = !value;
-                    btnEndReading.Enabled = value;
 
+                    btnEndReading.Enabled = value;
                     pbPreloader.Show();
 
                 }
                 else
                 {
-                    cbServerStarted.Enabled = !value;
-                    dateTimePicker1.Enabled = !value;
-                    dateTimePicker2.Enabled = !value;
-                    comboBox1.Enabled = !value;
-                    comboBox2.Enabled = !value;
-                    comboBox3.Enabled = !value;
-
-                    tbAddress.Enabled = !value;
-                    tbPort.Enabled = !value;
-
                     btnStartReading.Enabled = !value;
+
                     btnEndReading.Enabled = value;
-
                     pbPreloader.Hide();
-
                 }
             }
 
@@ -258,6 +249,7 @@ namespace Prizmer.PoolServer
 
         public void pollEnded()
         {
+            pbPreloader.Hide();
             MessageBox.Show("Опрос завершен","Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
             progressBar1.Value = 0;
             lblCnt.Text = "";
@@ -280,6 +272,7 @@ namespace Prizmer.PoolServer
             if (e.success)
             {
                 tsLabel1.Text = "Режим: полностью остановлен";
+                ManualStartInProcess = false;
             }
             else
             {
@@ -340,6 +333,8 @@ namespace Prizmer.PoolServer
             progressBar1.Value = 0;
             lblCnt.Text = "";
             lblCurCnt.Text = "";
+
+            ManualStartInProcess = false;
         }
 
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
