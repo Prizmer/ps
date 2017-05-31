@@ -1427,6 +1427,7 @@ namespace Prizmer.PoolServer
                     for (int takenPrmsIndex = 0; takenPrmsIndex < takenparams.Length; takenPrmsIndex++)
                     {
                         if (bStopServer) return 1;
+
                         if (lFlag) pmPrms.logger.LogInfo("RSL: 2. Вошли в цикл перебора считываемых параметров, итерация " + (takenPrmsIndex+1).ToString() + " из " + takenparams.Length);
 
                         Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[takenPrmsIndex].guid_params);
@@ -1438,6 +1439,9 @@ namespace Prizmer.PoolServer
                         
                         int valInDbCnt = valuesInDB.Count<Value>();
                         int valInDbCntToCurTime = valuesInDBToCurrentTime.Count<Value>();
+
+                        //счетчик уже имеющихся в БД записей
+                        int alreadyExistInDbValueCnt = 0;
 
                         if (lFlag) pmPrms.logger.LogInfo("RSL: 2.1. Число значений в базе за даты (" + date_from.ToShortDateString() + "; " +
     date_to.ToShortDateString() + "): " + valInDbCnt);
@@ -1471,12 +1475,6 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                                 if (lFlag) pmPrms.logger.LogInfo("RSL: 4.  Данные для параметра " + (takenPrmsIndex + 1) + " из " + takenparams.Length + " НЕ получены, переход к след. параметру");
                                 continue;
                             }
-
-
-
-
-                            //счетчик уже имеющихся в БД записей
-                            int alreadyExistInDbValueCnt = 0;
 
                             //если срезы из указанного диапазона дат прочитаны успешно
                             foreach (RecordPowerSlice rps in lrps)
@@ -1512,7 +1510,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                                 pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
                             }
 
-                            if (lFlag) pmPrms.logger.LogInfo("RSL: 5. Значения успешно занесены в VariousValues, " + alreadyExistInDbValueCnt + " пропущены, так как уже существуют");
+                            if (lFlag) pmPrms.logger.LogInfo("RSL: 5. Значения успешно занесены в VariousValues, " + alreadyExistInDbValueCnt + " из " + lrps.Count + " пропущены, так как уже существуют");
 
                         }
                         else
