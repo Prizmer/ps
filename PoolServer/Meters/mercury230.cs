@@ -1806,7 +1806,7 @@ namespace Prizmer.Meters
 
             //Вычисляем разницу в срезах
             diff = Convert.ToUInt16(diff_minutes / period);
-            ushort diff2 = Convert.ToUInt16((diff_minutes2 / period)-1);
+            ushort diff2 = Convert.ToUInt16((diff_minutes2 / period)+1);
 
 
             ushort address_slice = diff;
