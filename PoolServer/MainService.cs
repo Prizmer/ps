@@ -1964,7 +1964,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             apti.thread = (Thread)prmsList[1];
             mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
 
-            loggerThread.Initialize(portFullName, "", "", "", "main", true);
+            loggerThread.Initialize(portFullName.Replace(':','_'), "", "", "", "main", true);
 
            // WriteToLog("Meters by port length: " + metersbyport.Length);
 
