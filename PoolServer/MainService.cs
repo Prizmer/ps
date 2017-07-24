@@ -47,13 +47,15 @@ namespace Prizmer.PoolServer
         string workDirectory = "";
         bool isInitialized = false;
 
+        bool byThread = false;
+
         public static string BaseDirectory
         {
             get { return baseDirectory; }
         }
 
         SenderInfo si;
-        public void Initialize(string port, string addr, string driverName, string metersSerial, string workDirName = "")
+        public void Initialize(string port, string addr, string driverName, string metersSerial, string workDirName = "", bool byThread = false)
         {
             if (workDirName != String.Empty)
                 workDirectory = baseDirectory + "\\" + workDirName;
@@ -62,6 +64,8 @@ namespace Prizmer.PoolServer
 
             si = new SenderInfo(port, addr, driverName);
             Directory.CreateDirectory(workDirectory);
+
+            this.byThread = byThread;
 
             isInitialized = true;
         }
@@ -124,7 +128,12 @@ namespace Prizmer.PoolServer
             {
                 string pathToDir = String.Format(workDirectory + "\\{0}", DateTime.Now.Date.ToShortDateString().Replace(".", "_"));
                 Directory.CreateDirectory(pathToDir);
-                string logFileName = String.Format("\\{0}_a{1}_{3}_{2}_ms.log", senderInfo.port.Trim(), senderInfo.addr.Trim(), senderInfo.driverName.Trim(), serialNumberPart);
+                string logFileName = "";
+                if (!byThread)
+                    logFileName = String.Format("\\{0}_a{1}_{3}_{2}_ms.log", senderInfo.port.Trim(), senderInfo.addr.Trim(), senderInfo.driverName.Trim(), serialNumberPart);
+                else
+                    logFileName = String.Format("\\{0}_common_info.log", senderInfo.port.Trim(), senderInfo.addr.Trim(), senderInfo.driverName.Trim(), serialNumberPart);
+
                 fs = new FileStream(pathToDir + logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
                 string resMsg = String.Format("{1} [{0}]: {2}", messageType.ToString(), DateTime.Now.ToString(), message);
 
@@ -666,7 +675,7 @@ namespace Prizmer.PoolServer
         {
             if (bStopServer) return 1;
 
-            pmPrms.logger.LogInfo("Polling daily...");
+            //pmPrms.logger.LogInfo("Polling daily...");
 
             DateTime curDate = DateTime.Now;
             if (date.Date > curDate.Date) date = curDate.Date;
@@ -689,13 +698,12 @@ namespace Prizmer.PoolServer
                     Value[] lastvalue = pmPrms.ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], startDate, endDate);
                     if (lastvalue.Length > 0) continue;
 
+                    Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
+                    if (param.guid == Guid.Empty) continue;
+
                     if (pmPrms.meter.OpenLinkCanal())
                     {
-                        //logger.LogInfo("Канал для " + mName + " порт " + m_vport.ToString() + " адрес " + metersbyport[MetersCounter].address.ToString() + " открыт");
-
-                        Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
-                        if (param.guid == Guid.Empty) continue;
-
+                        
                         float curvalue = 0;
                         if (pmPrms.meter.ReadDailyValues(date, param.param_address, param.channel, ref curvalue))
                         {
@@ -710,14 +718,18 @@ namespace Prizmer.PoolServer
                         }
                         else
                         {
-                            string s_log = String.Format("Суточные: метод драйвера ReadDailyValues вернул false. Параметр {0} с адресом {1} каналом {2} не прочитан",
+                            string s_log = String.Format("Суточные: метод драйвера ReadDailyValues вернул false. Параметр {0} с адресом {1} каналом {2} не прочитан;",
                                 param.name, param.param_address, param.channel);
-                            pmPrms.logger.LogWarn(s_log);
+                            pmPrms.logger.LogWarn(s_log);                      
+                            pmPrms.logger.LogInfo("Счетчик " + mName + " порт " + pmPrms.m_vport.ToString() + " адрес " + pmPrms.metersbyport[pmPrms.MetersCounter].address.ToString() + ";");
                         }
                     }
                     else 
                     {
-                        pmPrms.logger.LogInfo("Не удалось открыть канал связи...");
+                        string s_log = String.Format("Суточные: не удалось открыть канал связи. Параметр {0} с адресом {1} каналом {2} не прочитан;",
+                            param.name, param.param_address, param.channel);
+                        pmPrms.logger.LogWarn(s_log);
+                        pmPrms.logger.LogInfo("Счетчик " + mName + " порт " + pmPrms.m_vport.ToString() + " адрес " + pmPrms.metersbyport[pmPrms.MetersCounter].address.ToString() + ";");
                     }
                 }
             }
@@ -746,7 +758,8 @@ namespace Prizmer.PoolServer
                     }
 
                     //организация вычитки за 2 предыдущих месяца
-                    for (int m = 2; m >= 0; m--)
+                    //todo? зачем это нужно? убрал вычитку за 2 месяца
+                    for (int m = 0; m >= 0; m--)
                     {
                         tmpDate = PrevTime.AddMonths(-m);
 
@@ -762,7 +775,7 @@ namespace Prizmer.PoolServer
                             if (param.guid == Guid.Empty) continue;
 
                             //RecordValueEnergy rve = new RecordValueEnergy();
-
+                            
                             float curvalue = 0;
 
                             //чтение месячных параметров
@@ -773,7 +786,10 @@ namespace Prizmer.PoolServer
                                 value.id_taken_params = takenparams[tpindex].id;
                                 value.status = false;
                                 value.value = curvalue;
+                                pmPrms.logger.LogInfo("Месячные: на дату " + value.dt.ToShortDateString() + " значение " + curvalue);
+
                                 value.value = (float)Math.Round(value.value, 4, MidpointRounding.AwayFromZero);
+                                pmPrms.logger.LogInfo("Месячные: на дату " + value.dt.ToShortDateString() + " значение преобразованное" + value.value);
                                 pmPrms.ServerStorage.AddMonthlyValues(value);
                                 pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
                             }
@@ -1900,7 +1916,10 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             Meter[] metersbyport = null;
             MyEventArgs myEventArgs = new MyEventArgs();      
             Logger logger = new Logger();
+            Logger loggerThread = new Logger();
             Guid PortGUID = Guid.Empty;
+
+
           
             //подключение к БД
             PgStorage ServerStorage = new PgStorage();
@@ -1910,6 +1929,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             data = prmsList[0];
             MainFormParamsStructure mfPrms = new MainFormParamsStructure();
             mfPrms = (MainFormParamsStructure)prmsList[prmsList.Count - 1];
+
 
             bool POLLING_ACTIVE = mfPrms.mode == 0 ? true : false;
 
@@ -1944,11 +1964,15 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             apti.thread = (Thread)prmsList[1];
             mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
 
+            loggerThread.Initialize(portFullName, "", "", "", "main", true);
+
            // WriteToLog("Meters by port length: " + metersbyport.Length);
 
             //if (m_vport == null) goto CloseThreadPoint;
             if (metersbyport == null || metersbyport.Length == 0)
             {
+                loggerThread.LogWarn("Остановка: к порту не привязаны приборы");
+
                 apti.metersByPort = 0;
                 apti.commentList.Add("Остановка: к порту не привязаны приборы");
                 goto CloseThreadPoint;
@@ -1965,6 +1989,8 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             myEventArgs.metersCount = metersbyport.Length;
             if (mfPrms.mode == 1 && pollingStarted != null)
                 pollingStarted(this, myEventArgs);
+
+
 
             while (!bStopServer)
             {
@@ -2036,7 +2062,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 meter.Init(metersbyport[MetersCounter].address, metersbyport[MetersCounter].password, m_vport);
                 logger.Initialize(m_vport.GetName(), metersbyport[MetersCounter].address.ToString(), typemeter.driver_name, metersbyport[MetersCounter].factory_number_manual, "main");
 
-                logger.LogInfo(String.Format("[{3}] Meter with id {0} and address {1} initialized. Port: {2}; ", metersbyport[MetersCounter].password, metersbyport[MetersCounter].address, m_vport.GetName(), typemeter.driver_name));
+              //  logger.LogInfo(String.Format("[{3}] Meter with id {0} and address {1} initialized. Port: {2}; ", metersbyport[MetersCounter].password, metersbyport[MetersCounter].address, m_vport.GetName(), typemeter.driver_name));
 
                 //выведем в лог общие ошибки если таковые есть
                 DateTime common_dt_install = metersbyport[MetersCounter].dt_install;
@@ -2165,6 +2191,8 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
 
                         if (metersbyport.Length == 0)
                         {
+                            loggerThread.LogError("Остановка: приборы были привязаны к порту, но сейчас их нет");
+
                             apti.metersByPort = 0;
                             apti.commentList.Add("Остановка: приборы были привязаны к порту, но сейчас их нет");
                             goto CloseThreadPoint;
