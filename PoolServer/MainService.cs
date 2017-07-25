@@ -751,7 +751,7 @@ namespace Prizmer.PoolServer
             TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, 2);
             if (takenparams.Length > 0)
             {
-                pmPrms.logger.LogInfo("Месячные: начало чтения...");
+                pmPrms.logger.LogInfo("Месячные: начало чтения суточных");
                 for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                 {
                     if (bStopServer){
@@ -763,7 +763,7 @@ namespace Prizmer.PoolServer
                     for (int m = 0; m >= 0; m--)
                     {
                         tmpDate = PrevTime.AddMonths(-m);
-                        pmPrms.logger.LogInfo("Месячные: дата " + tmpDate.ToShortDateString());
+
                         Value[] lastvalue = ServerStorage.GetExistsMonthlyValuesDT(takenparams[tpindex], tmpDate, tmpDate);
 
                         
@@ -2091,6 +2091,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 if (POLLING_ACTIVE && DM_POLL_ADDR)
                 {
                     int status = pollSerialNumber(pmPrms);
+                    pmPrms.logger.LogInfo("Прочитал серийный номер со статусом: " + status);
                     if (status == 1) goto CloseThreadPoint;
                 }
 
@@ -2100,6 +2101,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 if (POLLING_ACTIVE && DM_POLL_CURR && pollingParams.b_poll_current)
                 {
                     int status = pollCurrent(pmPrms, DateTime.Now);
+                    pmPrms.logger.LogInfo("Прочитал ТЕКУЩИЕ со статусом: " + status);
                     if (status == 1) goto CloseThreadPoint;
                 }
 
@@ -2108,6 +2110,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 if (POLLING_ACTIVE && DM_POLL_DAY && pollingParams.b_poll_day)
                 {
                     int status = pollDaily(pmPrms, DateTime.Now);
+                    pmPrms.logger.LogInfo("Прочитал СУТОЧНЫЕ со статусом: " + status);
                     if (status == 1) goto CloseThreadPoint;
                 }
 
@@ -2116,6 +2119,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 if (POLLING_ACTIVE && DM_POLL_MONTH && pollingParams.b_poll_month)
                 {
                     int status = pollMonthly(pmPrms);
+                    pmPrms.logger.LogInfo("Прочитал МЕСЯЧНЫЕ со статусом: " + status);
                     if (status == 1) goto CloseThreadPoint;
                 }
 
