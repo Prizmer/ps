@@ -402,6 +402,11 @@ namespace Prizmer.PoolServer
         {
             Logger.DeleteLogs();
         }
+
+        private void timerLogsDeletion_Tick(object sender, EventArgs e)
+        {
+
+        }
     }
 
     public struct MainFormParamsStructure

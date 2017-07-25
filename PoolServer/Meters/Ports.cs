@@ -12,6 +12,8 @@ using System.Net.NetworkInformation;
 
 using System.Configuration;
 
+using Prizmer.PoolServer;
+
 namespace Prizmer.Ports
 {
     public delegate int FindPacketSignature(Queue<byte> queue);
@@ -38,6 +40,7 @@ namespace Prizmer.Ports
         private ushort m_write_timeout = 100;
         private ushort m_read_timeout = 100;
         private int m_delay_between_sending = 100;
+        Logger tcpLogger;
 
         public string GetName()
         {
@@ -66,12 +69,15 @@ namespace Prizmer.Ports
         bool areLogsRestricted = false;
         public TcpipPort(string address, int port, ushort write_timeout, ushort read_timeout, int delay_between_sending)
         {
+            tcpLogger = new Logger();
+
             m_address = address;
             m_port = port;
             m_write_timeout = write_timeout;
             m_read_timeout = read_timeout;
             m_delay_between_sending = delay_between_sending;
 
+            tcpLogger.Initialize(Logger.DIR_LOGS_PORTS, false, GetName());
             try
             {
                 areLogsRestricted = bool.Parse(ConfigurationManager.AppSettings.GetValues("tcpLogsRestricted")[0]);
@@ -437,17 +443,19 @@ namespace Prizmer.Ports
 
         public void WriteToLog(string str)
         {
-            if (areLogsRestricted) return;
-            try
-            {
-                using (StreamWriter sw = new StreamWriter(@"logs\tcp_ports.log", true, Encoding.Default))
-                {
-                    sw.WriteLine(DateTime.Now.ToString() + ": " + GetName() + ": " + str);
-                }
-            }
-            catch
-            {
-            }
+            //if (areLogsRestricted) return;
+            //try
+            //{
+            //    using (StreamWriter sw = new StreamWriter(@"logs\tcp_ports.log", true, Encoding.Default))
+            //    {
+            //        sw.WriteLine(DateTime.Now.ToString() + ": " + GetName() + ": " + str);
+            //    }
+            //}
+            //catch
+            //{
+            //}
+
+            tcpLogger.LogWarn(str);
         }
 
         public string GetConnectionType()

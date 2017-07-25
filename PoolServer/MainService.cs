@@ -49,7 +49,9 @@ namespace Prizmer.PoolServer
         public const string DIR_LOGS_MAIN = "main";
         public const string DIR_LOGS_METERS = "meters";
         public const string DIR_LOGS_PORTS = "ports";
-        public const string DIR_LOGS_LOGGER = "logger";
+        public const string FNAM_LOGGER_LOG = "loggerErr.log";
+
+        public const int DAYS_TO_STORE_LOGS = 3;
 
         string workDirectory = "";
         bool isInitialized = false;
@@ -89,7 +91,7 @@ namespace Prizmer.PoolServer
 
             this.byThread = byThread;
 
-            if (titlesToPrintArr.Length > 1)
+            if (titlesToPrintArr.Length > 0)
                 isInitialized = true;
             else
                 isInitialized = false;
@@ -123,7 +125,7 @@ namespace Prizmer.PoolServer
 
             StreamWriter sw = null;
             string resMsg = String.Format("{0}: {1}", DateTime.Now.ToString(), msg);
-            sw = new StreamWriter(baseDirectory + @"\loggerErr.log", true, Encoding.Default);
+            sw = new StreamWriter(baseDirectory + @"\" + DateTime.Now.Date.ToShortDateString().Replace(".", "_") + "_" + FNAM_LOGGER_LOG, true, Encoding.Default);
             sw.WriteLine(resMsg);
             sw.Close();
 
@@ -194,7 +196,7 @@ namespace Prizmer.PoolServer
 
             if (!isInitialized)
             {
-                writeToLoggerLog("Логгер не проинициализирован");
+                writeToLoggerLog("Логгер не проинициализирован, попытка записать " + message);
                 return;
             }
 
@@ -243,31 +245,37 @@ namespace Prizmer.PoolServer
             }
         }
 
-        public static void DeleteDirectory(string target_dir)
-        {
-            string[] files = Directory.GetFiles(target_dir);
-            string[] dirs = Directory.GetDirectories(target_dir);
-
-            foreach (string file in files)
-            {
-                File.SetAttributes(file, FileAttributes.Normal);
-                File.Delete(file);
-            }
-
-            foreach (string dir in dirs)
-            {
-                DeleteDirectory(dir);
-            }
-
-            Directory.Delete(target_dir, false);
-        }
 
         public static void DeleteLogs()
         {
-            string[] dirsMain = Directory.GetDirectories(baseDirectory + "\\main");
-            string[] dirsMeters = Directory.GetDirectories(baseDirectory + "\\meters");
+            string[] logDirs = Directory.GetDirectories(baseDirectory);
 
+            //удалим папки, которые старше N дней
+            foreach (string logsSubDirName in logDirs)
+            { 
+                string[] dateDirs = Directory.GetDirectories(logsSubDirName);
 
+                foreach (string dateDirName in dateDirs)
+                {
+                    DirectoryInfo dirInfo = new DirectoryInfo(dateDirName);
+                    DateTime dirWasCreatedAtDate = dirInfo.CreationTime.Date;
+                    TimeSpan ts = DateTime.Now.Date - dirWasCreatedAtDate;
+
+                    if (ts.TotalDays > DAYS_TO_STORE_LOGS)
+                        dirInfo.Delete(true);
+                }
+            }
+
+            //удалим все файлы базовой дирректории, которые старше N дней
+            string[] logFiles = Directory.GetFiles(baseDirectory);
+            foreach (string logFileName in logFiles)
+            {
+                FileInfo fInfo = new FileInfo(logFileName);
+                DateTime fileWasCreatedAtDate = fInfo.CreationTime.Date;
+                TimeSpan ts = DateTime.Now.Date - fileWasCreatedAtDate;
+                if (ts.TotalDays > DAYS_TO_STORE_LOGS)
+                    fInfo.Delete();
+            }
         }
 
     }
@@ -292,7 +300,7 @@ namespace Prizmer.PoolServer
 
             StreamWriter sw = null;
             string resMsg = String.Format("{0}: {1}", DateTime.Now.ToString(), str);
-            sw = new StreamWriter(@"commonInfo.txt", true, Encoding.Default);
+            sw = new StreamWriter(@"logs\commonInfo.txt", true, Encoding.Default);
             sw.WriteLine(resMsg);
             sw.Close();
         }
@@ -341,7 +349,7 @@ namespace Prizmer.PoolServer
 
         public bool SO_AUTO_START = false;
 
-
+        Logger loggerMainService = new Logger();
         public MainService()
         {
             try
@@ -516,10 +524,10 @@ namespace Prizmer.PoolServer
 
             }
 
-            object iLogsAreAliveDays = 6;
-            //Thread logsEreaserThread = new Thread(new ParameterizedThreadStart(DeleteLogsDirectory));
-            //logsEreaserThread.IsBackground = true;
-            //logsEreaserThread.Start(iLogsAreAliveDays);
+            object deleteLogsThreadMethodPrmsObj = null;
+            Thread logsEreaserThread = new Thread(new ParameterizedThreadStart(DeleteLogsThreadMethod));
+            logsEreaserThread.IsBackground = true;
+            logsEreaserThread.Start(deleteLogsThreadMethodPrmsObj);
 
             //закрываем соединение с БД
             ServerStorageMainService.Close();
@@ -624,29 +632,19 @@ namespace Prizmer.PoolServer
             WriteToLog("Глобальное исключение: " + e.ExceptionObject.ToString());
         }
 
-        public void DeleteLogsDirectory(object param)
+        public void DeleteLogsThreadMethod(object param)
         {
             while (Thread.CurrentThread.IsAlive)
             {
                 //Автоудаление логов
                 try
                 {
-                    DirectoryInfo di = new DirectoryInfo(Logger.BaseDirectory);
-                    if (di.Exists)
-                    {
-                        TimeSpan ts = DateTime.Now.Date - di.CreationTime.Date;
-                        if (ts.TotalDays >= (int)param)
-                        {
-                            Logger.bRestrict = true;
-                            Thread.Sleep(100);
-                            Logger.DeleteDirectory(di.FullName);
-                            Logger.bRestrict = false;
-                        }
-                            
-                    }
+                    Logger.DeleteLogs();
                 }
                 catch (Exception ex)
-                { }
+                {
+                    WriteToLog("DeleteLogsThreadMethod: " + ex.Message);
+                }
 
                 TimeSpan sleepSpan = new TimeSpan(1, 0, 0);
                 Thread.Sleep(sleepSpan);
@@ -2109,7 +2107,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     case "teplouchet1": meter = new teplouchet1(); break;
                     case "m200": meter = new Mercury200(); break;
                     case "opcretranslator": meter = new OpcRetranslator(); break;
-                    //case "sayani_kombik": meter = new sayani_kombik(); break;
+                    case "sayani_kombik": meter = new sayani_kombik(); break;
                     case "m230": meter = new m234(); break;
                     case "m234": meter = new m234(); break;
                     case "m230_stable": meter = new m230(); break;
@@ -2146,8 +2144,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
               //  mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
  
                 meter.Init(metersbyport[MetersCounter].address, metersbyport[MetersCounter].password, m_vport);
-                //logger.Initialize(m_vport.GetName(), metersbyport[MetersCounter].address.ToString(), typemeter.driver_name, metersbyport[MetersCounter].factory_number_manual, "main");
-                logger.Initialize(Logger.DIR_LOGS_MAIN, false, m_vport.GetName(), metersbyport[MetersCounter].address.ToString(), typemeter.driver_name, metersbyport[MetersCounter].factory_number_manual);
+                logger.Initialize(Logger.DIR_LOGS_MAIN, false, m_vport.GetName(), typemeter.driver_name, metersbyport[MetersCounter].address.ToString(), metersbyport[MetersCounter].factory_number_manual);
                 //  logger.LogInfo(String.Format("[{3}] Meter with id {0} and address {1} initialized. Port: {2}; ", metersbyport[MetersCounter].password, metersbyport[MetersCounter].address, m_vport.GetName(), typemeter.driver_name));
 
                 //выведем в лог общие ошибки если таковые есть
