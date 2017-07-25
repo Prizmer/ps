@@ -396,8 +396,11 @@ namespace Prizmer.PoolServer
         private void ctxMenuShowLogsDir_Click(object sender, EventArgs e)
         {
             Process.Start("explorer.exe", @Logger.BaseDirectory);
+        }
 
-
+        private void ctxMenuDeleteLogs_Click(object sender, EventArgs e)
+        {
+            Logger.DeleteLogs();
         }
     }
 

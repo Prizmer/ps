@@ -41,9 +41,16 @@ namespace Prizmer.PoolServer
             public string metersSerial;
         }
 
+        string[] titlesToPrintArr;
+
         public static volatile bool bRestrict = false;
 
         static string baseDirectory = "logs";
+        public const string DIR_LOGS_MAIN = "main";
+        public const string DIR_LOGS_METERS = "meters";
+        public const string DIR_LOGS_PORTS = "ports";
+        public const string DIR_LOGS_LOGGER = "logger";
+
         string workDirectory = "";
         bool isInitialized = false;
 
@@ -70,6 +77,24 @@ namespace Prizmer.PoolServer
             isInitialized = true;
         }
 
+        public void Initialize(string workDirName = "", bool byThread = false, params string[] titlesToPrintArr)
+        {
+            if (workDirName != String.Empty)
+                workDirectory = baseDirectory + "\\" + workDirName;
+            else
+                workDirectory = baseDirectory;
+
+            this.titlesToPrintArr = titlesToPrintArr;
+            Directory.CreateDirectory(workDirectory);
+
+            this.byThread = byThread;
+
+            if (titlesToPrintArr.Length > 1)
+                isInitialized = true;
+            else
+                isInitialized = false;
+        }
+
         private enum MessageType
         {
             ERROR,
@@ -79,17 +104,17 @@ namespace Prizmer.PoolServer
 
         public void LogError(string message)
         {
-            this.writeToLog(message, si, MessageType.ERROR);
+            this.writeToLog(message, MessageType.ERROR);
         }
 
         public void LogInfo(string message)
         {
-            this.writeToLog(message, si, MessageType.INFO);
+            this.writeToLog(message, MessageType.INFO);
         }
 
         public void LogWarn(string message)
         {
-            this.writeToLog(message, si, MessageType.WARN);
+            this.writeToLog(message, MessageType.WARN);
         }
 
         private void writeToLoggerLog(string msg)
@@ -111,7 +136,7 @@ namespace Prizmer.PoolServer
 
         StreamWriter sw = null;
         FileStream fs = null;
-        private void writeToLog(string message, SenderInfo senderInfo, MessageType messageType)
+        private void writeToLog2(string message, SenderInfo senderInfo, MessageType messageType)
         {
             if (bRestrict) return; 
 
@@ -163,6 +188,61 @@ namespace Prizmer.PoolServer
             }
         }
 
+        private void writeToLog(string message, MessageType messageType)
+        {
+            if (bRestrict) return;
+
+            if (!isInitialized)
+            {
+                writeToLoggerLog("Логгер не проинициализирован");
+                return;
+            }
+
+            try
+            {
+                string pathToDir = String.Format(workDirectory + "\\{0}", DateTime.Now.Date.ToShortDateString().Replace(".", "_"));
+                Directory.CreateDirectory(pathToDir);
+
+                string logFileName = "\\";
+                for (int i = 0; i < titlesToPrintArr.Length; i++)
+                    logFileName += titlesToPrintArr[i] + "_";
+
+                if (!byThread)
+                    logFileName += "info.log";
+                else
+                    logFileName += "common_info.log";
+
+                logFileName.Replace(':', '_');
+
+                fs = new FileStream(pathToDir + logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+                string resMsg = String.Format("{1} [{0}]: {2}", messageType.ToString(), DateTime.Now.ToString(), message);
+
+                sw = new StreamWriter(fs, Encoding.Default);
+                sw.WriteLine(resMsg);
+
+                sw.Close();
+                fs.Close();
+            }
+            catch (Exception lEx)
+            {
+                writeToLoggerLog(lEx.Message);
+            }
+            finally
+            {
+                if (sw != null)
+                {
+                    sw.Close();
+                    sw = null;
+                }
+
+                if (fs != null)
+                {
+                    fs.Close();
+                    fs = null;
+                }
+            }
+        }
+
         public static void DeleteDirectory(string target_dir)
         {
             string[] files = Directory.GetFiles(target_dir);
@@ -180,6 +260,14 @@ namespace Prizmer.PoolServer
             }
 
             Directory.Delete(target_dir, false);
+        }
+
+        public static void DeleteLogs()
+        {
+            string[] dirsMain = Directory.GetDirectories(baseDirectory + "\\main");
+            string[] dirsMeters = Directory.GetDirectories(baseDirectory + "\\meters");
+
+
         }
 
     }
@@ -1406,8 +1494,6 @@ namespace Prizmer.PoolServer
             return 0;
         }
 
-
-
         private int pollHalfsForDates(PollMethodsParams pmPrms, DateTime dateFrom, DateTime dateTo)
         {
             if (bStopServer) return 1;
@@ -1965,8 +2051,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             apti.thread = (Thread)prmsList[1];
             mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
 
-            loggerThread.Initialize(portFullName.Replace(':','_'), "", "", "", "main", true);
-
+            loggerThread.Initialize(Logger.DIR_LOGS_MAIN, true, portFullName.Replace(':', '_'));
            // WriteToLog("Meters by port length: " + metersbyport.Length);
 
             //if (m_vport == null) goto CloseThreadPoint;
@@ -2061,9 +2146,9 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
               //  mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
  
                 meter.Init(metersbyport[MetersCounter].address, metersbyport[MetersCounter].password, m_vport);
-                logger.Initialize(m_vport.GetName(), metersbyport[MetersCounter].address.ToString(), typemeter.driver_name, metersbyport[MetersCounter].factory_number_manual, "main");
-
-              //  logger.LogInfo(String.Format("[{3}] Meter with id {0} and address {1} initialized. Port: {2}; ", metersbyport[MetersCounter].password, metersbyport[MetersCounter].address, m_vport.GetName(), typemeter.driver_name));
+                //logger.Initialize(m_vport.GetName(), metersbyport[MetersCounter].address.ToString(), typemeter.driver_name, metersbyport[MetersCounter].factory_number_manual, "main");
+                logger.Initialize(Logger.DIR_LOGS_MAIN, false, m_vport.GetName(), metersbyport[MetersCounter].address.ToString(), typemeter.driver_name, metersbyport[MetersCounter].factory_number_manual);
+                //  logger.LogInfo(String.Format("[{3}] Meter with id {0} and address {1} initialized. Port: {2}; ", metersbyport[MetersCounter].password, metersbyport[MetersCounter].address, m_vport.GetName(), typemeter.driver_name));
 
                 //выведем в лог общие ошибки если таковые есть
                 DateTime common_dt_install = metersbyport[MetersCounter].dt_install;
