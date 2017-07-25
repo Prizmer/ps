@@ -758,61 +758,55 @@ namespace Prizmer.PoolServer
                         return 1;  
                     }
 
-                    //организация вычитки за 2 предыдущих месяца
-                    //todo? зачем это нужно? убрал вычитку за 2 месяца
-                    for (int m = 0; m >= 0; m--)
+                    tmpDate = PrevTime;
+
+                    Value[] lastvalue = ServerStorage.GetExistsMonthlyValuesDT(takenparams[tpindex], tmpDate, tmpDate);
+                       
+                    string queryExample = "SELECT date, value, status, id_taken_params FROM monthly_values " +
+            "WHERE (id_taken_params = " + takenparams[tpindex].id + ") AND date BETWEEN '" + tmpDate.ToShortDateString() + "' AND '" + tmpDate.ToShortDateString() + "'";
+                    pmPrms.logger.LogInfo("Месячные: запрос в базу на проверку существования: " + queryExample);
+
+                    //если значение в БД уже есть, то не читать его из прибора
+                    if (lastvalue.Length > 0) continue;
+
+                    //читать данные только если прибор ответил
+                    if (pmPrms.meter.OpenLinkCanal())
                     {
-                        tmpDate = PrevTime.AddMonths(-m);
 
-                        Value[] lastvalue = ServerStorage.GetExistsMonthlyValuesDT(takenparams[tpindex], tmpDate, tmpDate);
+                        Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
+                        if (param.guid == Guid.Empty) continue;
 
-                        
-                        string queryExample = "SELECT date, value, status, id_taken_params FROM monthly_values " +
-                "WHERE (id_taken_params = " + takenparams[tpindex].id + ") AND date BETWEEN '" + tmpDate.ToShortDateString() + "' AND '" + tmpDate.ToShortDateString() + "'";
-                        pmPrms.logger.LogInfo("Месячные: запрос в базу на проверку существования: " + queryExample);
-
-                        //если значение в БД уже есть, то не читать его из прибора
-                        if (lastvalue.Length > 0) continue;
-
-                        //читать данные только если прибор ответил
-                        if (pmPrms.meter.OpenLinkCanal())
-                        {
-
-                            Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
-                            if (param.guid == Guid.Empty) continue;
-
-                            //RecordValueEnergy rve = new RecordValueEnergy();
+                        //RecordValueEnergy rve = new RecordValueEnergy();
                             
-                            float curvalue = 0;
+                        float curvalue = 0;
 
-                            //чтение месячных параметров
-                            if (pmPrms.meter.ReadMonthlyValues(tmpDate, param.param_address, param.channel, ref curvalue))
-                            {
-                                Value value = new Value();
-                                value.dt = new DateTime(tmpDate.Year, tmpDate.Month, 1);
-                                value.id_taken_params = takenparams[tpindex].id;
-                                value.status = false;
-                                value.value = curvalue;
-                                pmPrms.logger.LogInfo("Месячные: на дату " + value.dt.ToShortDateString() + " значение " + curvalue);
+                        //чтение месячных параметров
+                        if (pmPrms.meter.ReadMonthlyValues(tmpDate, param.param_address, param.channel, ref curvalue))
+                        {
+                            Value value = new Value();
+                            value.dt = new DateTime(tmpDate.Year, tmpDate.Month, 1);
+                            value.id_taken_params = takenparams[tpindex].id;
+                            value.status = false;
+                            value.value = curvalue;
+                            pmPrms.logger.LogInfo("Месячные: на дату " + value.dt.ToShortDateString() + " значение " + curvalue);
 
-                                value.value = (float)Math.Round(value.value, 4, MidpointRounding.AwayFromZero);
-                                pmPrms.logger.LogInfo("Месячные: на дату " + value.dt.ToShortDateString() + " значение преобразованное" + value.value);
-                                pmPrms.ServerStorage.AddMonthlyValues(value);
-                                pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
-                            }
-                            else
-                            {
-                                string s_log = String.Format("На начало месяца: метод драйвера ReadMonthlyValues вернул false. Параметр {0} с адресом {1} каналом {2} не прочитан. Запрашиваемая дата: {3}",
-                                    param.name, param.param_address, param.channel, tmpDate.ToString());
-                                pmPrms.logger.LogError(s_log);
-                                //meter.WriteToLog("текущий параметр не прочитан:" + param.param_address.ToString());
-                            }
+                            value.value = (float)Math.Round(value.value, 4, MidpointRounding.AwayFromZero);
+                            pmPrms.logger.LogInfo("Месячные: на дату " + value.dt.ToShortDateString() + " значение преобразованное" + value.value);
+                            pmPrms.ServerStorage.AddMonthlyValues(value);
+                            pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
                         }
                         else
                         {
-                            //meter.WriteToLog("ошибка cвязи с прибором");
+                            string s_log = String.Format("На начало месяца: метод драйвера ReadMonthlyValues вернул false. Параметр {0} с адресом {1} каналом {2} не прочитан. Запрашиваемая дата: {3}",
+                                param.name, param.param_address, param.channel, tmpDate.ToString());
+                            pmPrms.logger.LogError(s_log);
+                            //meter.WriteToLog("текущий параметр не прочитан:" + param.param_address.ToString());
                         }
                     }
+                    else
+                    {
+                        //meter.WriteToLog("ошибка cвязи с прибором");
+                    }                   
                 }
             }
             else
