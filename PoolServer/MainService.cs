@@ -1891,11 +1891,13 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     DateTime date_from = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
                     DateTime date_to = new DateTime(date.Year, date.Month, date.Day, 23, 59, 59);
 
+                    if (date_to > dt_cur) date_to = dt_cur;
+
                     //определим сколько срезов должно быть за период
                     TimeSpan span = date_to - date_from;
                     int diff_minutes = (int)Math.Ceiling(span.TotalMinutes);
                     int slicesNumber = diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD;
-                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: сейчас должно быть " + slicesNumber + "срезов за время (мин) " + diff_minutes);
+                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: должно быть " + slicesNumber + "срезов за период за время (мин) " + diff_minutes);
 
                     //определим существующее кол-во записей по параметрам
                     //если хотябы одного параметра не хватает - грузим все получасовки и выборочно
