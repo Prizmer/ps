@@ -34,10 +34,8 @@ namespace Prizmer.Meters
             catch (Exception ex)
             { }
 
-
-
             if (areLogsRestricted) return;
-            mLogger.Initialize(m_vport.GetName(), m_address.ToString(), "", "", "meters");
+            mLogger.Initialize(Logger.DIR_LOGS_METERS, false, m_vport.GetName(), m_address.ToString());
 
             if (doWrite)
             {

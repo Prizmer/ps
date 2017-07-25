@@ -63,22 +63,6 @@ namespace Prizmer.PoolServer
             get { return baseDirectory; }
         }
 
-        SenderInfo si;
-        public void Initialize(string port, string addr, string driverName, string metersSerial, string workDirName = "", bool byThread = false)
-        {
-            if (workDirName != String.Empty)
-                workDirectory = baseDirectory + "\\" + workDirName;
-            else
-                workDirectory = baseDirectory;
-
-            si = new SenderInfo(port, addr, driverName);
-            Directory.CreateDirectory(workDirectory);
-
-            this.byThread = byThread;
-
-            isInitialized = true;
-        }
-
         public void Initialize(string workDirName = "", bool byThread = false, params string[] titlesToPrintArr)
         {
             if (workDirName != String.Empty)
@@ -138,58 +122,6 @@ namespace Prizmer.PoolServer
 
         StreamWriter sw = null;
         FileStream fs = null;
-        private void writeToLog2(string message, SenderInfo senderInfo, MessageType messageType)
-        {
-            if (bRestrict) return; 
-
-            if (!isInitialized)
-            {
-                writeToLoggerLog("Логгер не проинициализирован");
-                return;
-            }
-
-            int serialNumberLength = senderInfo.metersSerial.Length;
-            string serialNumberPart = serialNumberLength > 3 ? senderInfo.metersSerial.Substring(serialNumberLength - 4) : "";
-
-            try
-            {
-                string pathToDir = String.Format(workDirectory + "\\{0}", DateTime.Now.Date.ToShortDateString().Replace(".", "_"));
-                Directory.CreateDirectory(pathToDir);
-                string logFileName = "";
-                if (!byThread)
-                    logFileName = String.Format("\\{0}_a{1}_{3}_{2}_ms.log", senderInfo.port.Trim(), senderInfo.addr.Trim(), senderInfo.driverName.Trim(), serialNumberPart);
-                else
-                    logFileName = String.Format("\\{0}_common_info.log", senderInfo.port.Trim(), senderInfo.addr.Trim(), senderInfo.driverName.Trim(), serialNumberPart);
-
-                fs = new FileStream(pathToDir + logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
-                string resMsg = String.Format("{1} [{0}]: {2}", messageType.ToString(), DateTime.Now.ToString(), message);
-
-                sw = new StreamWriter(fs, Encoding.Default);
-                sw.WriteLine(resMsg);
-
-                sw.Close();
-                fs.Close();
-            }
-            catch (Exception lEx)
-            {
-                writeToLoggerLog(lEx.Message);
-            }
-            finally
-            {
-                if (sw != null)
-                {
-                    sw.Close();
-                    sw = null;
-                }
-
-                if (fs != null)
-                {
-                    fs.Close();
-                    fs = null;
-                }
-            }
-        }
-
         private void writeToLog(string message, MessageType messageType)
         {
             if (bRestrict) return;
@@ -245,7 +177,6 @@ namespace Prizmer.PoolServer
             }
         }
 
-
         public static void DeleteLogs()
         {
             string[] logDirs = Directory.GetDirectories(baseDirectory);
@@ -277,7 +208,6 @@ namespace Prizmer.PoolServer
                     fInfo.Delete();
             }
         }
-
     }
 
     class MainService
