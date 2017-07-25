@@ -831,6 +831,8 @@ namespace Prizmer.PoolServer.DataBase
             string query = "SELECT date, value, status, id_taken_params FROM monthly_values " +
                             "WHERE (id_taken_params = " + taken_params.id + ") AND date BETWEEN '" + BeginDT.ToShortDateString() + "' AND '" + EndDT.ToShortDateString() + "'";
 
+            
+
             List<Object> list = GetRecordsFromReader(query, RetrieveValueWithDate);
 
             Value[] result = new Value[list.Count];

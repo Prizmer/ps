@@ -764,6 +764,12 @@ namespace Prizmer.PoolServer
                         tmpDate = PrevTime.AddMonths(-m);
 
                         Value[] lastvalue = ServerStorage.GetExistsMonthlyValuesDT(takenparams[tpindex], tmpDate, tmpDate);
+
+                        
+                        string queryExample = "SELECT date, value, status, id_taken_params FROM monthly_values " +
+                "WHERE (id_taken_params = " + takenparams[tpindex].id + ") AND date BETWEEN '" + tmpDate.ToShortDateString() + "' AND '" + tmpDate.ToShortDateString() + "'";
+                        pmPrms.logger.LogInfo("Monthly: запрос в базу на проверку существования: " + queryExample);
+
                         //если значение в БД уже есть, то не читать его из прибора
                         if (lastvalue.Length > 0) continue;
 
