@@ -321,7 +321,7 @@ namespace Prizmer.PoolServer
 
             for (int i = 0; i < cps.Length; i++)
             {
-                Meter[] metersbyport = ServerStorage.GetMetersByComportGUID(cps[i].guid);
+                Meter[] metersbyport = ServerStorageMainService.GetMetersByComportGUID(cps[i].guid);
                 //if (metersbyport.Length > 0)
               //  {
                     Thread portThread = new Thread(new ParameterizedThreadStart(this.pollingPortThread));
@@ -360,7 +360,7 @@ namespace Prizmer.PoolServer
                         continue;
                 }
                             
-                Meter[] metersbyport = ServerStorage.GetMetersByTcpIPGUID(tcpips[i].guid);
+                Meter[] metersbyport = ServerStorageMainService.GetMetersByTcpIPGUID(tcpips[i].guid);
                 //WriteToLog("mbp: " + metersbyport.Length );
              //   if (metersbyport.Length > 0)
               //  {
@@ -382,7 +382,7 @@ namespace Prizmer.PoolServer
             return tcpPortThreadsList;
         }
 
-        PgStorage ServerStorage = new PgStorage();
+        PgStorage ServerStorageMainService = new PgStorage();
         Analizator frmAnalizator = null;
         public void StartServer(MainFormParamsStructure mfPrms)
         {         
@@ -394,7 +394,7 @@ namespace Prizmer.PoolServer
                 sayani_kombik.DeleteDumpDirectory();
             #endregion
 
-                System.Data.ConnectionState conState = ServerStorage.Open(ConnectionString);
+            System.Data.ConnectionState conState = ServerStorageMainService.Open(ConnectionString);
             if (conState == System.Data.ConnectionState.Broken)
             {
                 MessageBox.Show("Невозможно подключиться к БД, проверьте строку подключения: " + ConnectionString, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -405,8 +405,8 @@ namespace Prizmer.PoolServer
             AppDomain domain = AppDomain.CurrentDomain;
             domain.UnhandledException += new UnhandledExceptionEventHandler(UnhandledException_Handler);
 
-            ComPortSettings[] cps = ServerStorage.GetComportSettings();
-            TCPIPSettings[] tcpips = ServerStorage.GetTCPIPSettings();
+            ComPortSettings[] cps = ServerStorageMainService.GetComportSettings();
+            TCPIPSettings[] tcpips = ServerStorageMainService.GetTCPIPSettings();
 
             List<Thread> comPortThreads = new List<Thread>();
             List<Thread> tcpPortThreads = new List<Thread>();
@@ -434,7 +434,7 @@ namespace Prizmer.PoolServer
             //logsEreaserThread.Start(iLogsAreAliveDays);
 
             //закрываем соединение с БД
-            ServerStorage.Close();
+            ServerStorageMainService.Close();
         }
 
         bool _manualStartInProcess = false;
@@ -760,7 +760,7 @@ namespace Prizmer.PoolServer
 
                     tmpDate = PrevTime;
 
-                    Value[] lastvalue = ServerStorage.GetExistsMonthlyValuesDT(takenparams[tpindex], tmpDate, tmpDate);
+                    Value[] lastvalue = pmPrms.ServerStorage.GetExistsMonthlyValuesDT(takenparams[tpindex], tmpDate, tmpDate);
                        
                     string queryExample = "SELECT date, value, status, id_taken_params FROM monthly_values " +
             "WHERE (id_taken_params = " + takenparams[tpindex].id + ") AND date BETWEEN '" + tmpDate.ToShortDateString() + "' AND '" + tmpDate.ToShortDateString() + "'";

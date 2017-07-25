@@ -59,6 +59,8 @@
             this.pbPreloader = new System.Windows.Forms.PictureBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tsLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.ctxMenuShowLogsDir = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -314,9 +316,11 @@
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ctxMenuAnalizator,
-            this.конфигураторToolStripMenuItem});
+            this.конфигураторToolStripMenuItem,
+            this.toolStripMenuItem1,
+            this.ctxMenuShowLogsDir});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(187, 48);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(201, 98);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening_1);
             // 
             // ctxMenuAnalizator
@@ -324,7 +328,7 @@
             this.ctxMenuAnalizator.Image = ((System.Drawing.Image)(resources.GetObject("ctxMenuAnalizator.Image")));
             this.ctxMenuAnalizator.Name = "ctxMenuAnalizator";
             this.ctxMenuAnalizator.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.ctxMenuAnalizator.Size = new System.Drawing.Size(186, 22);
+            this.ctxMenuAnalizator.Size = new System.Drawing.Size(200, 22);
             this.ctxMenuAnalizator.Text = "Анализатор";
             this.ctxMenuAnalizator.Click += new System.EventHandler(this.ctxMenuAnalizator_Click);
             // 
@@ -332,7 +336,7 @@
             // 
             this.конфигураторToolStripMenuItem.Name = "конфигураторToolStripMenuItem";
             this.конфигураторToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.K)));
-            this.конфигураторToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
+            this.конфигураторToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
             this.конфигураторToolStripMenuItem.Text = "Конфигуратор";
             // 
             // pictureBox1
@@ -372,6 +376,19 @@
             // 
             this.tsLabel1.Name = "tsLabel1";
             this.tsLabel1.Size = new System.Drawing.Size(0, 17);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(197, 6);
+            // 
+            // ctxMenuShowLogsDir
+            // 
+            this.ctxMenuShowLogsDir.Name = "ctxMenuShowLogsDir";
+            this.ctxMenuShowLogsDir.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.L)));
+            this.ctxMenuShowLogsDir.Size = new System.Drawing.Size(200, 22);
+            this.ctxMenuShowLogsDir.Text = "Проводник - логи";
+            this.ctxMenuShowLogsDir.Click += new System.EventHandler(this.ctxMenuShowLogsDir_Click);
             // 
             // FormMain
             // 
@@ -434,6 +451,8 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel tsLabel1;
         private System.Windows.Forms.ToolStripMenuItem конфигураторToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem ctxMenuShowLogsDir;
     }
 }
 

@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using Prizmer.PoolServer.DataBase;
-
+using System.Diagnostics;
 
 namespace Prizmer.PoolServer
 {
@@ -391,6 +391,13 @@ namespace Prizmer.PoolServer
         {
             this.frmAnalizator.Show();
             this.frmAnalizator.Focus();
+        }
+
+        private void ctxMenuShowLogsDir_Click(object sender, EventArgs e)
+        {
+            Process.Start("explorer.exe", @Logger.BaseDirectory);
+
+
         }
     }
 
