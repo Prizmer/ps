@@ -800,7 +800,7 @@ namespace Prizmer.PoolServer
                             string s_log = String.Format("На начало месяца: метод драйвера ReadMonthlyValues вернул false. Параметр {0} с адресом {1} каналом {2} не прочитан. Запрашиваемая дата: {3}",
                                 param.name, param.param_address, param.channel, tmpDate.ToString());
                             pmPrms.logger.LogError(s_log);
-                            //meter.WriteToLog("текущий параметр не прочитан:" + param.param_address.ToString());
+                            //meter.WriteToLog("текущий параметр не прочитан:" + param.param_address.ToString());   
                         }
                     }
                     else
