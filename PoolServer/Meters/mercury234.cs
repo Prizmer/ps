@@ -1639,7 +1639,11 @@ namespace Prizmer.Meters
             RecordPowerSlice record_slice = new RecordPowerSlice();
             DateTime dt_lastslice;
 
-            bool moveDates = this.m_version == 90000 ? true : false;
+            //TODO: здесь непонятно, но так делать нельзя
+            //при запросе диапазона дат 00.30 - 2.30 -> выдается 1.00 - 3.00
+            //все дело в том, что 234 данной версии воспринимает первую получасовку нового дня 24.01.2017 00:00 
+            //как 23.01.2017 00:00, т.е. 23.01.2017 24:00
+            bool moveDates = false;//this.m_version == 90000 ? true : false;
             if (moveDates)
             {
                 dt_begin = dt_begin.AddMinutes(30);
