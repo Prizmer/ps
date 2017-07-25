@@ -339,7 +339,7 @@ namespace Prizmer.PoolServer.DataBase
         #endregion
 
         #region Для дочитки
-            List<string> GetDriverNames();
+        List<string> GetDriverNames();
             List<string> GetPortsAvailiableByDriverParamType(int paramType, string driverName);
             Meter[] GetMetersByTcpIPGUIDAndParams(Guid guid_tcpip, int paramType, string driverName);
 

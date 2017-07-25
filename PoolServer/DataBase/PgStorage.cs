@@ -874,7 +874,8 @@ namespace Prizmer.PoolServer.DataBase
         public Value GetLatestVariousValue(TakenParams taken_params)
         {
             Value tempVal = new Value();
-            string query = "SELECT * FROM various_values WHERE id_taken_params=" + taken_params.id.ToString() + " ORDER BY date DESC,time DESC LIMIT 1";
+            DateTime dt = DateTime.Now.Date;
+            string query = "SELECT * FROM various_values WHERE id_taken_params=" + taken_params.id.ToString() + " AND date BETWEEN '" + dt.ToShortDateString() + "' AND '" + dt.ToShortDateString() + "' ORDER BY date DESC,time DESC LIMIT 1";
 
             List<Object> list = GetRecordsFromReader(query, RetrieveValueWithDateTime);
 
@@ -884,6 +885,10 @@ namespace Prizmer.PoolServer.DataBase
             return tempVal;
         }
 
+        public Value GetLatestVariousValueDT(TakenParams taken_params, DateTime BeginDT, DateTime EndDT)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

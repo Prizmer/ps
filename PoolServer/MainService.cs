@@ -257,20 +257,20 @@ namespace Prizmer.PoolServer
 
         volatile bool bStopServer = true;
 
-        #region Флаги отладки
+        #region Флаги отладки (DEBUG FLAGS)
 
-        bool B_DEBUG_MODE_TCP = false;
-        string DMTCP_IP = "172.40.40.28";
-        ushort DMTCP_PORT = 4013;
-        string DMTCP_DRIVER_NAME = "tem4";
-        uint DMTCP_METER_ADDR = 187;
-        bool DMTCP_STATIC_METER_NUMBER = false;
+        bool B_DEBUG_MODE_TCP = true;
+        string DMTCP_IP = "192.168.23.52";
+        ushort DMTCP_PORT = 5001;
+        string DMTCP_DRIVER_NAME = "m230";
+        uint DMTCP_METER_ADDR = 188;
+        bool DMTCP_STATIC_METER_NUMBER = true;
 
-        bool DM_POLL_ADDR = true;
-        bool DM_POLL_CURR = true;
-        bool DM_POLL_DAY = true;
-        bool DM_POLL_MONTH = true;
-        bool DM_POLL_HOUR = true;
+        bool DM_POLL_ADDR = false;
+        bool DM_POLL_CURR = false;
+        bool DM_POLL_DAY = false;
+        bool DM_POLL_MONTH = false;
+        bool DM_POLL_HOUR = false;
         bool DM_POLL_HALFANHOUR = true;
         bool DM_POLL_ARCHIVE = false;
 
@@ -767,7 +767,7 @@ namespace Prizmer.PoolServer
             TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, 2);
             if (takenparams.Length > 0)
             {
-                pmPrms.logger.LogInfo("Месячные: начало чтения суточных");
+                //pmPrms.logger.LogInfo("Месячные: начало чтения суточных");
                 for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                 {
                     if (bStopServer){
@@ -778,9 +778,9 @@ namespace Prizmer.PoolServer
 
                     Value[] lastvalue = pmPrms.ServerStorage.GetExistsMonthlyValuesDT(takenparams[tpindex], tmpDate, tmpDate);
                        
-                    string queryExample = "SELECT date, value, status, id_taken_params FROM monthly_values " +
-            "WHERE (id_taken_params = " + takenparams[tpindex].id + ") AND date BETWEEN '" + tmpDate.ToShortDateString() + "' AND '" + tmpDate.ToShortDateString() + "'";
-                    pmPrms.logger.LogInfo("Месячные: запрос в базу на проверку существования: " + queryExample);
+                   // string queryExample = "SELECT date, value, status, id_taken_params FROM monthly_values " +
+            //"WHERE (id_taken_params = " + takenparams[tpindex].id + ") AND date BETWEEN '" + tmpDate.ToShortDateString() + "' AND '" + tmpDate.ToShortDateString() + "'";
+                    //pmPrms.logger.LogInfo("Месячные: запрос в базу на проверку существования: " + queryExample);
 
                     //если значение в БД уже есть, то не читать его из прибора
                     if (lastvalue.Length > 0) continue;
@@ -804,10 +804,10 @@ namespace Prizmer.PoolServer
                             value.id_taken_params = takenparams[tpindex].id;
                             value.status = false;
                             value.value = curvalue;
-                            pmPrms.logger.LogInfo("Месячные: на дату " + value.dt.ToShortDateString() + " значение " + curvalue);
+                            //pmPrms.logger.LogInfo("Месячные: на дату " + value.dt.ToShortDateString() + " значение " + curvalue);
 
                             value.value = (float)Math.Round(value.value, 4, MidpointRounding.AwayFromZero);
-                            pmPrms.logger.LogInfo("Месячные: на дату " + value.dt.ToShortDateString() + " значение преобразованное" + value.value);
+                            //pmPrms.logger.LogInfo("Месячные: на дату " + value.dt.ToShortDateString() + " значение преобразованное" + value.value);
                             pmPrms.ServerStorage.AddMonthlyValues(value);
                             pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
                         }
@@ -1422,7 +1422,7 @@ namespace Prizmer.PoolServer
             return 0;
         }
 
-        private int pollHalfsForDates(PollMethodsParams pmPrms, DateTime dateFrom, DateTime dateTo)
+        private int pollHalfsForDatesPrevious(PollMethodsParams pmPrms, DateTime dateFrom, DateTime dateTo)
         {
             if (bStopServer) return 1;
 
@@ -1439,7 +1439,7 @@ namespace Prizmer.PoolServer
                 //читать данные только если прибор ответил
                 if (pmPrms.meter.OpenLinkCanal())
                 {
-                    if (lFlag) pmPrms.logger.LogInfo("RSL: 1. Открыт канал для чтения получасовок ПО ДАТАМ (метод 3)");
+                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: открыт канал для чтения получасовок ПО ДАТАМ (метод pollHalfsForDates)");
 
                     DateTime dt_cur = DateTime.Now;
 
@@ -1449,17 +1449,20 @@ namespace Prizmer.PoolServer
                     DateTime date_to = dateTo;
                     if (date_to > dt_cur) date_to = new DateTime(dt_cur.Ticks);
 
+                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: даты с/по " + date_from.ToString() + "/" + date_to.ToString());
+
                     //определим возможное кол-во срезов за период
                     TimeSpan span = date_to - date_from;
                     int diff_minutes = (int)Math.Ceiling(span.TotalMinutes);
                     int slicesNumber = diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD;
+                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: требуемое кол-во срезов " + slicesNumber + " за время (мин) " + diff_minutes);
 
                     List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
                     for (int takenPrmsIndex = 0; takenPrmsIndex < takenparams.Length; takenPrmsIndex++)
                     {
                         if (bStopServer) return 1;
 
-                        if (lFlag) pmPrms.logger.LogInfo("RSL: 2. Вошли в цикл перебора считываемых параметров, итерация " + (takenPrmsIndex+1).ToString() + " из " + takenparams.Length);
+                        if (lFlag) pmPrms.logger.LogInfo("Получасовки: вошли в цикл перебора считываемых параметров, итерация " + (takenPrmsIndex+1).ToString() + " из " + takenparams.Length);
 
                         Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[takenPrmsIndex].guid_params);
                         if (param.guid == Guid.Empty) continue;
@@ -1474,11 +1477,11 @@ namespace Prizmer.PoolServer
                         //счетчик уже имеющихся в БД записей
                         int alreadyExistInDbValueCnt = 0;
 
-                        if (lFlag) pmPrms.logger.LogInfo("RSL: 2.1. Число значений в базе за даты (" + date_from.ToShortDateString() + "; " +
+                        if (lFlag) pmPrms.logger.LogInfo("Получасовки: число значений в базе за даты (" + date_from.ToShortDateString() + "; " +
     date_to.ToShortDateString() + "): " + valInDbCnt);
-                        if (lFlag) pmPrms.logger.LogInfo("RSL: 2.2. Число значений в базе за даты (" + date_from.ToShortDateString() + "; " +
+                        if (lFlag) pmPrms.logger.LogInfo("Получасовки: число значений в базе за даты (" + date_from.ToShortDateString() + "; " +
 DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
-                        if (lFlag) pmPrms.logger.LogInfo("RSL: 2.3. Должно быть срезов сейчас: " + slicesNumber);
+                        if (lFlag) pmPrms.logger.LogInfo("Получасовки: должно быть срезов сейчас: " + slicesNumber);
                  
 
                         if (valInDbCnt < slicesNumber)
@@ -1564,6 +1567,293 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
 
             return successFlag ? 10 : 0;
         }
+        private int pollHalfsForDates(PollMethodsParams pmPrms, DateTime dateFrom, DateTime dateTo)
+        {
+            if (bStopServer) return 1;
+
+            const byte SLICE_PER_HALF_AN_HOUR_TYPE = 4;                         //тип значения в БД (получасовой)
+            const byte SLICE_PER_HALF_AN_HOUR_PERIOD = 30;                      //интервал записи срезов
+            bool successFlag = false;
+            bool lFlag = true;
+
+            //чтение получасовых срезов, подлежащих чтению, относящихся к конкретному прибору
+            TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, SLICE_PER_HALF_AN_HOUR_TYPE);
+
+            if (takenparams.Length > 0)
+            {
+                //читать данные только если прибор ответил
+                if (pmPrms.meter.OpenLinkCanal())
+                {
+                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: открыт канал для чтения получасовок ПО ДАТАМ (метод pollHalfsForDates)");
+
+                    DateTime dt_cur = DateTime.Now;
+
+                    DateTime date_from = dateFrom;
+                    if (dateFrom > dt_cur) dateFrom = new DateTime(dt_cur.Ticks);
+
+                    DateTime date_to = dateTo;
+                    if (date_to > dt_cur) date_to = new DateTime(dt_cur.Ticks);
+
+                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: даты с/по " + date_from.ToString() + "/" + date_to.ToString());
+
+
+
+                    //определим дату самого раннего из последних параметров записанных в базу
+                    Value earliestValue = pmPrms.ServerStorage.GetLatestVariousValue(takenparams[0]);
+                    for (int tpInd = 0; tpInd < takenparams.Length; tpInd++)
+                    {
+                        Value tmpVal = pmPrms.ServerStorage.GetLatestVariousValue(takenparams[tpInd]);
+                        if (tmpVal.dt.Ticks == 0)
+                            continue;
+                        else if (tmpVal.dt < earliestValue.dt) earliestValue = tmpVal;
+                    }
+                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: самый ранний из последних записанных срезов от " + earliestValue.ToString());
+
+
+                    //прочитаем срезы от самого раннего до date_to
+
+
+
+                    //определим возможное кол-во срезов за период
+                    TimeSpan span = date_to - date_from;
+                    int diff_minutes = (int)Math.Ceiling(span.TotalMinutes);
+                    int slicesNumber = diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD;
+                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: требуемое кол-во срезов " + slicesNumber + " за время (мин) " + diff_minutes);
+
+                    List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
+                    for (int takenPrmsIndex = 0; takenPrmsIndex < takenparams.Length; takenPrmsIndex++)
+                    {
+                        if (bStopServer) return 1;
+
+                        if (lFlag) pmPrms.logger.LogInfo("Получасовки: вошли в цикл перебора считываемых параметров, итерация " + (takenPrmsIndex + 1).ToString() + " из " + takenparams.Length);
+
+                        Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[takenPrmsIndex].guid_params);
+                        if (param.guid == Guid.Empty) continue;
+
+                        Value[] valuesInDB = pmPrms.ServerStorage.GetExistsVariousValuesDT(takenparams[takenPrmsIndex], date_from, date_to);
+                        //для поддержки драйвера 230, который выдает значения с заданного момента до времени последнего среза
+                        //игнорируя date_to. В драйвере 234го это поправлено.
+                        Value[] valuesInDBToCurrentTime = pmPrms.ServerStorage.GetExistsVariousValuesDT(takenparams[takenPrmsIndex], date_from, DateTime.Now);
+
+                        int valInDbCnt = valuesInDB.Count<Value>();
+                        int valInDbCntToCurTime = valuesInDBToCurrentTime.Count<Value>();
+
+                        //счетчик уже имеющихся в БД записей
+                        int alreadyExistInDbValueCnt = 0;
+
+                        if (lFlag) pmPrms.logger.LogInfo("Получасовки: число значений в базе за даты (" + date_from.ToShortDateString() + "; " +
+    date_to.ToShortDateString() + "): " + valInDbCnt);
+                        if (lFlag) pmPrms.logger.LogInfo("Получасовки: число значений в базе за даты (" + date_from.ToShortDateString() + "; " +
+DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
+                        if (lFlag) pmPrms.logger.LogInfo("Получасовки: должно быть срезов сейчас: " + slicesNumber);
+
+
+                        if (valInDbCnt < slicesNumber)
+                        {
+
+                            //в случае с классическим драйвером M230 - по боку date_to. Он ищет с date_from до последней записи
+                            //но в целом такая ситуация устраивает, в базу записывается сразу на несколько дней
+                            //когда опрашивается следующая дата, нужное количество записей в БД уже имеется
+
+                            bool res = false;
+
+                            if (lrps.Count == 0)
+                            {
+                                res = pmPrms.meter.ReadPowerSlice(date_from, date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD);
+                                if (lFlag) if (res) pmPrms.logger.LogInfo("RSL: 3. Метод ReadPowerSlice завершен, получено " + lrps.Count + " значений");
+                            }
+
+                            if (lrps.Count > 0)
+                            {
+                                if (lFlag) pmPrms.logger.LogInfo("RSL: 4. Данные для параметра " + (takenPrmsIndex + 1) + " из " + takenparams.Length + " уже получены");
+                                successFlag = true;
+                            }
+                            else
+                            {
+                                if (lFlag) pmPrms.logger.LogInfo("RSL: 4.  Данные для параметра " + (takenPrmsIndex + 1) + " из " + takenparams.Length + " НЕ получены, переход к след. параметру");
+                                continue;
+                            }
+
+                            //если срезы из указанного диапазона дат прочитаны успешно
+                            foreach (RecordPowerSlice rps in lrps)
+                            {
+                                if (bStopServer) return 1;
+
+                                Value val = new Value();
+                                val.dt = rps.date_time;
+                                val.id_taken_params = takenparams[takenPrmsIndex].id;
+                                val.status = Convert.ToBoolean(rps.status);
+
+                                if (valuesInDBToCurrentTime.Length > 0)
+                                {
+                                    if (valuesInDBToCurrentTime.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0)
+                                    {
+                                        //if (lFlag) pmPrms.logger.LogInfo("RSL: 4. Получасовка за " + val.dt.ToString() + " уже есть в базе");
+                                        alreadyExistInDbValueCnt++;
+                                        continue;
+                                    }
+                                }
+
+
+                                switch (param.param_address)
+                                {
+                                    case 0: { val.value = rps.APlus; break; }
+                                    case 1: { val.value = rps.AMinus; break; }
+                                    case 2: { val.value = rps.RPlus; break; }
+                                    case 3: { val.value = rps.RMinus; break; }
+                                    default: continue;
+                                }
+
+                                pmPrms.ServerStorage.AddVariousValues(val);
+                                pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
+                            }
+
+                            if (lFlag) pmPrms.logger.LogInfo("RSL: 5. Значения успешно занесены в VariousValues, " + alreadyExistInDbValueCnt + " из " + lrps.Count + " пропущены, так как уже существуют");
+
+                        }
+                        else
+                        {
+                            //для данного параметра все получасовки в базе
+                            if (lFlag) pmPrms.logger.LogInfo("RSL: 3: для данного параметра собраны все получасовки на текущий момент");
+                        }
+                    }
+                }
+                else
+                {
+                    if (lFlag) pmPrms.logger.LogInfo("RSL: 0: не удалось открыть канал...");
+                    return 3;
+                }
+            }
+            else
+            {
+                return 2;
+            }
+
+            return successFlag ? 10 : 0;
+        }
+
+        private int pollHalfsAutomatically(PollMethodsParams pmPrms)
+        {
+            if (bStopServer) return 1;
+
+            const byte SLICE_PER_HALF_AN_HOUR_TYPE = 4;                         //тип значения в БД (получасовой)
+            const byte SLICE_PER_HALF_AN_HOUR_PERIOD = 30;                      //интервал записи срезов
+            bool successFlag = false;
+            bool lFlag = true;
+
+            //чтение получасовых срезов, подлежащих чтению, относящихся к конкретному прибору
+            TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, SLICE_PER_HALF_AN_HOUR_TYPE);
+
+            if (takenparams.Length > 0)
+            {
+                //читать данные только если прибор ответил
+                if (pmPrms.meter.OpenLinkCanal())
+                {
+                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: открыт канал для чтения получасовок АВТО (метод pollHalfsAutomatically)");
+
+                    DateTime dt_cur = DateTime.Now;
+                    DateTime date_from = new DateTime(dt_cur.Year, dt_cur.Month, dt_cur.Day, 0, 0, 0);
+                    DateTime date_to = new DateTime(dt_cur.Year, dt_cur.Month, dt_cur.Day, 23, 59, 59);
+
+                    //определим сколько срезов должно быть на текущий момент
+                    TimeSpan span = dt_cur - date_from;
+                    int diff_minutes = (int)Math.Ceiling(span.TotalMinutes);
+                    int slicesNumber = diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD;
+                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: сейчас должно быть " + slicesNumber + "срезов за время (мин) " + diff_minutes);
+
+                    //определим дату самого раннего из последних параметров записанных в базу за сегодня
+                    //а также какое кол-во записей сделано
+                    Value earliestValue = pmPrms.ServerStorage.GetLatestVariousValue(takenparams[0]);
+                    int leastValueCnt = pmPrms.ServerStorage.GetExistsVariousValuesDT(takenparams[0], date_from, DateTime.Now).Length;
+
+                    for (int tpInd = 0; tpInd < takenparams.Length; tpInd++)
+                    {
+                        Value tmpVal = pmPrms.ServerStorage.GetLatestVariousValue(takenparams[tpInd]);
+                        Value[] valuesInDBToCurrentTime = pmPrms.ServerStorage.GetExistsVariousValuesDT(takenparams[tpInd], date_from, DateTime.Now);
+
+                        if (tmpVal.dt.Ticks == 0)
+                            continue;
+                        else
+                            if (tmpVal.dt < earliestValue.dt)
+                            {
+                                earliestValue = tmpVal;
+                                leastValueCnt = valuesInDBToCurrentTime.Length;
+                            }
+                    }
+                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: самый ранний из последних записанных срезов от " + earliestValue.ToString());
+                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: за это время записей сделано " + leastValueCnt.ToString());
+
+                    //прочитаем срезы от самого раннего до date_to
+                    bool res = false;
+                    List<RecordPowerSlice> lrps = new List<RecordPowerSlice>();
+                    if (leastValueCnt < slicesNumber)
+                    {         
+                        res = pmPrms.meter.ReadPowerSlice(earliestValue.dt.AddMinutes(1), date_to, ref lrps, SLICE_PER_HALF_AN_HOUR_PERIOD);
+                        if (lFlag) pmPrms.logger.LogInfo("Получасовки:  метод ReadPowerSlice завершен, получено " + lrps.Count + " значений");
+                    }
+
+                    if (!res)
+                    {
+                        if (lFlag) pmPrms.logger.LogInfo("Получасовки: метод ReadPowerSlice вернул 0 значений, выход");
+                        return 0;
+                    }
+
+                    //если срезы из указанного диапазона дат прочитаны успешно
+                    foreach (RecordPowerSlice rps in lrps)
+                    {
+                        if (bStopServer) return 1;
+
+
+                        for (int tpInd = 0; tpInd < takenparams.Length; tpInd++)
+                        {
+                            Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[tpInd].guid_params);
+                            if (param.guid == Guid.Empty) continue;
+
+                            Value val = new Value();
+                            val.dt = rps.date_time;
+                            val.id_taken_params = takenparams[tpInd].id;
+                            val.status = Convert.ToBoolean(rps.status);
+
+                            Value[] valuesInDBToCurrentTime = pmPrms.ServerStorage.GetExistsVariousValuesDT(takenparams[tpInd], date_from, DateTime.Now);
+
+                            if (valuesInDBToCurrentTime.Length > 0)
+                            {
+                                if (valuesInDBToCurrentTime.Count<Value>((valDb) => { return valDb.dt == val.dt; }) > 0)
+                                {
+                                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: получасовка за " + val.dt.ToString() + " уже есть в базе");
+                                    continue;
+                                }
+                            }
+
+                            switch (param.param_address)
+                            {
+                                case 0: { val.value = rps.APlus; break; }
+                                case 1: { val.value = rps.AMinus; break; }
+                                case 2: { val.value = rps.RPlus; break; }
+                                case 3: { val.value = rps.RMinus; break; }
+                                default: continue;
+                            }
+
+                            pmPrms.ServerStorage.AddVariousValues(val);
+                            pmPrms.ServerStorage.UpdateMeterLastRead(pmPrms.metersbyport[pmPrms.MetersCounter].guid, DateTime.Now);
+                        }
+                    }
+                }
+                else
+                {
+                    if (lFlag) pmPrms.logger.LogInfo("Получасовки: не удалось открыть канал...");
+                    return 3;
+                }
+            }
+            else
+            {
+                return 2;
+            }
+
+            return successFlag ? 10 : 0;
+        }
+
+
         private int pollHalfsM230New(PollMethodsParams pmPrms)
         {
             DateTime dtCur = DateTime.Now.Date;
@@ -1933,9 +2223,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             Logger logger = new Logger();
             Logger loggerThread = new Logger();
             Guid PortGUID = Guid.Empty;
-
-
-          
+         
             //подключение к БД
             PgStorage ServerStorage = new PgStorage();
             System.Data.ConnectionState conState = ServerStorage.Open(ConnectionString);
@@ -2152,14 +2440,14 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     else if (typemeter.driver_name == "m230")
                     {
                         //дочитка за вчера
-                        DateTime dtCur = DateTime.Now;
-                        DateTime dtStartY = new DateTime(dtCur.Year, dtCur.Month, dtCur.Day, 0, 0, 0).AddDays(-1);
-                        DateTime dtEndY = new DateTime(dtCur.Year, dtCur.Month, dtCur.Day, 23, 59, 59).AddDays(-1);
+                        //DateTime dtCur = DateTime.Now;
+                        //DateTime dtStartY = new DateTime(dtCur.Year, dtCur.Month, dtCur.Day, 0, 0, 0).AddDays(-1);
+                        //DateTime dtEndY = new DateTime(dtCur.Year, dtCur.Month, dtCur.Day, 23, 59, 59).AddDays(-1);
 
-                        int status = pollHalfsForDates(pmPrms, dtStartY, dtEndY);
-                        if (status == 1) goto CloseThreadPoint;
+                        //int status = pollHalfsForDates(pmPrms, dtStartY, dtEndY);
+                        //if (status == 1) goto CloseThreadPoint;
 
-                        status = pollHalfsM230New(pmPrms);
+                        int status = pollHalfsAutomatically(pmPrms);
                         if (status == 1) goto CloseThreadPoint;
                     }
                     else
