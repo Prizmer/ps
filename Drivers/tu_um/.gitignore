@@ -1,0 +1,10 @@
+ComPorts.log
+
+teplouchetapp.suo
+
+teplouchetapp/bin/Release
+
+obj
+obj/*
+/teplouchetapp/bin/Debug/*.pi
+/teplouchetapp/bin/Debug/teplouchetlog.txt

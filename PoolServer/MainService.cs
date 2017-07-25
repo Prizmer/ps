@@ -751,6 +751,7 @@ namespace Prizmer.PoolServer
             TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, 2);
             if (takenparams.Length > 0)
             {
+                pmPrms.logger.LogInfo("Месячные: начало чтения...");
                 for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                 {
                     if (bStopServer){
@@ -762,13 +763,13 @@ namespace Prizmer.PoolServer
                     for (int m = 0; m >= 0; m--)
                     {
                         tmpDate = PrevTime.AddMonths(-m);
-
+                        pmPrms.logger.LogInfo("Месячные: дата " + tmpDate.ToShortDateString());
                         Value[] lastvalue = ServerStorage.GetExistsMonthlyValuesDT(takenparams[tpindex], tmpDate, tmpDate);
 
                         
                         string queryExample = "SELECT date, value, status, id_taken_params FROM monthly_values " +
                 "WHERE (id_taken_params = " + takenparams[tpindex].id + ") AND date BETWEEN '" + tmpDate.ToShortDateString() + "' AND '" + tmpDate.ToShortDateString() + "'";
-                        pmPrms.logger.LogInfo("Monthly: запрос в базу на проверку существования: " + queryExample);
+                        pmPrms.logger.LogInfo("Месячные: запрос в базу на проверку существования: " + queryExample);
 
                         //если значение в БД уже есть, то не читать его из прибора
                         if (lastvalue.Length > 0) continue;
@@ -2029,7 +2030,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     case "teplouchet1": meter = new teplouchet1(); break;
                     case "m200": meter = new Mercury200(); break;
                     case "opcretranslator": meter = new OpcRetranslator(); break;
-                    case "sayani_kombik": meter = new sayani_kombik(); break;
+                    //case "sayani_kombik": meter = new sayani_kombik(); break;
                     case "m230": meter = new m234(); break;
                     case "m234": meter = new m234(); break;
                     case "m230_stable": meter = new m230(); break;
