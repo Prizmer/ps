@@ -259,17 +259,17 @@ namespace Prizmer.PoolServer
 
         #region Флаги отладки (DEBUG FLAGS)
 
-        bool B_DEBUG_MODE_TCP = true;
+        bool B_DEBUG_MODE_TCP = false;
         string DMTCP_IP = "192.168.23.52";
         ushort DMTCP_PORT = 5001;
         string DMTCP_DRIVER_NAME = "m230";
         uint DMTCP_METER_ADDR = 188;
-        bool DMTCP_STATIC_METER_NUMBER = true;
+        bool DMTCP_STATIC_METER_NUMBER = false;
 
-        bool DM_POLL_ADDR = false;
-        bool DM_POLL_CURR = false;
-        bool DM_POLL_DAY = false;
-        bool DM_POLL_MONTH = false;
+        bool DM_POLL_ADDR = true;
+        bool DM_POLL_CURR = true;
+        bool DM_POLL_DAY = true;
+        bool DM_POLL_MONTH = true;
         bool DM_POLL_HOUR = false;
         bool DM_POLL_HALFANHOUR = true;
         bool DM_POLL_ARCHIVE = false;
@@ -1769,7 +1769,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     //определим сколько срезов должно быть на текущий момент
                     TimeSpan span = dt_cur - date_from;
                     int diff_minutes = (int)Math.Ceiling(span.TotalMinutes);
-                    int slicesNumber = diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD;
+                    int slicesNumber = diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD + 1;
                     if (lFlag) pmPrms.logger.LogInfo("Получасовки: сейчас должно быть " + slicesNumber + "срезов за время (мин) " + diff_minutes);
 
                     //определим дату самого раннего из последних параметров записанных в базу за сегодня
@@ -1896,7 +1896,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     //определим сколько срезов должно быть за период
                     TimeSpan span = date_to - date_from;
                     int diff_minutes = (int)Math.Ceiling(span.TotalMinutes);
-                    int slicesNumber = diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD;
+                    int slicesNumber = diff_minutes / SLICE_PER_HALF_AN_HOUR_PERIOD + 1;
                     if (lFlag) pmPrms.logger.LogInfo("Получасовки: должно быть " + slicesNumber + "срезов за период за время (мин) " + diff_minutes);
 
                     //определим существующее кол-во записей по параметрам
@@ -2573,14 +2573,13 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     else if (typemeter.driver_name == "m230")
                     {
                         //дочитка за вчера
-                        //DateTime dtCur = DateTime.Now;
-                        //DateTime dtStartY = new DateTime(dtCur.Year, dtCur.Month, dtCur.Day, 0, 0, 0).AddDays(-1);
-                        //DateTime dtEndY = new DateTime(dtCur.Year, dtCur.Month, dtCur.Day, 23, 59, 59).AddDays(-1);
+                        DateTime dtCur = DateTime.Now;
+                        DateTime dtStartY = new DateTime(dtCur.Year, dtCur.Month, dtCur.Day, 0, 0, 0).AddDays(-1);
 
-                        //int status = pollHalfsForDates(pmPrms, dtStartY, dtEndY);
-                        //if (status == 1) goto CloseThreadPoint;
+                        int status = pollHalfsForDate(pmPrms, dtStartY);
+                        if (status == 1) goto CloseThreadPoint;
 
-                        int status = pollHalfsAutomatically(pmPrms);
+                        status = pollHalfsAutomatically(pmPrms);
                         if (status == 1) goto CloseThreadPoint;
                     }
                     else
