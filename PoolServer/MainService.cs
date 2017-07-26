@@ -1764,7 +1764,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
 
                     DateTime dt_cur = DateTime.Now;
                     DateTime date_from = new DateTime(dt_cur.Year, dt_cur.Month, dt_cur.Day, 0, 0, 0);
-                    DateTime date_to = new DateTime(dt_cur.Year, dt_cur.Month, dt_cur.Day, 23, 59, 59);
+                    DateTime date_to = new DateTime(dt_cur.Year, dt_cur.Month, dt_cur.Day, 23, 31, 0);
 
                     //определим сколько срезов должно быть на текущий момент
                     TimeSpan span = dt_cur - date_from;
@@ -1889,7 +1889,11 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
 
                     DateTime dt_cur = DateTime.Now;
                     DateTime date_from = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
-                    DateTime date_to = new DateTime(date.Year, date.Month, date.Day, 23, 59, 59);
+                    //date_to - захватывает последнюю получасовку, но не более. Если сделать 23:59
+                    //23:59 -> (~24:00) diff_minutes ~= 1440 / 30 = 48. Это следствие округления.
+                    //если сделать 23:31 -> округления не произойдет, и получасовка 23:30 будет 47.
+                    //однако, мы уже посчитали получасовку, коорая 00:00, поэтому 48-я получасовка - 23:30
+                    DateTime date_to = new DateTime(date.Year, date.Month, date.Day, 23, 31, 0);
 
                     if (date_to > dt_cur) date_to = dt_cur;
 
@@ -1953,7 +1957,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                             val.id_taken_params = takenparams[tpInd].id;
                             val.status = Convert.ToBoolean(rps.status);
 
-                            Value[] valuesInDBToCurrentTime = pmPrms.ServerStorage.GetExistsVariousValuesDT(takenparams[tpInd], date_from, DateTime.Now);
+                            Value[] valuesInDBToCurrentTime = pmPrms.ServerStorage.GetExistsVariousValuesDT(takenparams[tpInd], date_from, date_to);
 
                             if (valuesInDBToCurrentTime.Length > 0)
                             {

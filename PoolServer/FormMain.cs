@@ -27,6 +27,8 @@ namespace Prizmer.PoolServer
         string connectionStr = "";
         private void FormMain_Load(object sender, EventArgs e)
         {
+            //SANDBOX
+
             try
             {
                 connectionStr = ms.GetConnectionString();
