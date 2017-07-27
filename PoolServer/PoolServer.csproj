@@ -59,9 +59,6 @@
       <HintPath>..\packages\FirebirdSql.Data.FirebirdClient.5.0.5\lib\net40-client\FirebirdSql.Data.FirebirdClient.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="libLogger">
-      <HintPath>..\Logger\bin\Debug\libLogger.dll</HintPath>
-    </Reference>
     <Reference Include="Mono.Security">
       <HintPath>dll\Mono.Security.dll</HintPath>
     </Reference>
@@ -166,6 +163,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Logger\LibLogger.csproj">
+      <Project>{d20d8acb-ad07-4e7f-a99e-47f4113b32ea}</Project>
+      <Name>LibLogger</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
