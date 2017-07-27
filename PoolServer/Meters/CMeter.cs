@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Collections;
+using System.Configuration;
 
 using Prizmer.Ports;
-using Prizmer.PoolServer;
 
-using System.Configuration;
+
+using PollingLibraries.LibLogger;
 
 namespace Prizmer.Meters
 {

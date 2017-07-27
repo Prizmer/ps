@@ -13,6 +13,21 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -43,6 +58,9 @@
     <Reference Include="FirebirdSql.Data.FirebirdClient, Version=5.0.5.0, Culture=neutral, PublicKeyToken=3750abcc3150b00c, processorArchitecture=MSIL">
       <HintPath>..\packages\FirebirdSql.Data.FirebirdClient.5.0.5\lib\net40-client\FirebirdSql.Data.FirebirdClient.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="libLogger">
+      <HintPath>..\Logger\bin\Debug\libLogger.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Security">
       <HintPath>dll\Mono.Security.dll</HintPath>
@@ -142,7 +160,34 @@
   <ItemGroup>
     <Content Include="Resources\64ico.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>RD /S /Q "$(TargetDir)cs\"
+RD /S /Q "$(TargetDir)da\"
+RD /S /Q "$(TargetDir)de\"
+RD /S /Q "$(TargetDir)es\"
+RD /S /Q "$(TargetDir)fa\"
+RD /S /Q "$(TargetDir)fi\"
+RD /S /Q "$(TargetDir)fr\"
+RD /S /Q "$(TargetDir)it\"
+RD /S /Q "$(TargetDir)ko\"
+RD /S /Q "$(TargetDir)mk\"
+RD /S /Q "$(TargetDir)nl\"
+RD /S /Q "$(TargetDir)pl\"
+RD /S /Q "$(TargetDir)pt\"
+RD /S /Q "$(TargetDir)ru\"
+RD /S /Q "$(TargetDir)sv\"
+RD /S /Q "$(TargetDir)tr\"
+RD /S /Q "$(TargetDir)zh-CN\"
+RD /S /Q "$(TargetDir)ja\"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

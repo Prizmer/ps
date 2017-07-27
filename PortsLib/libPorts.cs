@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Collections;
 using System.Threading;
 
 using System.IO;
@@ -10,13 +9,12 @@ using System.Net;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
 
-using System.Configuration;
-
-using Prizmer.PoolServer;
+using System.Collections.Specialized;
 
 using PollingLibraries.LibLogger;
 
-namespace Prizmer.Ports
+
+namespace PollingLibraries.LibPorts
 {
     public delegate int FindPacketSignature(Queue<byte> queue);
 
@@ -32,6 +30,8 @@ namespace Prizmer.Ports
         void Close();
         void SetReadTimeout(int timeout = 1200);
 
+        void SetConfigurationManagerAppSettings(NameValueCollection loadedAppSettings);
+
         object GetPortObject();
     }
 
@@ -42,31 +42,10 @@ namespace Prizmer.Ports
         private ushort m_write_timeout = 100;
         private ushort m_read_timeout = 100;
         private int m_delay_between_sending = 100;
+
         Logger tcpLogger;
 
-        public string GetName()
-        {
-            return "tcp" + m_address + "_" + m_port;
-        }
-
-        ~TcpipPort()
-        {
-            if (sender != null)
-                sender.Close();
-        }
-
-        public void Close()
-        {
-            if (sender != null)
-                sender.Close();
-        }
-        
-        IPAddress ipLocalAddr = null;
-        IPEndPoint ipLocalEndpoint = null;
-        IPEndPoint remoteEndPoint = null;
-        Socket sender = null;
-
-        DateTime dtCreated = DateTime.Now;
+        NameValueCollection loadedAppSettings = new NameValueCollection();
 
         bool areLogsRestricted = false;
         public TcpipPort(string address, int port, ushort write_timeout, ushort read_timeout, int delay_between_sending)
@@ -80,17 +59,39 @@ namespace Prizmer.Ports
             m_delay_between_sending = delay_between_sending;
 
             tcpLogger.Initialize(Logger.DIR_LOGS_PORTS, false, GetName());
-            try
-            {
-                areLogsRestricted = bool.Parse(ConfigurationManager.AppSettings.GetValues("tcpLogsRestricted")[0]);
-            }
-            catch (Exception ex)
-            { }
+            areLogsRestricted = false;
 
             ReInitialize();
         }
 
+        ~TcpipPort()
+        {
+            if (sender != null)
+                sender.Close();
+        }
 
+        public string GetName()
+        {
+            return "tcp" + m_address + "_" + m_port;
+        }
+
+        public void Close()
+        {
+            if (sender != null)
+                sender.Close();
+        }
+
+        void VirtualPort.SetConfigurationManagerAppSettings(NameValueCollection loadedAppSettings)
+        {
+            this.loadedAppSettings = loadedAppSettings;
+        }
+
+        IPAddress ipLocalAddr = null;
+        IPEndPoint ipLocalEndpoint = null;
+        IPEndPoint remoteEndPoint = null;
+        Socket sender = null;
+
+        DateTime dtCreated = DateTime.Now;
 
         public bool ReInitialize()
         {
@@ -118,7 +119,7 @@ namespace Prizmer.Ports
                     //WriteToLog("IpLocalEndp: " + ipLocalEndpoint.ToString() + ";  Remote: " + remoteEndPoint.ToString() );
 
                     sender.Bind(ipLocalEndpoint);
-                    
+
                     //old version of connection 
                     //sender.Connect(remoteEndPoint);
 
@@ -150,7 +151,6 @@ namespace Prizmer.Ports
             }
         }
 
-
         bool GetTCPPortLiveMinutes(out int timeout)
         {
             timeout = 60;
@@ -158,7 +158,7 @@ namespace Prizmer.Ports
             string tmpValStr = "";
             try
             {
-                tmpValStr = ConfigurationManager.AppSettings.GetValues("tcpPortLiveMinutes")[0];
+                tmpValStr = loadedAppSettings.GetValues("tcpPortLiveMinutes")[0];
             }
             catch (Exception ex)
             {
@@ -229,7 +229,7 @@ namespace Prizmer.Ports
             string strIpConfig = "";
             try
             {
-                strIpConfig = ConfigurationManager.AppSettings.GetValues("localEndPointIp")[0];
+                strIpConfig = loadedAppSettings.GetValues("localEndPointIp")[0];
             }
             catch (Exception ex)
             { }
@@ -249,8 +249,8 @@ namespace Prizmer.Ports
             }
         }
 
-        public bool ManageUpWithReceivedBytes(List<byte> readBytesList, 
-            FindPacketSignature func,  int target_in_length,
+        public bool ManageUpWithReceivedBytes(List<byte> readBytesList,
+            FindPacketSignature func, int target_in_length,
             out byte[] outDataArr, out int outReadingSize,
             uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
@@ -300,7 +300,7 @@ namespace Prizmer.Ports
                     if (target_in_length == -1)
                     {
                         outDataArr = new byte[reading_queue.Count];
-                       // outDataArr = new byte[reading_size];
+                        // outDataArr = new byte[reading_size];
 
                         for (int i = 0; i < outDataArr.Length; i++)
                             outDataArr[i] = temp_buffer[i];
@@ -341,13 +341,13 @@ namespace Prizmer.Ports
             {
                 //погружаемся в сон на 5 минут, чтобы "дать отдохнуть" принимающим устройствам
                 //WriteToLog("WriteReadData: погружаемся в сон на 5 минут, чтобы дать отдохнуть принимающим устройствам");
-                
+
                 if (sender != null && sender.Connected) sender.Close();
                 Thread.Sleep(1000 * 60 * 5);
                 dtCreated = DateTime.Now;
 
                 ReInitialize();
-               // WriteToLog("WriteReadData: открыт новый сокет после сна: " + sender.LocalEndPoint.ToString());
+                // WriteToLog("WriteReadData: открыт новый сокет после сна: " + sender.LocalEndPoint.ToString());
             }
 
             try
@@ -396,20 +396,20 @@ namespace Prizmer.Ports
                         }
 
                         string tmpResStr = BitConverter.ToString(readBytesList.ToArray());
-                      //  if (tmpResStr.Length < 4)
-                           // WriteToLog("received data: " + tmpResStr);
+                        //  if (tmpResStr.Length < 4)
+                        // WriteToLog("received data: " + tmpResStr);
 
                         bool bManageRes = false;
                         try
                         {
                             bManageRes = ManageUpWithReceivedBytes(
-                                readBytesList, 
-                                func, 
-                                target_in_length, 
-                                out in_buffer, 
+                                readBytesList,
+                                func,
+                                target_in_length,
+                                out in_buffer,
                                 out readingSize,
-                                pos_count_data_size, 
-                                size_data, 
+                                pos_count_data_size,
+                                size_data,
                                 header_size
                             );
                         }
@@ -473,7 +473,7 @@ namespace Prizmer.Ports
 
         public void SetReadTimeout(int timeout = 1200)
         {
-           // this.readTimeout = timeout;
+            // this.readTimeout = timeout;
         }
 
 
@@ -520,18 +520,13 @@ namespace Prizmer.Ports
             m_name = "COM" + Convert.ToString(number);
             m_baudrate = baudrate;
             m_data_bits = data_bits;
-            m_parity = (Parity)parity; 
+            m_parity = (Parity)parity;
             m_stop_bits = (StopBits)stop_bits;
             m_write_timeout = write_timeout;
             m_read_timeout = read_timeout;
             m_attemts = attemts;
 
-            try
-            {
-                areLogsRestricted = bool.Parse(ConfigurationManager.AppSettings.GetValues("comLogsRestricted")[0]);
-            }
-            catch (Exception ex)
-            { }
+            areLogsRestricted = false;
 
             try
             {
@@ -543,9 +538,9 @@ namespace Prizmer.Ports
             }
             catch (Exception ex)
             {
-                #if (DEBUG)
-                    WriteToLog("Create " + m_name + ": " + ex.Message);
-                #endif
+#if (DEBUG)
+                WriteToLog("Create " + m_name + ": " + ex.Message);
+#endif
             }
         }
 
@@ -630,7 +625,7 @@ namespace Prizmer.Ports
 
                         data = tmp_buff;
 
-                        
+
                     }
                     catch (Exception ex)
                     {
@@ -674,7 +669,7 @@ namespace Prizmer.Ports
                 {
                     //пишем в порт команду, ограниченную out_length
                     m_Port.Write(out_buffer, 0, out_length);
-                    
+
                     //ожидаем 100мс
                     Thread.Sleep(100);
                     uint elapsed_time_count = 100;
@@ -764,7 +759,7 @@ namespace Prizmer.Ports
 
             return reading_size;
         }
-         */
+            */
         #endregion
 
         public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length,
@@ -915,23 +910,28 @@ namespace Prizmer.Ports
 
         public void SetReadTimeout(int timeout = 1200)
         {
-            throw new NotImplementedException();
+            return;
         }
 
 
         public object GetPortObject()
         {
-            throw new NotImplementedException();
+            return null;
         }
 
 
         public string GetFullName()
         {
-            throw new NotImplementedException();
+            return "COM_NOT_IMPLEMENTED";
+        }
+
+        public void SetConfigurationManagerAppSettings(NameValueCollection loadedAppSettings)
+        {
+            return;
         }
     }
 
-    public class ComPort : VirtualPort, IDisposable 
+    public class ComPort : VirtualPort, IDisposable
     {
         SerialPort serialPort;
         int readTimeout = 600;
@@ -971,14 +971,14 @@ namespace Prizmer.Ports
             Close();
         }
 
-        public int  WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
+        public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
             if (!OpenPort()) return 0;
 
-           // Thread.Sleep(10);
+            // Thread.Sleep(10);
             serialPort.Write(out_buffer, 0, out_buffer.Length);
 
-            
+
 
             Thread.Sleep(10);
             if (serialPort.BytesToRead == 0)
@@ -1013,32 +1013,32 @@ namespace Prizmer.Ports
             }
 
 
-            
+
             return in_buffer == null ? 0 : in_buffer.Length;
         }
 
-        public string  GetName()
+        public string GetName()
         {
- 	       if (serialPort != null)
-               return serialPort.PortName;
-           else
-               return "";
+            if (serialPort != null)
+                return serialPort.PortName;
+            else
+                return "";
         }
-        public bool  isOpened()
+        public bool isOpened()
         {
- 	        if (serialPort != null && serialPort.IsOpen)
+            if (serialPort != null && serialPort.IsOpen)
                 return true;
             else
                 return false;
         }
-        public SerialPort  getSerialPortObject()
+        public SerialPort getSerialPortObject()
         {
- 	        return serialPort;
+            return serialPort;
         }
 
-        public bool  OpenPort()
+        public bool OpenPort()
         {
- 	        if (serialPort != null)
+            if (serialPort != null)
             {
 
                 if (!serialPort.IsOpen)
@@ -1074,10 +1074,10 @@ namespace Prizmer.Ports
 
             return false;
         }
-    
-        public void  Dispose()
+
+        public void Dispose()
         {
- 	        serialPort.Close();
+            serialPort.Close();
         }
 
 
@@ -1124,9 +1124,11 @@ namespace Prizmer.Ports
             else
                 return "";
         }
+
+        public void SetConfigurationManagerAppSettings(NameValueCollection loadedAppSettings)
+        {
+            return;
+        }
     }
-
-
-
-
+   
 }

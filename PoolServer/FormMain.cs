@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using Prizmer.PoolServer.DataBase;
 using System.Diagnostics;
 
+using PollingLibraries.LibLogger;
+
 namespace Prizmer.PoolServer
 {
     public partial class FormMain : Form
