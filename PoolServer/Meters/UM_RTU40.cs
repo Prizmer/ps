@@ -65,7 +65,6 @@ namespace Prizmer.Meters
             //очистка временных списков ОЧЕНь ВАЖНО для данного прибора
             listOfDailyValues.Clear();
             listOfMonthlyValues.Clear();
-            listOfSliceValues.Clear();
         }
 
         public struct ValueUM
@@ -698,8 +697,6 @@ namespace Prizmer.Meters
             else
                 return false;
         }
-
-
         public bool getMonthlyValuesForID(int id, DateTime dt, out List<ValueUM> umVals)
         {
             umVals = new List<ValueUM>();
@@ -793,23 +790,108 @@ namespace Prizmer.Meters
             return true;
         }
 
-        public bool getSlicesValuesForID(int id, DateTime dt_start, DateTime dt_end, out List<ValueUM> umVals)
+        //добавлены при интеграции получасовок
+        public bool parseSingleSliceString(string sliceString, ref RecordPowerSlice powerSlice)
         {
-            umVals = new List<ValueUM>();
+            powerSlice = new RecordPowerSlice();
 
-            string cmdStr = "READSTATEUTC=" + dt_start.ToString("yy") + "." + dt_start.ToString("MM") + "." + dt_start.ToString("dd") +
-                " " + dt_start.ToString("MM") + ":" + dt_start.ToString("MM") + ":" + dt_start.ToString("cc") + " " + Convert.ToInt32(dt_start.IsDaylightSavingTime()).ToString() +
-                " " + dt_end.ToString("HH") + "." + dt_end.ToString("mm") + "." + dt_end.ToString("dd") +
-                " " + dt_end.ToString("MM") + ":" + dt_end.ToString("MM") + ":" + dt_end.ToString("cc") + " " + Convert.ToInt32(dt_start.IsDaylightSavingTime()).ToString() +
-                " ;" + id;
+            //здесь происходит разбор фрагмента ответа от DT до следующего DT
+            //sliceString = "<DT.27.07.17 00:00:00 02 0<.<TD.1<.<FL.W;;;<.<DPAp.0.0025<.<DPAm.?<.<DPRp.0.0035<.<DPRm.?<.";
+            string dateStr = sliceString.Substring(4, 17);
+
+            //!!! дата не учитывает сезон лето/зима, хотя драйвер присылает эту информацию
+            DateTime sliceDt = new DateTime();
+
+            if (!DateTime.TryParseExact(dateStr, "dd.MM.yy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out sliceDt))
+            {
+                WriteToLog("Ошибка преобразования даты в методе parseSingleSliceString");
+                return false;
+            }
+
+            List<int> valueIndexesList = new List<int>();
+            valueIndexesList.Add(sliceString.IndexOf("DPAp"));
+            valueIndexesList.Add(sliceString.IndexOf("DPAm"));
+            valueIndexesList.Add(sliceString.IndexOf("DPRp"));
+            valueIndexesList.Add(sliceString.IndexOf("DPRm"));
+
+            int valueCaptionLength = "DPap.".Length;
+
+            List<string> valueStringsList = new List<string>();
+
+
+            powerSlice.date_time = sliceDt;
+            powerSlice.period = 30;
+
+            for (int i = 0; i < 4; i++)
+            {
+                int tmpValueStartIndex = valueIndexesList[i] + valueCaptionLength;
+                int tmpValueEndIndex = sliceString.IndexOf("<", tmpValueStartIndex);
+                var tmpValString = sliceString.Substring(tmpValueStartIndex, tmpValueEndIndex - tmpValueStartIndex);
+                valueStringsList.Add(tmpValString.Replace("?", "0"));
+            }
+
+            try
+            {
+                powerSlice.APlus = float.Parse(valueStringsList[0], CultureInfo.InvariantCulture);
+                powerSlice.AMinus = float.Parse(valueStringsList[1], CultureInfo.InvariantCulture);
+                powerSlice.RPlus = float.Parse(valueStringsList[2], CultureInfo.InvariantCulture);
+                powerSlice.RMinus = float.Parse(valueStringsList[3], CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                WriteToLog("Ошибка преобразования строк в методе parseSingleSliceString: " + ex.Message);
+                return false;
+            }
+
+            return true;
+        }
+        public bool getSlicesValuesForID(int id, DateTime dt_start, DateTime dt_end, out List<RecordPowerSlice> rpsVals)
+        {
+            rpsVals = new List<RecordPowerSlice>();
+
+            string cmdStr = "READSTATE=" + dt_start.ToString("yy.MM.dd HH:mm:ss", CultureInfo.InvariantCulture) + " " + Convert.ToInt32(dt_start.IsDaylightSavingTime()).ToString() +
+                " " + dt_end.ToString("yy.MM.dd HH:mm:ss", CultureInfo.InvariantCulture) + " " + Convert.ToInt32(dt_end.IsDaylightSavingTime()).ToString() +
+                ";" + id;
             List<byte> cmd = wrapCmd(cmdStr);
+
+            //byte[] testCmd = ASCIIEncoding.ASCII.GetBytes("00000000,READSTATE=17.07.27 00:00:00 0 17.07.27 22:02:13 043BC\n\n");
 
             byte[] incommingData = new byte[1];
             m_vport.WriteReadData(FindPacketSignature, cmd.ToArray(), ref incommingData, cmd.Count, -1);
 
             string answ = ASCIIEncoding.ASCII.GetString(incommingData);
 
+            int endIndex = answ.IndexOf("\nEND");
+            if (endIndex == -1) return false;
+
             //разбор значений
+            int indexDt = answ.IndexOf("<DT");
+            if (indexDt == -1) return false;
+
+            while (indexDt != -1)
+            {
+                int tmpIndexDt = answ.IndexOf("<DT", indexDt + 1);
+                string tmpVal = "";
+                if (tmpIndexDt == -1)
+                {
+                    tmpVal = answ.Substring(indexDt, endIndex - indexDt + 1);
+                }
+                else
+                {
+                    tmpVal = answ.Substring(indexDt, tmpIndexDt - indexDt + 1);
+                }
+
+                indexDt = tmpIndexDt;
+
+                RecordPowerSlice rps = new RecordPowerSlice();
+                if (!parseSingleSliceString(tmpVal, ref rps))
+                {
+                    WriteToLog("Ошибка в методе разбора строки с одной получасовкой: " + tmpVal + "; метод getSlicesValuesForID завершен");
+                    return false;
+                }
+
+                rpsVals.Add(rps);
+            }
 
             return true;
         }
@@ -975,12 +1057,9 @@ namespace Prizmer.Meters
             return true;
         }
 
-        List<ValueType> listOfSliceValues = new List<ValueType>();
         public bool ReadPowerSlice(DateTime dt_begin, DateTime dt_end, ref List<RecordPowerSlice> listRPS, byte period)
         {
-
-
-            return true;
+            return getSlicesValuesForID(meterId, dt_begin, dt_end, out listRPS);
         }
 
         #endregion
