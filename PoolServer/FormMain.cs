@@ -31,6 +31,9 @@ namespace Prizmer.PoolServer
         {
             //SANDBOX
 
+            const string SO_VERSION = "v. 0.9.1";
+            this.Text += " - " + SO_VERSION;
+
             try
             {
                 connectionStr = ms.GetConnectionString();

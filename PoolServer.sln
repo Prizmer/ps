@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibPorts", "PortsLib\LibPor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibLogger", "Logger\LibLogger.csproj", "{D20D8ACB-AD07-4E7F-A99E-47F4113B32EA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibMeter", "LibMeter\LibMeter.csproj", "{F0106CA4-43DE-4017-956B-0842AD89F90E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +67,18 @@ Global
 		{D20D8ACB-AD07-4E7F-A99E-47F4113B32EA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{D20D8ACB-AD07-4E7F-A99E-47F4113B32EA}.Release|x86.ActiveCfg = Release|Any CPU
 		{D20D8ACB-AD07-4E7F-A99E-47F4113B32EA}.Release|x86.Build.0 = Release|Any CPU
+		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Debug|x86.Build.0 = Debug|Any CPU
+		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Release|x86.ActiveCfg = Release|Any CPU
+		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

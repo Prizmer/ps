@@ -8,11 +8,18 @@ using System.Configuration;
 using System.IO;
 
 using Prizmer.PoolServer.DataBase;
+
+//временное решение до перевода всех драйверов в DLL
 using Prizmer.Meters;
 using Prizmer.Meters.iMeters;
-using Prizmer.Ports;
+
 
 using PollingLibraries.LibLogger;
+using PollingLibraries.LibPorts;
+
+//using Drivers.LibMeter;
+using Drivers.PulsarDriver;
+using Drivers.ElfApatorDriver;
 
 namespace Prizmer.PoolServer
 {
@@ -2259,8 +2266,6 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     case "tem4": meter = new tem104(); break;
                     case "tem106": meter = new tem106(); break;
                     case "set4tm_03": meter = new set4tm_03(); break;
-                    case "elf108": meter = new elf108(); break;
-                    case "PulsarM": meter = new PulsarM(); break;
                     case "spg76212": meter = new spg76212(); break;
                     case "teplouchet1": meter = new teplouchet1(); break;
                     case "m200": meter = new Mercury200(); break;
@@ -2270,6 +2275,11 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     case "m234": meter = new m234(); break;
                     case "m230_stable": meter = new m230(); break;
                     case "um40rtu" : meter = new UM_RTU40(); break;
+                    case "elf108": meter = (Prizmer.Meters.iMeters.IMeter)new ElfApatorDriver(); break;
+                    case "PulsarM": meter = (Prizmer.Meters.iMeters.IMeter)new PulsarDriver(); break;
+                    case "pulsar_teplo": meter = (Prizmer.Meters.iMeters.IMeter)new PulsarDriver(); break;
+                    case "pulsar_hvs": meter = (Prizmer.Meters.iMeters.IMeter)new PulsarDriver(); break;
+                    case "pulsar_gvs": meter = (Prizmer.Meters.iMeters.IMeter)new PulsarDriver(); break;
                 }
 
                 if (meter == null) goto NetxMeter;

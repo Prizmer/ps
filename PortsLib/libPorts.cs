@@ -48,7 +48,7 @@ namespace PollingLibraries.LibPorts
         NameValueCollection loadedAppSettings = new NameValueCollection();
 
         bool areLogsRestricted = false;
-        public TcpipPort(string address, int port, ushort write_timeout, ushort read_timeout, int delay_between_sending)
+        public TcpipPort(string address, int port, ushort write_timeout, ushort read_timeout, int delay_between_sending, NameValueCollection loadedAppSettings = null)
         {
             tcpLogger = new Logger();
 
@@ -60,6 +60,9 @@ namespace PollingLibraries.LibPorts
 
             tcpLogger.Initialize(Logger.DIR_LOGS_PORTS, false, GetName());
             areLogsRestricted = false;
+
+            if (loadedAppSettings != null)
+                this.loadedAppSettings = loadedAppSettings;
 
             ReInitialize();
         }
@@ -83,7 +86,7 @@ namespace PollingLibraries.LibPorts
 
         void VirtualPort.SetConfigurationManagerAppSettings(NameValueCollection loadedAppSettings)
         {
-            this.loadedAppSettings = loadedAppSettings;
+
         }
 
         IPAddress ipLocalAddr = null;
@@ -134,7 +137,8 @@ namespace PollingLibraries.LibPorts
                     }
                     else
                     {
-                        WriteToLog("ReInitialize: не удалось установить соединение");
+                        WriteToLog("ReInitialize: не удалось установить соединение между " + 
+                            ipLocalEndpoint.ToString() + " и " + remoteEndPoint.ToString()) ;
                         return false;
                     }
                 }
@@ -230,9 +234,12 @@ namespace PollingLibraries.LibPorts
             try
             {
                 strIpConfig = loadedAppSettings.GetValues("localEndPointIp")[0];
+                //WriteToLog("GetLocalEndPointIp: IP прочитанный из конфигурации: " + strIpConfig);
             }
             catch (Exception ex)
-            { }
+            {
+                WriteToLog("GetLocalEndPointIp: " + ex.ToString());
+            }
 
             bool parsingResult = false;
             if (strIpConfig.Length > 0)
@@ -282,10 +289,10 @@ namespace PollingLibraries.LibPorts
 
                     byte[] temp_buffer = new byte[reading_size];
                     temp_buffer = reading_queue.ToArray();
-                    //WriteToLog(BitConverter.ToString(temp_buffer));
+                    WriteToLog("ManageUpWithReceivedBytes: received=" + BitConverter.ToString(temp_buffer));
 
-                    //WriteToLog("ManageUpWithReceivedBytes: targetInLength=" + target_in_length);
-                    //WriteToLog("ManageUpWithReceivedBytes: readingSize=" + reading_size);
+                    WriteToLog("ManageUpWithReceivedBytes: targetInLength=" + target_in_length);
+                    WriteToLog("ManageUpWithReceivedBytes: readingSize=" + reading_size);
 
                     //если длина полезных данных ответа определена как 0, произведем расчет по необязательнм параметрам
                     if (target_in_length == 0)
@@ -396,6 +403,7 @@ namespace PollingLibraries.LibPorts
                         }
 
                         string tmpResStr = BitConverter.ToString(readBytesList.ToArray());
+                        WriteToLog("WriteReadData: received data: " + tmpResStr);
                         //  if (tmpResStr.Length < 4)
                         // WriteToLog("received data: " + tmpResStr);
 
