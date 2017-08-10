@@ -554,7 +554,7 @@ namespace Prizmer.PoolServer
                             string s_log = String.Format("Суточные: метод драйвера ReadDailyValues вернул false. Параметр {0} с адресом {1} каналом {2} не прочитан;",
                                 param.name, param.param_address, param.channel);
                             pmPrms.logger.LogWarn(s_log);                      
-                            pmPrms.logger.LogInfo("Счетчик " + mName + " порт " + pmPrms.m_vport.ToString() + " адрес " + pmPrms.metersbyport[pmPrms.MetersCounter].address.ToString() + ";");
+                            pmPrms.logger.LogInfo("Счетчик " + mName + " порт " + pmPrms.m_vport.GetName() + " адрес " + pmPrms.metersbyport[pmPrms.MetersCounter].address.ToString() + ";");
                         }
                     }
                     else 
@@ -562,7 +562,7 @@ namespace Prizmer.PoolServer
                         string s_log = String.Format("Суточные: не удалось открыть канал связи. Параметр {0} с адресом {1} каналом {2} не прочитан;",
                             param.name, param.param_address, param.channel);
                         pmPrms.logger.LogWarn(s_log);
-                        pmPrms.logger.LogInfo("Счетчик " + mName + " порт " + pmPrms.m_vport.ToString() + " адрес " + pmPrms.metersbyport[pmPrms.MetersCounter].address.ToString() + ";");
+                        pmPrms.logger.LogInfo("Счетчик " + mName + " порт " + pmPrms.m_vport.GetName() + " адрес " + pmPrms.metersbyport[pmPrms.MetersCounter].address.ToString() + ";");
                     }
                 }
             }
@@ -2111,7 +2111,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             pmPrms.logger.LogInfo("Вычитка данных за интервал дат для " + mName);
             pmPrms.logger.LogInfo("Дата начала: " + dtStart.ToShortDateString());
             pmPrms.logger.LogInfo("Дата конца: " + dtEnd.ToShortDateString());
-            pmPrms.logger.LogInfo("Прибор: " + mName + " порт " + pmPrms.m_vport.ToString() + " адрес " + pmPrms.metersbyport[pmPrms.MetersCounter].address.ToString());
+            pmPrms.logger.LogInfo("Прибор: " + mName + " порт " + pmPrms.m_vport.GetName() + " адрес " + pmPrms.metersbyport[pmPrms.MetersCounter].address.ToString());
 
             //чтение текущих параметров, подлежащих чтению, относящихся к конкретному прибору
             TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, (byte)mfPrms.paramType);
