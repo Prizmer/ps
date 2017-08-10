@@ -8,14 +8,17 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Threading;
 
-using Prizmer.Ports;
-using Prizmer.Meters.iMeters;
+//using Prizmer.Ports;
+//using Prizmer.Meters.iMeters;
+
+using Drivers.LibMeter;
+using PollingLibraries.LibPorts;
 
 
 namespace Prizmer.Meters
 {
 
-    public sealed class UM_RTU40 : CMeter, IMeter
+    public sealed class UM_RTU40 : Drivers.LibMeter.CMeter, Drivers.LibMeter.IMeter
     {
         //пароль к самой ум
         string password = "00000000";

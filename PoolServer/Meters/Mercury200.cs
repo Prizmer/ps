@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-using Prizmer.Meters.iMeters;
-using Prizmer.Ports;
+using Drivers.LibMeter;
+using PollingLibraries.LibPorts;
+
+//using Prizmer.Meters.iMeters;
+//using Prizmer.Ports;
 
 namespace Prizmer.Meters
 {
-    public sealed class Mercury200 : CMeter, IMeter
+    public sealed class Mercury200 : Drivers.LibMeter.CMeter, Drivers.LibMeter.IMeter
     {
         private enum TypesValues
         {

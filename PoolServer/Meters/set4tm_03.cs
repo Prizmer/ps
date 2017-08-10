@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
-using Prizmer.Meters.iMeters;
-using Prizmer.Ports;
+
+//using Prizmer.Meters.iMeters;
+//using Prizmer.Ports;
+
+using Drivers.LibMeter;
+using PollingLibraries.LibPorts;
 
 namespace Prizmer.Meters
 {
-    public sealed class set4tm_03 : CMeter, IMeter
+    public sealed class set4tm_03 : Drivers.LibMeter.CMeter, Drivers.LibMeter.IMeter
     {
         private enum TypesValues
         {
@@ -1606,7 +1610,7 @@ namespace Prizmer.Meters
             return false;
         }
 
-        public bool ReadPowerSlice(DateTime dt_begin, DateTime dt_end, ref List<iMeters.RecordPowerSlice> listRPS, byte period)
+        public bool ReadPowerSlice(DateTime dt_begin, DateTime dt_end, ref List<RecordPowerSlice> listRPS, byte period)
         {
             if (ReadPowerSlice(ref listRPS, dt_begin, 30))
                 return true;

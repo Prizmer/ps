@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
-using Prizmer.Meters.iMeters;
-using Prizmer.Ports;
+
+//using Prizmer.Meters.iMeters;
+//using Prizmer.Ports;
+
+using Drivers.LibMeter;
+using PollingLibraries.LibPorts;
 
 namespace Prizmer.Meters
 {
 
-    public sealed class tem106 : CMeter, IMeter
+    public sealed class tem106 : Drivers.LibMeter.CMeter, Drivers.LibMeter.IMeter
     {
         #region Imported Struct
         protected Dictionary<byte, string> m_dictDataTypes = new Dictionary<byte, string>();
@@ -999,7 +1003,7 @@ namespace Prizmer.Meters
             }
         }
 
-        public bool ReadPowerSlice(DateTime dt_begin, DateTime dt_end, ref List<iMeters.RecordPowerSlice> listRPS, byte period)
+        public bool ReadPowerSlice(DateTime dt_begin, DateTime dt_end, ref List<RecordPowerSlice> listRPS, byte period)
         {
             return false;
         }

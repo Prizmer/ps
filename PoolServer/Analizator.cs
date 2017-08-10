@@ -12,8 +12,8 @@ using System.IO.Ports;
 using System.Net.Sockets;
 using System.Threading;
 
-using Prizmer.Ports;
 
+using PollingLibraries.LibPorts;
 
 namespace Prizmer.PoolServer
 {

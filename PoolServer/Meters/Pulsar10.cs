@@ -4,12 +4,15 @@ using System.Text;
 using System.IO;
 using System.Collections;
 
-using Prizmer.Meters.iMeters;
-using Prizmer.Ports;
+//using Prizmer.Meters.iMeters;
+//using Prizmer.Ports;
+
+using Drivers.LibMeter;
+using PollingLibraries.LibPorts;
 
 namespace Prizmer.Meters
 {
-    public sealed class pulsar10 : CMeter, IMeter
+    public sealed class pulsar10 : Drivers.LibMeter.CMeter, Drivers.LibMeter.IMeter
     {
         public enum TypeDataPulsar : byte
         {
@@ -570,7 +573,7 @@ namespace Prizmer.Meters
         }
 
 
-        public bool ReadPowerSlice(DateTime dt_begin, DateTime dt_end, ref List<iMeters.RecordPowerSlice> listRPS, byte period)
+        public bool ReadPowerSlice(DateTime dt_begin, DateTime dt_end, ref List<RecordPowerSlice> listRPS, byte period)
         {
             return false;
         }
@@ -591,6 +594,7 @@ namespace Prizmer.Meters
         {
             return false;
         }
+
     }
 }
 

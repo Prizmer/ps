@@ -4,14 +4,17 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.IO.Ports;
-using Prizmer.Ports;
-using Prizmer.Meters.iMeters;
 
+//using Prizmer.Ports;
+//using Prizmer.Meters.iMeters;
+
+using Drivers.LibMeter;
+using PollingLibraries.LibPorts;
 
 
 namespace Prizmer.Meters
 {
-    public class teplouchet1 : CMeter, IMeter
+    public class teplouchet1 : Drivers.LibMeter.CMeter, Drivers.LibMeter.IMeter
     {
         public void Init(uint address, string pass, VirtualPort vp)
         {

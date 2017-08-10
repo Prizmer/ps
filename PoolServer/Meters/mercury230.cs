@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-using Prizmer.Meters.iMeters;
-using Prizmer.Ports;
-using System.IO;
-using System.Linq;
+
+//using Prizmer.Meters.iMeters;
+//using Prizmer.Ports;
+
+using Drivers.LibMeter;
+using PollingLibraries.LibPorts;
+
+
+
 
 namespace Prizmer.Meters
 {
@@ -32,7 +36,7 @@ namespace Prizmer.Meters
         public DateTime date_time;
     };*/
 
-    class m230 : CMeter, IMeter
+    class m230 : Drivers.LibMeter.CMeter, Drivers.LibMeter.IMeter
     {
         public struct RecordValueEnergy
         {

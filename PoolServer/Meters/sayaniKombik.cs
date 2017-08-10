@@ -6,10 +6,12 @@ using System.IO;
 using System.IO.Ports;
 
 
-using Prizmer.Meters.iMeters;
-using Prizmer.Meters;
-using Prizmer.Ports;
+//using Prizmer.Meters.iMeters;
+//using Prizmer.Meters;
+//using Prizmer.Ports;
 
+using Drivers.LibMeter;
+using PollingLibraries.LibPorts;
 
 using System.Configuration;
 using System.Text.RegularExpressions;
@@ -56,7 +58,7 @@ namespace Prizmer.Meters
     }
 
 
-    public class sayani_kombik : CMeter, IMeter
+    public class sayani_kombik : Drivers.LibMeter.CMeter, Drivers.LibMeter.IMeter
     {
         public sayani_kombik()
         {

@@ -8,14 +8,15 @@ using System.Net;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
 
-using Prizmer.Ports;
-using Prizmer.Meters.iMeters;
+//using Prizmer.Ports;
+//using Prizmer.Meters.iMeters;
 
-
+using Drivers.LibMeter;
+using PollingLibraries.LibPorts;
 
 namespace Prizmer.Meters
 {
-    class OpcRetranslator : CMeter, IMeter
+    class OpcRetranslator : Drivers.LibMeter.CMeter, Drivers.LibMeter.IMeter
     {
         private string sPrgId = "";
         private string sItemTag = "";

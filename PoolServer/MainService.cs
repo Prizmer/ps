@@ -11,13 +11,14 @@ using Prizmer.PoolServer.DataBase;
 
 //временное решение до перевода всех драйверов в DLL
 using Prizmer.Meters;
-using Prizmer.Meters.iMeters;
+//using Prizmer.Meters.iMeters;
+//using Prizmer.Ports;
 
 
 using PollingLibraries.LibLogger;
 using PollingLibraries.LibPorts;
 
-//using Drivers.LibMeter;
+using Drivers.LibMeter;
 using Drivers.PulsarDriver;
 using Drivers.ElfApatorDriver;
 
@@ -34,7 +35,7 @@ namespace Prizmer.PoolServer
         public event MyEventHandler stoppingEnded;
 
         List<Thread> PortsThreads = new List<Thread>();
-        List<Ports.TcpipPort> tcpPortsGlobal = new List<Ports.TcpipPort>();
+        List<TcpipPort> tcpPortsGlobal = new List<TcpipPort>();
 
         public void WriteToLog(string str, string port = "", string addr = "", string mName = "", bool doWrite = true)
         {
@@ -396,7 +397,7 @@ namespace Prizmer.PoolServer
         public struct PollMethodsParams
         {
             public IMeter meter;
-            public Ports.VirtualPort m_vport;
+            public VirtualPort m_vport;
             public PgStorage ServerStorage;
             public Meter[] metersbyport;
             public uint MetersCounter;
@@ -2164,7 +2165,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
 
         private void pollingPortThread(object data)
         {
-            Prizmer.Ports.VirtualPort m_vport = null;
+            VirtualPort m_vport = null;
             Meter[] metersbyport = null;
             MyEventArgs myEventArgs = new MyEventArgs();      
             Logger logger = new Logger();
@@ -2187,7 +2188,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             if (data.GetType().Name == "ComPortSettings" && !B_DEBUG_MODE_TCP)
             {
                 ComPortSettings portsettings = (ComPortSettings)data;
-                m_vport = new Prizmer.Ports.ComPort(byte.Parse(portsettings.name), (int)portsettings.baudrate, portsettings.data_bits, portsettings.parity, portsettings.stop_bits, portsettings.write_timeout, portsettings.read_timeout, (byte)portsettings.attempts);
+                m_vport = new ComPort(byte.Parse(portsettings.name), (int)portsettings.baudrate, portsettings.data_bits, portsettings.parity, portsettings.stop_bits, portsettings.write_timeout, portsettings.read_timeout, (byte)portsettings.attempts);
 
                 portFullName = m_vport.GetFullName();
                 //читаем список приборов, привязанных к порту
@@ -2275,11 +2276,11 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     case "m234": meter = new m234(); break;
                     case "m230_stable": meter = new m230(); break;
                     case "um40rtu" : meter = new UM_RTU40(); break;
-                    case "elf108": meter = (Prizmer.Meters.iMeters.IMeter)new ElfApatorDriver(); break;
-                    case "PulsarM": meter = (Prizmer.Meters.iMeters.IMeter)new PulsarDriver(); break;
-                    case "pulsar_teplo": meter = (Prizmer.Meters.iMeters.IMeter)new PulsarDriver(); break;
-                    case "pulsar_hvs": meter = (Prizmer.Meters.iMeters.IMeter)new PulsarDriver(); break;
-                    case "pulsar_gvs": meter = (Prizmer.Meters.iMeters.IMeter)new PulsarDriver(); break;
+                    case "elf108": meter = new ElfApatorDriver(); break;
+                    case "PulsarM": meter = new PulsarDriver(); break;
+                    case "pulsar_teplo": meter = new PulsarDriver(); break;
+                    case "pulsar_hvs": meter = new PulsarDriver(); break;
+                    case "pulsar_gvs": meter = new PulsarDriver(); break;
                 }
 
                 if (meter == null) goto NetxMeter;
@@ -2293,14 +2294,14 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
 
                 if (m_vport == null && (typemeter.driver_name != "sayani_kombik")) {
                     TCPIPSettings portsettings = (TCPIPSettings)data;
-                    m_vport = new Prizmer.Ports.TcpipPort(portsettings.ip_address, (int)portsettings.ip_port, portsettings.write_timeout, portsettings.read_timeout, 50);
+                    m_vport = new TcpipPort(portsettings.ip_address, (int)portsettings.ip_port, portsettings.write_timeout, portsettings.read_timeout, 50);
 
                     apti.vp = m_vport;
                     mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
                 }
                 else if (m_vport == null && (typemeter.driver_name == "sayani_kombik"))
                 {
-                    m_vport = new Prizmer.Ports.ComPort(byte.Parse("250"), 2400, 8, 1, 1, 1, 1, 1);
+                    m_vport = new ComPort(byte.Parse("250"), 2400, 8, 1, 1, 1, 1, 1);
 
                     apti.vp = m_vport;
                     apti.commentList.Add("Порт для поддержки RDS");
