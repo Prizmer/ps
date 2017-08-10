@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Text;
 using System.Threading;
 using System.Linq;
@@ -91,6 +92,8 @@ namespace Prizmer.PoolServer
         public bool SO_AUTO_START = false;
 
         Logger loggerMainService = new Logger();
+        NameValueCollection ApplicationParamsCollection = null;
+
         public MainService()
         {
             try
@@ -118,6 +121,8 @@ namespace Prizmer.PoolServer
 
             try
             {
+                ApplicationParamsCollection = ConfigurationManager.AppSettings;
+
                 string strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_current")[0];
                 bool.TryParse(strTmpVal, out pollingParams.b_poll_current);
 
@@ -141,6 +146,7 @@ namespace Prizmer.PoolServer
 
                 strTmpVal = ConfigurationManager.AppSettings.GetValues("b_auto_start")[0];
                 bool.TryParse(strTmpVal, out SO_AUTO_START);
+
             }
             catch (Exception ex)
             {
@@ -2294,7 +2300,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
 
                 if (m_vport == null && (typemeter.driver_name != "sayani_kombik")) {
                     TCPIPSettings portsettings = (TCPIPSettings)data;
-                    m_vport = new TcpipPort(portsettings.ip_address, (int)portsettings.ip_port, portsettings.write_timeout, portsettings.read_timeout, 50);
+                    m_vport = new TcpipPort(portsettings.ip_address, (int)portsettings.ip_port, portsettings.write_timeout, portsettings.read_timeout, 50, ApplicationParamsCollection);
 
                     apti.vp = m_vport;
                     mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
