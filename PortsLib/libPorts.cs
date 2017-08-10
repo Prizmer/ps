@@ -233,7 +233,9 @@ namespace PollingLibraries.LibPorts
             string strIpConfig = "";
             try
             {
-                strIpConfig = loadedAppSettings.GetValues("localEndPointIp")[0];
+                object tmp = loadedAppSettings.GetValues("localEndPointIp");
+                if (tmp != null)
+                    strIpConfig = ((string[])tmp)[0];
                 //WriteToLog("GetLocalEndPointIp: IP прочитанный из конфигурации: " + strIpConfig);
             }
             catch (Exception ex)
