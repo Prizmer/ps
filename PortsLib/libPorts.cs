@@ -291,10 +291,10 @@ namespace PollingLibraries.LibPorts
 
                     byte[] temp_buffer = new byte[reading_size];
                     temp_buffer = reading_queue.ToArray();
-                    WriteToLog("ManageUpWithReceivedBytes: received=" + BitConverter.ToString(temp_buffer));
+                    //WriteToLog("ManageUpWithReceivedBytes: received=" + BitConverter.ToString(temp_buffer));
 
-                    WriteToLog("ManageUpWithReceivedBytes: targetInLength=" + target_in_length);
-                    WriteToLog("ManageUpWithReceivedBytes: readingSize=" + reading_size);
+                    //WriteToLog("ManageUpWithReceivedBytes: targetInLength=" + target_in_length);
+                    //WriteToLog("ManageUpWithReceivedBytes: readingSize=" + reading_size);
 
                     //если длина полезных данных ответа определена как 0, произведем расчет по необязательнм параметрам
                     if (target_in_length == 0)
@@ -405,7 +405,7 @@ namespace PollingLibraries.LibPorts
                         }
 
                         string tmpResStr = BitConverter.ToString(readBytesList.ToArray());
-                        WriteToLog("WriteReadData: received data: " + tmpResStr);
+                        //WriteToLog("WriteReadData: received data: " + tmpResStr);
                         //  if (tmpResStr.Length < 4)
                         // WriteToLog("received data: " + tmpResStr);
 
