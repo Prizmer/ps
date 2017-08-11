@@ -722,6 +722,8 @@ namespace Prizmer.PoolServer.DataBase
             return (o != null) ? (TakenParams)o : new TakenParams();
         }
 
+        const string DOUBLE_STRING_FORMATER = "0.#######";
+
         public int AddCurrentValues(Value value)
         {
             string query = "SELECT date, time, value, status, id_taken_params FROM current_values " +
@@ -734,7 +736,7 @@ namespace Prizmer.PoolServer.DataBase
                             "VALUES (" +
                             "'" + value.dt.ToShortDateString() + "', " +
                             "'" + value.dt.ToShortTimeString() + "', " +
-                            value.value.ToString().Replace(',', '.') + ", " +
+                            value.value.ToString(DOUBLE_STRING_FORMATER).Replace(',', '.') + ", " +
                             value.status.ToString() + ", " +
                             value.id_taken_params.ToString() +
                             ")";
@@ -744,7 +746,7 @@ namespace Prizmer.PoolServer.DataBase
                 query = "UPDATE current_values SET " +
                                 "date = '" + value.dt.ToShortDateString() + "', " +
                                 "time = '" + value.dt.ToShortTimeString() + "', " +
-                                "value = " + value.value.ToString().Replace(',', '.') + ", " +
+                                "value = " + value.value.ToString(DOUBLE_STRING_FORMATER).Replace(',', '.') + ", " +
                                 "status = " + value.status.ToString() + ", " +
                                 "id_taken_params = " + value.id_taken_params.ToString() +
                                 " WHERE id_taken_params = " + value.id_taken_params;
@@ -766,13 +768,13 @@ namespace Prizmer.PoolServer.DataBase
              */
             return AddRecord(query);
         }
-
+        
         public int AddDailyValues(Value value)
         {
             string query = "INSERT INTO daily_values (date, value, status, id_taken_params) " +
                 "VALUES (" +
                 "'" + value.dt.ToShortDateString() + "', " +
-                value.value.ToString().Replace(',', '.') + ", " +
+                value.value.ToString(DOUBLE_STRING_FORMATER).Replace(',', '.') + ", " +
                 value.status.ToString() + ", " +
                 value.id_taken_params.ToString() +
                 ")";
@@ -785,7 +787,7 @@ namespace Prizmer.PoolServer.DataBase
             string query = "INSERT INTO monthly_values (date, value, status, id_taken_params) " +
                             "VALUES (" +
                             "'" + value.dt.ToShortDateString() + "', " +
-                            value.value.ToString().Replace(',', '.') + ", " +
+                            value.value.ToString(DOUBLE_STRING_FORMATER).Replace(',', '.') + ", " +
                             value.status.ToString() + ", " +
                             value.id_taken_params.ToString() +
                             ")";
@@ -799,7 +801,7 @@ namespace Prizmer.PoolServer.DataBase
                 "VALUES (" +
                 "'" + value.dt.ToShortDateString() + "', " +
                 "'" + value.dt.ToShortTimeString() + "', " +
-                value.value.ToString().Replace(',', '.') + ", " +
+                value.value.ToString(DOUBLE_STRING_FORMATER).Replace(',', '.') + ", " +
                 value.status.ToString() + ", " +
                 value.id_taken_params.ToString() +
                 ")";
