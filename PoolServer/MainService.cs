@@ -51,7 +51,7 @@ namespace Prizmer.PoolServer
         string ConnectionString = "Server=localhost;Port=5432;User Id=postgres;Password=1;Database=prizmer;";
         public string GetConnectionString()
         {
-            WriteToLog("test");
+            //WriteToLog("test");
             return ConnectionString;
         }
 
@@ -94,6 +94,19 @@ namespace Prizmer.PoolServer
         Logger loggerMainService = new Logger();
         NameValueCollection ApplicationParamsCollection = null;
 
+        //получает данные из файла конфигурации предварительно проверяя на null
+        private bool getSafeAppSettingsValue(string key, ref string value)
+        {
+            object oTmpVal = ConfigurationManager.AppSettings.GetValues(key);
+            if (oTmpVal != null)
+            {
+                value = ((string[])oTmpVal)[0];
+                return true;
+            }
+
+            return false;
+        }
+
         public MainService()
         {
             try
@@ -122,31 +135,31 @@ namespace Prizmer.PoolServer
             try
             {
                 ApplicationParamsCollection = ConfigurationManager.AppSettings;
+                string strTmpVal = "";
 
-                string strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_current")[0];
-                bool.TryParse(strTmpVal, out pollingParams.b_poll_current);
+                if (getSafeAppSettingsValue("b_poll_current", ref strTmpVal))  
+                    bool.TryParse(strTmpVal, out pollingParams.b_poll_current);
 
-                strTmpVal = ConfigurationManager.AppSettings.GetValues("ts_current_period")[0];
-                TimeSpan.TryParse(strTmpVal, out pollingParams.ts_current_period);
+                if (getSafeAppSettingsValue("ts_current_period", ref strTmpVal))
+                    TimeSpan.TryParse(strTmpVal, out pollingParams.ts_current_period);
 
-                strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_day")[0];
-                bool.TryParse(strTmpVal, out pollingParams.b_poll_day);
+                if (getSafeAppSettingsValue("b_poll_day", ref strTmpVal))
+                    bool.TryParse(strTmpVal, out pollingParams.b_poll_day);
 
-                strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_month")[0];
-                bool.TryParse(strTmpVal, out pollingParams.b_poll_month);
+                if (getSafeAppSettingsValue("b_poll_month", ref strTmpVal))
+                    bool.TryParse(strTmpVal, out pollingParams.b_poll_month);
 
-                strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_hour")[0];
-                bool.TryParse(strTmpVal, out pollingParams.b_poll_hour);
+                if (getSafeAppSettingsValue("b_poll_hour", ref strTmpVal))
+                    bool.TryParse(strTmpVal, out pollingParams.b_poll_hour);
 
-                strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_halfanhour")[0];
-                bool.TryParse(strTmpVal, out pollingParams.b_poll_halfanhour);
+                if (getSafeAppSettingsValue("b_poll_halfanhour", ref strTmpVal))
+                    bool.TryParse(strTmpVal, out pollingParams.b_poll_halfanhour);
 
-                strTmpVal = ConfigurationManager.AppSettings.GetValues("b_poll_archive")[0];
-                bool.TryParse(strTmpVal, out pollingParams.b_poll_archive);
+                if (getSafeAppSettingsValue("b_poll_archive", ref strTmpVal))
+                    bool.TryParse(strTmpVal, out pollingParams.b_poll_archive);
 
-                strTmpVal = ConfigurationManager.AppSettings.GetValues("b_auto_start")[0];
-                bool.TryParse(strTmpVal, out SO_AUTO_START);
-
+                if (getSafeAppSettingsValue("b_auto_start", ref strTmpVal))
+                    bool.TryParse(strTmpVal, out SO_AUTO_START);
             }
             catch (Exception ex)
             {
