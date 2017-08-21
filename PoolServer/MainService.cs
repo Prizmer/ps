@@ -22,6 +22,7 @@ using PollingLibraries.LibPorts;
 using Drivers.LibMeter;
 using Drivers.PulsarDriver;
 using Drivers.ElfApatorDriver;
+using Drivers.UMDriver;
 
 namespace Prizmer.PoolServer
 {
@@ -2294,7 +2295,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     case "m230": meter = new m234(); break;
                     case "m234": meter = new m234(); break;
                     case "m230_stable": meter = new m230(); break;
-                    case "um40rtu" : meter = new UM_RTU40(); break;
+                    case "um40rtu" : meter = new UMRTU40Driver(); break;
                     case "elf108": meter = new ElfApatorDriver(); break;
                     case "PulsarM": meter = new PulsarDriver(); break;
                     case "pulsar_teplo": meter = new PulsarDriver(); break;
