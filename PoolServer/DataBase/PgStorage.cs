@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 
+using PollingLibraries.LibLogger;
+
 using Npgsql;
 
 namespace Prizmer.PoolServer.DataBase
@@ -10,6 +12,13 @@ namespace Prizmer.PoolServer.DataBase
     {
         private string m_connection_string;
         private Npgsql.NpgsqlConnection m_pg_con = null;
+
+        Logger loggerStorage = new Logger();
+
+        public PgStorage()
+        {
+            loggerStorage.Initialize("pgstorage", false, "common");
+        }
 
         public ConnectionState Open(String ConnectionString)
         {
@@ -752,6 +761,8 @@ namespace Prizmer.PoolServer.DataBase
                                 " WHERE id_taken_params = " + value.id_taken_params;
             }
 
+            if (value.value > 0 && value.value.ToString(DOUBLE_STRING_FORMATER) == "0")
+                loggerStorage.LogWarn("AddDailyValues: значение не равно 0, но выглядит в базе как 0 - " + value.value.ToString());
 
             /*
             query = "INSERT INTO current_values_archive (date, time, value, status, id_taken_params) " +
@@ -779,6 +790,9 @@ namespace Prizmer.PoolServer.DataBase
                 value.id_taken_params.ToString() +
                 ")";
 
+            if (value.value > 0 && value.value.ToString(DOUBLE_STRING_FORMATER) == "0")
+                loggerStorage.LogWarn("AddDailyValues: значение не равно 0, но выглядит в базе как 0 - " + value.value.ToString());
+
             return AddRecord(query);
         }
 
@@ -791,6 +805,9 @@ namespace Prizmer.PoolServer.DataBase
                             value.status.ToString() + ", " +
                             value.id_taken_params.ToString() +
                             ")";
+
+            if (value.value > 0 && value.value.ToString(DOUBLE_STRING_FORMATER) == "0")
+                loggerStorage.LogWarn("AddDailyValues: значение не равно 0, но выглядит в базе как 0 - " + value.value.ToString());
 
             return AddRecord(query);
         }
@@ -805,6 +822,9 @@ namespace Prizmer.PoolServer.DataBase
                 value.status.ToString() + ", " +
                 value.id_taken_params.ToString() +
                 ")";
+
+            if (value.value > 0 && value.value.ToString(DOUBLE_STRING_FORMATER) == "0")
+                loggerStorage.LogWarn("AddDailyValues: значение не равно 0, но выглядит в базе как 0 - " + value.value.ToString());
 
             return AddRecord(query);
         }

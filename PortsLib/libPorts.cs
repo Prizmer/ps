@@ -9,6 +9,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
 
+using System.Windows.Forms;
+
 using System.Collections.Specialized;
 
 using PollingLibraries.LibLogger;
@@ -33,6 +35,72 @@ namespace PollingLibraries.LibPorts
         void SetConfigurationManagerAppSettings(NameValueCollection loadedAppSettings);
 
         object GetPortObject();
+    }
+
+    public class PortSettings
+    {
+        public static string selectedLocalIp = "";
+
+        public static void ShowFormSelectLocalIp()
+        {
+            Form formSelectLocalIp = new Form()
+            {
+                Height = 178,
+                Width = 230,
+                FormBorderStyle = FormBorderStyle.FixedToolWindow,
+                Text = "Выберите локальный адрес"
+            };
+
+            ListBox listBoxLocalIps = new ListBox()
+            {
+                Height = 96,
+                Width = 198,
+                Top = 12,
+                Left = 12
+            };
+
+            Button btnApply = new Button()
+            {
+                Height = 23,
+                Width = 75,
+                Top = 113,
+                Left = 135,
+                Text = "Применить",
+                DialogResult = DialogResult.OK,
+                Enabled = false
+            };
+
+
+            formSelectLocalIp.Load += delegate (object sender, EventArgs e)
+            {
+                var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
+                foreach (var ip in host.AddressList)
+                {
+                    if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
+                        listBoxLocalIps.Items.Add(ip.ToString());
+                    }
+}
+
+                if (listBoxLocalIps.Items.Count > 0)
+                {
+                    btnApply.Enabled = true;
+                }
+            };
+
+            btnApply.Click += delegate (object sender, EventArgs e)
+            {
+                if (listBoxLocalIps.SelectedIndex != -1)
+                {
+                    selectedLocalIp = listBoxLocalIps.SelectedItem.ToString();
+                }
+
+                MessageBox.Show(selectedLocalIp);
+            };
+
+            formSelectLocalIp.Controls.Add(listBoxLocalIps);
+            formSelectLocalIp.Controls.Add(btnApply);
+        }
     }
 
     public sealed class TcpipPort : VirtualPort
