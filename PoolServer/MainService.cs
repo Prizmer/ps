@@ -2242,9 +2242,11 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             if (metersbyport == null || metersbyport.Length == 0)
             {
                 loggerThread.LogWarn("Остановка: к порту не привязаны приборы");
+                loggerThread.LogWarn("Остановка: portGUID: " + PortGUID);
 
                 apti.metersByPort = 0;
                 apti.commentList.Add("Остановка: к порту не привязаны приборы");
+                apti.commentList.Add("Остановка: portGUID: " + PortGUID);
                 goto CloseThreadPoint;
             }
 

@@ -731,6 +731,9 @@ namespace Prizmer.PoolServer.DataBase
             return (o != null) ? (TakenParams)o : new TakenParams();
         }
 
+        //также следует убедиться что в бд правильный тип столбца, к примеру, если будет
+        //double precision то 0.000005 будет отображаться в научной нотации, а 
+        //если numeric - то как есть.
         const string DOUBLE_STRING_FORMATER = "0.#######";
 
         public int AddCurrentValues(Value value)
