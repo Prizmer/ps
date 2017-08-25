@@ -2225,7 +2225,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 //здесь мы не создаем порт сразу (это сделано для поддержки RDS, порт создается дальше               
                 PortGUID = portsettings.guid;
 
-                loggerThread.LogInfo("pollingPortThread-conState: " + Enum.GetName(typeof(System.Data.ConnectionState), conState));
+
 
                 if (mfPrms.mode == 1)
                     metersbyport = ServerStorage.GetMetersByTcpIPGUIDAndParams(PortGUID, mfPrms.paramType, mfPrms.driverName);
@@ -2239,7 +2239,8 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
 
             loggerThread.Initialize(Logger.DIR_LOGS_MAIN, true, portFullName.Replace(':', '_'));
-           // WriteToLog("Meters by port length: " + metersbyport.Length);
+            loggerThread.LogInfo("pollingPortThread-conState: " + Enum.GetName(typeof(System.Data.ConnectionState), conState));
+            // WriteToLog("Meters by port length: " + metersbyport.Length);
 
             //if (m_vport == null) goto CloseThreadPoint;
             if (metersbyport == null || metersbyport.Length == 0)
