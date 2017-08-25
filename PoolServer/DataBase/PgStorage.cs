@@ -89,7 +89,7 @@ namespace Prizmer.PoolServer.DataBase
             try
             {
                 dr = command.ExecuteReader();
-
+                
                 if (dr.HasRows)
                 {
                     while (dr.Read())
@@ -100,7 +100,7 @@ namespace Prizmer.PoolServer.DataBase
             }
             catch (Exception e)
             {
-
+                
             }
             finally
             {
@@ -133,9 +133,9 @@ namespace Prizmer.PoolServer.DataBase
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-
+                loggerStorage.LogError("GetRecordFromReader: " + ex  + "\n query: " + query);
             }
             finally
             {
