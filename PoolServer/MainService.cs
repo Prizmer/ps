@@ -2239,8 +2239,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             mfPrms.frmAnalizator.addThreadToLiveListOrUpdate(apti);
 
             loggerThread.Initialize(Logger.DIR_LOGS_MAIN, true, portFullName.Replace(':', '_'));
-            loggerThread.LogInfo("pollingPortThread-conState: " + Enum.GetName(typeof(System.Data.ConnectionState), conState));
-            // WriteToLog("Meters by port length: " + metersbyport.Length);
+            //loggerThread.LogInfo("pollingPortThread-conState: " + Enum.GetName(typeof(System.Data.ConnectionState), conState));
 
             //if (m_vport == null) goto CloseThreadPoint;
             if (metersbyport == null || metersbyport.Length == 0)
