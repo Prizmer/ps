@@ -31,6 +31,7 @@ namespace Prizmer.PoolServer.DataBase
             }
             catch (Exception ex)
             {
+                loggerStorage.LogError("Open: " + ex);
                 return ConnectionState.Broken;
             }
 
@@ -371,6 +372,8 @@ namespace Prizmer.PoolServer.DataBase
 
             Meter[] result = new Meter[list.Count];
 
+
+
             for (int i = 0; i < list.Count; i++)
             {
                 result[i] = (Meter)list[i];
@@ -432,7 +435,7 @@ namespace Prizmer.PoolServer.DataBase
             try
             {
                 dr = command.ExecuteReader();
-
+               
                 if (dr.HasRows)
                 {
                     while (dr.Read())

@@ -2224,6 +2224,9 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 portFullName = portsettings.ip_address + ":" + portsettings.ip_port;
                 //здесь мы не создаем порт сразу (это сделано для поддержки RDS, порт создается дальше               
                 PortGUID = portsettings.guid;
+
+                loggerThread.LogInfo("pollingPortThread-conState: " + Enum.GetName(typeof(System.Data.ConnectionState), conState));
+
                 if (mfPrms.mode == 1)
                     metersbyport = ServerStorage.GetMetersByTcpIPGUIDAndParams(PortGUID, mfPrms.paramType, mfPrms.driverName);
                 else
