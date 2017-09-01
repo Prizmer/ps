@@ -55,13 +55,13 @@
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ctxMenuAnalizator = new System.Windows.Forms.ToolStripMenuItem();
             this.конфигураторToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.ctxMenuShowLogsDir = new System.Windows.Forms.ToolStripMenuItem();
+            this.ctxMenuDeleteLogs = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pbPreloader = new System.Windows.Forms.PictureBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tsLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.ctxMenuShowLogsDir = new System.Windows.Forms.ToolStripMenuItem();
-            this.ctxMenuDeleteLogs = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -205,7 +205,6 @@
             // rbCom
             // 
             this.rbCom.AutoSize = true;
-            this.rbCom.Enabled = false;
             this.rbCom.Location = new System.Drawing.Point(15, 138);
             this.rbCom.Name = "rbCom";
             this.rbCom.Size = new System.Drawing.Size(49, 17);
@@ -341,6 +340,26 @@
             this.конфигураторToolStripMenuItem.Size = new System.Drawing.Size(186, 22);
             this.конфигураторToolStripMenuItem.Text = "Конфигуратор";
             // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(183, 6);
+            // 
+            // ctxMenuShowLogsDir
+            // 
+            this.ctxMenuShowLogsDir.Name = "ctxMenuShowLogsDir";
+            this.ctxMenuShowLogsDir.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.L)));
+            this.ctxMenuShowLogsDir.Size = new System.Drawing.Size(186, 22);
+            this.ctxMenuShowLogsDir.Text = "Открыть логи";
+            this.ctxMenuShowLogsDir.Click += new System.EventHandler(this.ctxMenuShowLogsDir_Click);
+            // 
+            // ctxMenuDeleteLogs
+            // 
+            this.ctxMenuDeleteLogs.Name = "ctxMenuDeleteLogs";
+            this.ctxMenuDeleteLogs.Size = new System.Drawing.Size(186, 22);
+            this.ctxMenuDeleteLogs.Text = "Стереть логи";
+            this.ctxMenuDeleteLogs.Click += new System.EventHandler(this.ctxMenuDeleteLogs_Click);
+            // 
             // pictureBox1
             // 
             this.pictureBox1.ContextMenuStrip = this.contextMenuStrip1;
@@ -378,26 +397,6 @@
             // 
             this.tsLabel1.Name = "tsLabel1";
             this.tsLabel1.Size = new System.Drawing.Size(0, 17);
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(183, 6);
-            // 
-            // ctxMenuShowLogsDir
-            // 
-            this.ctxMenuShowLogsDir.Name = "ctxMenuShowLogsDir";
-            this.ctxMenuShowLogsDir.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.L)));
-            this.ctxMenuShowLogsDir.Size = new System.Drawing.Size(186, 22);
-            this.ctxMenuShowLogsDir.Text = "Открыть логи";
-            this.ctxMenuShowLogsDir.Click += new System.EventHandler(this.ctxMenuShowLogsDir_Click);
-            // 
-            // ctxMenuDeleteLogs
-            // 
-            this.ctxMenuDeleteLogs.Name = "ctxMenuDeleteLogs";
-            this.ctxMenuDeleteLogs.Size = new System.Drawing.Size(186, 22);
-            this.ctxMenuDeleteLogs.Text = "Стереть логи";
-            this.ctxMenuDeleteLogs.Click += new System.EventHandler(this.ctxMenuDeleteLogs_Click);
             // 
             // FormMain
             // 

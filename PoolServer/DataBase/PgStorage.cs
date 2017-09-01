@@ -463,10 +463,11 @@ namespace Prizmer.PoolServer.DataBase
             return result;
         }
 
-        public List<string> GetPortsAvailiableByDriverParamType(int paramType, string driverName)
+        //используется на форме при выборе порта под приборы указанного типа
+        public List<string> GetPortsAvailiableByDriverParamType(int paramType, string driverName, bool isTcp = true)
         {
 
-           string query = @"SELECT DISTINCT 
+           string queryTcp = @"SELECT DISTINCT 
               tcpip_settings.ip_address, 
               tcpip_settings.ip_port
             FROM 
@@ -487,10 +488,30 @@ namespace Prizmer.PoolServer.DataBase
               types_params.type = " + paramType + @" AND 
               types_meters.driver_name = '" + driverName + "';";
 
+            string queryCom = @"SELECT DISTINCT 
+                  comport_settings.name
+                FROM 
+                  public.comport_settings, 
+                  public.meters, 
+                  public.taken_params, 
+                  public.params, 
+                  public.types_params, 
+                  public.types_meters, 
+                  public.link_meters_comport_settings
+                WHERE 
+                  meters.guid_types_meters = types_meters.guid AND
+                  taken_params.guid_meters = meters.guid AND
+                  taken_params.guid_params = params.guid AND
+                  params.guid_types_params = types_params.guid AND
+                  link_meters_comport_settings.guid_meters = meters.guid AND
+                  link_meters_comport_settings.guid_comport_settings = comport_settings.guid AND
+                  types_params.type = " + paramType + @" AND 
+                  types_meters.driver_name = '" + driverName + "';";
+         
 
             List<string> result = new List<string>();
 
-            NpgsqlCommand command = new NpgsqlCommand(query, m_pg_con);
+            NpgsqlCommand command = new NpgsqlCommand(isTcp ? queryTcp : queryCom, m_pg_con);
             NpgsqlDataReader dr = null;
 
             try

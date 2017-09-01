@@ -31,7 +31,7 @@ namespace Prizmer.PoolServer
         {
             //SANDBOX
 
-            const string SO_VERSION = "v. 0.9.2";
+            const string SO_VERSION = "v. 0.9.3";
             this.Text += " - " + SO_VERSION;
 
             try
@@ -184,7 +184,7 @@ namespace Prizmer.PoolServer
                 prms.ip = tbAddress.Text;
                 prms.port = int.Parse(tbPort.Text);
                 prms.mode = 1;
-                prms.isTcp = rbTCP.Checked;
+                prms.isTcp = _isTcpMode;
                 prms.paramType = comboBox2.SelectedIndex;
 
                 ManualStartInProcess = true;
@@ -319,18 +319,22 @@ namespace Prizmer.PoolServer
         {
             this.Invoke(new InvokeDelegatePrms(threadClosingEnd), sender, e);
         }
- 
+
+        private bool _isTcpMode = true;
         private void rbCom_CheckedChanged(object sender, EventArgs e)
         {
             RadioButton rb = (RadioButton)sender;
             if (rb.Tag.ToString() == "com")
             {
                 tbPort.Enabled = false;
-                tbPort.Clear();
+                tbAddress.Enabled = false;
+                _isTcpMode = false;
             }
             else
             {
                 tbPort.Enabled = true;
+                tbAddress.Enabled = true;
+                _isTcpMode = true;
             }
         }
 
@@ -365,7 +369,7 @@ namespace Prizmer.PoolServer
 
         void comboBox3Upd()
         {
-            List<string> availiablePorts = storage.GetPortsAvailiableByDriverParamType(comboBox2.SelectedIndex, comboBox1.Text);
+            List<string> availiablePorts = storage.GetPortsAvailiableByDriverParamType(comboBox2.SelectedIndex, comboBox1.Text, _isTcpMode);
             comboBox3.Items.Clear();
             comboBox3.Items.AddRange(availiablePorts.ToArray());
         }
@@ -379,8 +383,17 @@ namespace Prizmer.PoolServer
         {
             if (comboBox3.Text.Length > 0)
             {
-                tbAddress.Text = comboBox3.Text.Split(':')[0];
-                tbPort.Text = comboBox3.Text.Split(':')[1];
+                if (_isTcpMode)
+                {
+                    tbAddress.Text = comboBox3.Text.Split(':')[0];
+                    tbPort.Text = comboBox3.Text.Split(':')[1];
+                }
+                else
+                {
+                    tbAddress.Text = comboBox3.Text;
+                    tbPort.Text = "0";
+                }
+
             }
         }
 

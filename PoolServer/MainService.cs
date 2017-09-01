@@ -172,27 +172,34 @@ namespace Prizmer.PoolServer
         {
             List<Thread> comPortThreadsList = new List<Thread>();
 
+            //нам не нужны ком порты если дочитываем tcp
+            if (prms.mode == 1 && prms.isTcp) return comPortThreadsList;
             //нам не нужны ком порты если отлаживаем tcp
             if (B_DEBUG_MODE_TCP) return comPortThreadsList;
 
 
             for (int i = 0; i < cps.Length; i++)
             {
+                //если дочитка, пропустим все порты кроме выбранного
+                if (prms.mode == 1 && !prms.isTcp)
+                {
+                    if (cps[i].name != prms.ip)
+                        continue;
+                }
+
                 Meter[] metersbyport = ServerStorageMainService.GetMetersByComportGUID(cps[i].guid);
-                //if (metersbyport.Length > 0)
-              //  {
-                    Thread portThread = new Thread(new ParameterizedThreadStart(this.pollingPortThread));
-                    portThread.IsBackground = true;
 
-                    List<object> prmsList = new List<object>();
+                Thread portThread = new Thread(new ParameterizedThreadStart(this.pollingPortThread));
+                portThread.IsBackground = true;
 
-                    prmsList.Add(cps[i]);
-                    prmsList.Add(portThread);
-                    prmsList.Add(prms);                  
+                List<object> prmsList = new List<object>();
 
-                    portThread.Start(prmsList);
-                    comPortThreadsList.Add(portThread);
-             //   }
+                prmsList.Add(cps[i]);
+                prmsList.Add(portThread);
+                prmsList.Add(prms);                  
+
+                portThread.Start(prmsList);
+                comPortThreadsList.Add(portThread);
             }
 
             return comPortThreadsList;
@@ -201,6 +208,9 @@ namespace Prizmer.PoolServer
         private List<Thread> getStartTcpThreadsList(TCPIPSettings[] tcpips, MainFormParamsStructure prms)
         {
             List<Thread> tcpPortThreadsList = new List<Thread>();
+
+            //нам не нужны tcp если дочитываем com
+            if (prms.mode == 1 && !prms.isTcp) return tcpPortThreadsList;
 
             for (int i = 0; i < tcpips.Length; i++)
             {
@@ -218,22 +228,18 @@ namespace Prizmer.PoolServer
                 }
                             
                 Meter[] metersbyport = ServerStorageMainService.GetMetersByTcpIPGUID(tcpips[i].guid);
-                //WriteToLog("mbp: " + metersbyport.Length );
-             //   if (metersbyport.Length > 0)
-              //  {
 
+                Thread portThread = new Thread(new ParameterizedThreadStart(this.pollingPortThread));
+                portThread.IsBackground = true;
 
-                    Thread portThread = new Thread(new ParameterizedThreadStart(this.pollingPortThread));
-                    portThread.IsBackground = true;
+                List<object> prmsList = new List<object>();
+                prmsList.Add(tcpips[i]);
+                prmsList.Add(portThread);
+                prmsList.Add(prms);
 
-                    List<object> prmsList = new List<object>();
-                    prmsList.Add(tcpips[i]);
-                    prmsList.Add(portThread);
-                    prmsList.Add(prms);
-
-                    portThread.Start(prmsList);                 
-                    tcpPortThreadsList.Add(portThread);
-               // }
+                portThread.Start(prmsList);                 
+                tcpPortThreadsList.Add(portThread);
+ 
             }
 
             return tcpPortThreadsList;
