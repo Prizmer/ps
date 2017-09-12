@@ -31,7 +31,7 @@ namespace Prizmer.PoolServer
         {
             //SANDBOX
 
-            const string SO_VERSION = "v. 0.9.3";
+            const string SO_VERSION = "v. 0.10.0";
             this.Text += " - " + SO_VERSION;
 
             try

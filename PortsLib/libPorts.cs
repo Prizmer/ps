@@ -20,6 +20,40 @@ namespace PollingLibraries.LibPorts
 {
     public delegate int FindPacketSignature(Queue<byte> queue);
 
+    /// <summary>
+    /// Структура хранит данные о подключении по последовательному порту
+    /// </summary>
+    public struct ComPortSettings
+    {
+        public Guid guid;
+        public String name;
+        public UInt32 baudrate;
+        public Byte data_bits;
+        public Byte parity;
+        public Byte stop_bits;
+        public UInt16 write_timeout;
+        public UInt16 read_timeout;
+        public UInt16 attempts;
+        public UInt16 delay_between_sending;
+        public string gsm_phone_number;
+        public string gsm_init_string;
+        public bool gsm_on;
+    }
+
+    /// <summary>
+    /// Структура хранит данные о подключении по tcp/ip
+    /// </summary>
+    public struct TCPIPSettings
+    {
+        public Guid guid;
+        public String ip_address;
+        public UInt16 ip_port;
+        public UInt16 write_timeout;
+        public UInt16 read_timeout;
+        public UInt16 attempts;
+        public UInt16 delay_between_sending;
+    }
+
     public interface VirtualPort
     {
         int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0);
@@ -1014,24 +1048,70 @@ namespace PollingLibraries.LibPorts
         SerialPort serialPort;
         int readTimeout = 600;
         int writeTimeout = 600;
+        int attemts = 1;
+        ComPortSettings _cps = new ComPortSettings();
+        Logger comLogger;
+        //public ComPort(byte number, int baudrate, byte data_bits, byte parity, byte stop_bits, ushort write_timeout, ushort read_timeout, byte attemts)
+        //{
+        //    serialPort = new SerialPort("COM" + number);
 
-        public ComPort(byte number, int baudrate, byte data_bits, byte parity, byte stop_bits, ushort write_timeout, ushort read_timeout, byte attemts)
+
+        //    serialPort.BaudRate = baudrate;
+        //    serialPort.Parity = (Parity)parity;
+
+        //    serialPort.DataBits = data_bits;
+        //    serialPort.StopBits = (StopBits)stop_bits;
+
+        //    readTimeout = read_timeout;
+        //    writeTimeout = write_timeout;
+        //}
+
+
+
+        public ComPort(ComPortSettings cps)
         {
-            serialPort = new SerialPort("COM" + number);
+            _cps = cps;
 
+            //comLogger = new Logger();
+           // comLogger.Initialize(Logger.DIR_LOGS_PORTS, false, GetName(), "com");
 
-            serialPort.BaudRate = baudrate;
-            serialPort.Parity = (Parity)parity;
+            //если не передано настроек, создадим рандомный порт
+            if (cps.name == "")
+            {
+                serialPort = new SerialPort("COM250");
+                serialPort.BaudRate = 2400;
+                serialPort.Parity = Parity.Odd;
+                serialPort.DataBits = 8;
+                serialPort.StopBits =StopBits.One;
 
-            serialPort.DataBits = data_bits;
-            serialPort.StopBits = (StopBits)stop_bits;
+                readTimeout = 400;
+                writeTimeout = 400;
+                attemts = 1;
+                return;
+            }
+            
 
-            readTimeout = read_timeout;
-            writeTimeout = write_timeout;
+            serialPort = new SerialPort("COM" + cps.name);
+
+            serialPort.BaudRate = (int)cps.baudrate;
+            serialPort.Parity = (Parity)cps.parity;
+
+            serialPort.DataBits = cps.data_bits;
+            serialPort.StopBits = (StopBits)cps.stop_bits;
+
+            readTimeout = cps.read_timeout;
+            writeTimeout = cps.write_timeout;
+            attemts = cps.attempts;
+
+            idleThread = new Thread(idleThreadHandler);
+            idleThread.Start();
         }
 
         public ComPort(SerialPort sp, byte attempts, ushort read_timeout, ushort write_timeout)
         {
+            //comLogger = new Logger();
+            //comLogger.Initialize(Logger.DIR_LOGS_PORTS, false, GetName());
+
             serialPort = new SerialPort(sp.PortName, sp.BaudRate, sp.Parity, sp.DataBits, sp.StopBits);
 
             readTimeout = read_timeout;
@@ -1041,7 +1121,6 @@ namespace PollingLibraries.LibPorts
             serialPort.WriteTimeout = 1000;
             serialPort.DtrEnable = true;
             serialPort.RtsEnable = true;
-
         }
 
         ~ComPort()
@@ -1049,9 +1128,142 @@ namespace PollingLibraries.LibPorts
             Close();
         }
 
+
+        private int FindATSignature(Queue<byte> queue)
+        {
+            byte[] qArr = queue.ToArray();
+            for (int i = 0; i < qArr.Length; i++)
+            {
+                if (qArr[i] == 0x4f && i < qArr.Length - 1 && qArr[i + 1] == 0x4b)
+                    return 1;
+            }
+
+            return 0;
+        }
+
+        private int FindATDisconnectSignature(Queue<byte> queue)
+        {
+            byte[] qArr = queue.ToArray();
+            for (int i = 0; i < qArr.Length; i++)
+            {
+                if (qArr[i] == 0x4f && i < qArr.Length - 1 && qArr[i + 1] == 0x4b)
+                    return 1;
+            }
+
+            return 0;
+        }
+
+        private bool ConnectToAt()
+        {
+            string at_cmd_connect = "ATD" + _cps.gsm_phone_number + "\r";
+            byte[] cmdConnect = ASCIIEncoding.ASCII.GetBytes(at_cmd_connect);
+            byte[] inAtBuffer = new byte[1];
+
+            // comLogger.LogInfo("WriteReadData, gsm connect: " + BitConverter.ToString(cmdConnect));
+            readTimeout = 30000;
+            int _rTimeout = readTimeout;
+            WriteReadData(FindATSignature, cmdConnect, ref inAtBuffer, cmdConnect.Length, -1);
+            readTimeout = _rTimeout;
+            string answ = ASCIIEncoding.ASCII.GetString(inAtBuffer);
+            // comLogger.LogInfo("WriteReadData, gsm connect answ: " + answ);
+
+            if (answ.IndexOf("CONNECT") != -1)
+            {
+                return true;
+
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool DisconnectFromAt()
+        {
+            byte[] at_cmd_plus = new byte[] { 0x2b, 0x2b, 0x2b };
+            string at_cmd_hang = "ATH0\r";
+            byte[] cmdHang= ASCIIEncoding.ASCII.GetBytes(at_cmd_hang);
+            byte[] inAtBuffer = new byte[1];
+
+            WriteReadData(FindATDisconnectSignature, at_cmd_plus, ref inAtBuffer, at_cmd_plus.Length, -1);
+            string answ = ASCIIEncoding.ASCII.GetString(inAtBuffer);
+            if (answ.IndexOf("OK") == -1)
+            {
+                //comLogger.LogError("WriteReadData, gsm disconnect: реакция на команду " + BitConverter.ToString(at_cmd_plus) + ": " + answ);
+              //  comLogger.LogError("WriteReadData, gsm disconnect: выход");
+                return false;
+            }
+
+            //comLogger.LogInfo("WriteReadData, gsm disconnect: " + BitConverter.ToString(cmdHang));
+            WriteReadData(FindATDisconnectSignature, cmdHang, ref inAtBuffer, cmdHang.Length, -1);
+            answ = ASCIIEncoding.ASCII.GetString(inAtBuffer);
+            if (answ.IndexOf("OK") == -1)
+            {
+                // comLogger.LogError("WriteReadData, gsm disconnect: реакция на команду " + BitConverter.ToString(cmdHang) + ": " + answ);
+                //  comLogger.LogError("WriteReadData, gsm disconnect: выход");
+                isConnectedToAt = false;
+                return false;
+            }
+
+            return true;
+        }
+
+
+        bool isTryingToPerformATConnect = false;
+        bool isTryingToPerformATDisconnect = false;
+        bool dataWillBeTransfered = false;
+        bool isConnectedToAt = false;
+
+        Thread idleThread;
+        private volatile bool isIdle = false;
+        private volatile int secondsToDisconect = 10;
+        public void idleThreadHandler()
+        {
+            int cnt = 0;
+            while (true)
+            {
+                Thread.Sleep(1000);
+
+                if (isIdle)
+                {
+                    cnt++;
+                    if (cnt == secondsToDisconect)
+                    {
+                        DisconnectFromAt();
+                        cnt = 0;
+                        isIdle = false;
+                        isConnectedToAt = false;
+                        isTryingToPerformATConnect = false;
+                        isTryingToPerformATDisconnect = false;
+
+                        Close();
+                    }
+                }
+
+            }
+        }
+
+
         public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
+            isIdle = false;
+
             if (!OpenPort()) return 0;
+
+            
+            if (_cps.gsm_on && !isConnectedToAt && !isTryingToPerformATConnect && !isTryingToPerformATDisconnect)
+            {
+                isTryingToPerformATConnect = true;
+                isConnectedToAt = ConnectToAt();
+                isTryingToPerformATConnect = false;
+
+                if (!isConnectedToAt)
+                {
+                    //  comLogger.LogError("WriteReadData, gsm connect: не удалось подключиться к модему");
+                    isIdle = true;
+                    return 0;
+                }
+            }
 
             // Thread.Sleep(10);
             serialPort.Write(out_buffer, 0, out_buffer.Length);
@@ -1090,7 +1302,7 @@ namespace PollingLibraries.LibPorts
                 elapsedTime += 100;
             }
 
-
+            isIdle = true;
 
             return in_buffer == null ? 0 : in_buffer.Length;
         }
@@ -1130,8 +1342,15 @@ namespace PollingLibraries.LibPorts
                         return false;
                     }
 
+                    try
+                    { 
                     serialPort.DiscardOutBuffer();
                     serialPort.DiscardInBuffer();
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
 
                     if (serialPort.IsOpen)
                     {
@@ -1144,8 +1363,16 @@ namespace PollingLibraries.LibPorts
                 }
                 else
                 {
-                    serialPort.DiscardOutBuffer();
-                    serialPort.DiscardInBuffer();
+                    try
+                    {
+                        serialPort.DiscardOutBuffer();
+                        serialPort.DiscardInBuffer();
+
+                    }catch (Exception ex)
+                    {
+
+                    }
+
                     return true;
                 }
             }

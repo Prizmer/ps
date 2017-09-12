@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 
 using PollingLibraries.LibLogger;
+using PollingLibraries.LibPorts;
 
 using Npgsql;
 
@@ -199,6 +200,9 @@ namespace Prizmer.PoolServer.DataBase
             cps.read_timeout = Convert.ToUInt16(dr["read_timeout"]);
             cps.attempts = Convert.ToUInt16(dr["attempts"]);
             cps.delay_between_sending = Convert.ToUInt16(dr["delay_between_sending"]);
+            cps.gsm_init_string = Convert.ToString(dr["gsm_init_string"]);
+            cps.gsm_on = Convert.ToBoolean(dr["gsm_on"]);
+            cps.gsm_phone_number = Convert.ToString(dr["gsm_phone_number"]);
 
             return (Object)cps;
         }

@@ -2214,7 +2214,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             if (data.GetType().Name == "ComPortSettings" && !B_DEBUG_MODE_TCP)
             {
                 ComPortSettings portsettings = (ComPortSettings)data;
-                m_vport = new ComPort(byte.Parse(portsettings.name), (int)portsettings.baudrate, portsettings.data_bits, portsettings.parity, portsettings.stop_bits, portsettings.write_timeout, portsettings.read_timeout, (byte)portsettings.attempts);
+                m_vport = new ComPort(portsettings);
 
                 portFullName = m_vport.GetFullName();
                 //читаем список приборов, привязанных к порту
@@ -2230,8 +2230,6 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 portFullName = portsettings.ip_address + ":" + portsettings.ip_port;
                 //здесь мы не создаем порт сразу (это сделано для поддержки RDS, порт создается дальше               
                 PortGUID = portsettings.guid;
-
-
 
                 if (mfPrms.mode == 1)
                     metersbyport = ServerStorage.GetMetersByTcpIPGUIDAndParams(PortGUID, mfPrms.paramType, mfPrms.driverName);
@@ -2332,7 +2330,8 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 }
                 else if (m_vport == null && (typemeter.driver_name == "sayani_kombik"))
                 {
-                    m_vport = new ComPort(byte.Parse("250"), 2400, 8, 1, 1, 1, 1, 1);
+                    ComPortSettings tmpRdsComSettings = new ComPortSettings();
+                    m_vport = new ComPort(tmpRdsComSettings);
 
                     apti.vp = m_vport;
                     apti.commentList.Add("Порт для поддержки RDS");

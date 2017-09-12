@@ -3,6 +3,8 @@ using System.Data;
 using System.Collections;
 using System.Collections.Generic;
 
+using PollingLibraries.LibPorts;
+
 namespace Prizmer.PoolServer.DataBase
 {
     #region Data
@@ -34,37 +36,6 @@ namespace Prizmer.PoolServer.DataBase
         public Guid guid_types_meters;
         public Guid guid_meters;
         public UInt16 time_delay_current;
-    }
-
-    /// <summary>
-    /// Структура хранит данные о подключении по tcp/ip
-    /// </summary>
-    public struct TCPIPSettings
-    {
-        public Guid guid;
-        public String ip_address;
-        public UInt16 ip_port;
-        public UInt16 write_timeout;
-        public UInt16 read_timeout;
-        public UInt16 attempts;
-        public UInt16 delay_between_sending;
-    }
-
-    /// <summary>
-    /// Структура хранит данные о подключении по последовательному порту
-    /// </summary>
-    public struct ComPortSettings
-    {
-        public Guid guid;
-        public String name;
-        public UInt32 baudrate;
-        public Byte data_bits;
-        public Byte parity;
-        public Byte stop_bits;
-        public UInt16 write_timeout;
-        public UInt16 read_timeout;
-        public UInt16 attempts;
-        public UInt16 delay_between_sending;
     }
 
     /// <summary>
