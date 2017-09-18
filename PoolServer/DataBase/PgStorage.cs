@@ -526,9 +526,19 @@ namespace Prizmer.PoolServer.DataBase
                 {
                     while (dr.Read())
                     {
-                        string ip = Convert.ToString(dr["ip_address"]);
-                        string port = Convert.ToString(dr["ip_port"]);
-                        string summary = ip + ":" + port;
+                        string summary = "";
+                        if (isTcp)
+                        {
+                            string ip = Convert.ToString(dr["ip_address"]);
+                            string port = Convert.ToString(dr["ip_port"]);
+                            summary = ip + ":" + port;
+                        }
+                        else
+                        {
+                            string comNumber = Convert.ToString(dr["name"]);
+                            summary = "COM" + comNumber;
+                        }
+
                         result.Add(summary);
                     }
                 }
