@@ -472,7 +472,7 @@ namespace PollingLibraries.LibPorts
                         // Send the data through the socket.
                         sender.Send(out_buffer, 0, out_length, SocketFlags.None);
 
-                        //WriteToLog("written data: " + BitConverter.ToString(out_buffer));
+                        WriteToLog("written data: " + BitConverter.ToString(out_buffer));
 
 
                         Thread.Sleep(10);
@@ -486,7 +486,8 @@ namespace PollingLibraries.LibPorts
                                 {
                                     byte[] tmp_buff = new byte[sender.Available];
                                     int readed_bytes = sender.Receive(tmp_buff);
-
+                                    WriteToLog("Received" + elapsed_time_count + ": " + BitConverter.ToString(tmp_buff));
+                                    WriteToLog("ReadedBytes: " + readed_bytes);
                                     readBytesList.AddRange(tmp_buff);
                                 }
                                 catch (Exception ex)
@@ -507,7 +508,7 @@ namespace PollingLibraries.LibPorts
                         }
 
                         string tmpResStr = BitConverter.ToString(readBytesList.ToArray());
-                        //WriteToLog("WriteReadData: received data: " + tmpResStr);
+                        WriteToLog("WriteReadData: received data: " + tmpResStr);
                         //  if (tmpResStr.Length < 4)
                         // WriteToLog("received data: " + tmpResStr);
 
