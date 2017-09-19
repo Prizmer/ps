@@ -65,7 +65,7 @@ namespace Prizmer.PoolServer
                 dateTimePicker2.Value = DateTime.Now;
                 MainFormParamsStructure prms = new MainFormParamsStructure();
                 prms.frmAnalizator = this.frmAnalizator;
-                prms.mode = 0;
+                prms.mode = OperatingMode.OM_AUTO;
 
                 ms.pollingStarted += new MainService.MyEventHandler(ms_pollingStarted);
                 ms.meterPolled += new MainService.MyEventHandler(ms_meterPolled);
@@ -181,10 +181,10 @@ namespace Prizmer.PoolServer
                 prms.driverName = comboBox1.Text;
                 prms.dtStart = dateTimePicker1.Value;
                 prms.dtEnd = dateTimePicker2.Value;
-                prms.ip = tbAddress.Text;
-                prms.port = int.Parse(tbPort.Text);
-                prms.mode = 1;
                 prms.isTcp = _isTcpMode;
+                prms.ip = _isTcpMode ? tbAddress.Text : tbAddress.Text.Replace("COM", "");
+                prms.port = int.Parse(tbPort.Text);
+                prms.mode = OperatingMode.OM_MANUAL;
                 prms.paramType = comboBox2.SelectedIndex;
 
                 ManualStartInProcess = true;
@@ -336,6 +336,9 @@ namespace Prizmer.PoolServer
                 tbAddress.Enabled = true;
                 _isTcpMode = true;
             }
+
+            comboBox3Upd();
+            comboBox3.SelectedIndex = comboBox3.Items.Count - 1;
         }
 
         private void btnEndReading_Click(object sender, EventArgs e)
@@ -429,9 +432,15 @@ namespace Prizmer.PoolServer
         }
     }
 
+    public enum OperatingMode
+    {
+        OM_AUTO = 0,
+        OM_MANUAL = 1
+    }
+
     public struct MainFormParamsStructure
     {
-        public int mode;
+        public OperatingMode mode;
         public DateTime dtStart;
         public DateTime dtEnd;
         public string driverName;

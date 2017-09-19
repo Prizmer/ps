@@ -173,7 +173,7 @@ namespace Prizmer.PoolServer
             List<Thread> comPortThreadsList = new List<Thread>();
 
             //нам не нужны ком порты если дочитываем tcp
-            if (prms.mode == 1 && prms.isTcp) return comPortThreadsList;
+            if (prms.mode == OperatingMode.OM_MANUAL && prms.isTcp) return comPortThreadsList;
             //нам не нужны ком порты если отлаживаем tcp
             if (B_DEBUG_MODE_TCP) return comPortThreadsList;
 
@@ -181,7 +181,7 @@ namespace Prizmer.PoolServer
             for (int i = 0; i < cps.Length; i++)
             {
                 //если дочитка, пропустим все порты кроме выбранного
-                if (prms.mode == 1 && !prms.isTcp)
+                if (prms.mode == OperatingMode.OM_MANUAL && !prms.isTcp)
                 {
                     if (cps[i].name != prms.ip)
                         continue;
@@ -210,7 +210,7 @@ namespace Prizmer.PoolServer
             List<Thread> tcpPortThreadsList = new List<Thread>();
 
             //нам не нужны tcp если дочитываем com
-            if (prms.mode == 1 && !prms.isTcp) return tcpPortThreadsList;
+            if (prms.mode == OperatingMode.OM_MANUAL && !prms.isTcp) return tcpPortThreadsList;
 
             for (int i = 0; i < tcpips.Length; i++)
             {
@@ -219,7 +219,7 @@ namespace Prizmer.PoolServer
                     if (tcpips[i].ip_address != DMTCP_IP || tcpips[i].ip_port != DMTCP_PORT)
                         continue;
                 }
-                else if (prms.mode == 1 && prms.isTcp)
+                else if (prms.mode == OperatingMode.OM_MANUAL && prms.isTcp)
                 {
                     //WriteToLog("addr: " + tcpips[i].ip_address + "; p: " + tcpips[i].ip_port.ToString());
                     //WriteToLog("addr: " + prms.ip + "; p: " + ((ushort)prms.port).ToString());
@@ -275,18 +275,45 @@ namespace Prizmer.PoolServer
             List<Thread> tcpPortThreads = new List<Thread>();
             PortsThreads = new List<Thread>();
 
-            if (!B_DEBUG_MODE_TCP && mfPrms.mode == 0)
+            if (!B_DEBUG_MODE_TCP)
             {
-                comPortThreads = this.getStartComThreadsList(cps, mfPrms);
-                PortsThreads.AddRange(comPortThreads);
+                if (mfPrms.mode == OperatingMode.OM_AUTO)
+                {
+                    comPortThreads = this.getStartComThreadsList(cps, mfPrms);
+                    tcpPortThreads = this.getStartTcpThreadsList(tcpips, mfPrms);
+
+                    PortsThreads.AddRange(comPortThreads);
+                    PortsThreads.AddRange(tcpPortThreads);
+                }
+                else
+                {
+                    //manual operating mode
+
+                    if (mfPrms.isTcp)
+                    {
+                        tcpPortThreads = this.getStartTcpThreadsList(tcpips, mfPrms);
+                        PortsThreads.AddRange(tcpPortThreads);
+                    }
+                    else
+                    {
+                        comPortThreads = this.getStartComThreadsList(cps, mfPrms);
+                        PortsThreads.AddRange(comPortThreads);
+                    }
+
+
+                }
             }
-
-            tcpPortThreads = this.getStartTcpThreadsList(tcpips, mfPrms);
-            PortsThreads.AddRange(tcpPortThreads);
-
-            if (tcpPortThreads.Count == 0)
+            else
             {
-                if (mfPrms.mode == 1 && pollingEnded != null)
+                //debug пока только для tcp портов
+                tcpPortThreads = this.getStartTcpThreadsList(tcpips, mfPrms);
+                PortsThreads.AddRange(tcpPortThreads);
+            }
+            
+
+            if (PortsThreads.Count == 0)
+            {
+                if (mfPrms.mode == OperatingMode.OM_MANUAL && pollingEnded != null)
                     pollingEnded(this, new MyEventArgs());
 
             }
@@ -299,28 +326,6 @@ namespace Prizmer.PoolServer
             //закрываем соединение с БД
             ServerStorageMainService.Close();
         }
-
-        bool _manualStartInProcess = false;
-        bool ManualStartInProcess
-        {
-            get { return _manualStartInProcess; }
-            set
-            {
-                if (value)
-                {
-
-
-                }
-                else
-                {
-
-
-
-                }
-            }
-
-        }
-
 
         Thread stopServerThread;
 
@@ -2208,7 +2213,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             mfPrms = (MainFormParamsStructure)prmsList[prmsList.Count - 1];
 
 
-            bool POLLING_ACTIVE = mfPrms.mode == 0 ? true : false;
+            bool POLLING_ACTIVE = mfPrms.mode == OperatingMode.OM_AUTO ? true : false;
 
             string portFullName = "";
             if (data.GetType().Name == "ComPortSettings" && !B_DEBUG_MODE_TCP)
@@ -2231,7 +2236,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 //здесь мы не создаем порт сразу (это сделано для поддержки RDS, порт создается дальше               
                 PortGUID = portsettings.guid;
 
-                if (mfPrms.mode == 1)
+                if (mfPrms.mode == OperatingMode.OM_MANUAL)
                     metersbyport = ServerStorage.GetMetersByTcpIPGUIDAndParams(PortGUID, mfPrms.paramType, mfPrms.driverName);
                 else
                     metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
@@ -2266,7 +2271,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             }
 
             myEventArgs.metersCount = metersbyport.Length;
-            if (mfPrms.mode == 1 && pollingStarted != null)
+            if (mfPrms.mode == OperatingMode.OM_MANUAL && pollingStarted != null)
                 pollingStarted(this, myEventArgs);
 
 
@@ -2450,7 +2455,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 //********************************************************************************************************************* 
                 //***************************************| ДОЧИТКА ЗНАЧЕНИЙ |**********************************************************
                 //*********************************************************************************************************************
-                if (mfPrms.mode == 1 && typemeter.driver_name == mfPrms.driverName)
+                if (mfPrms.mode == OperatingMode.OM_MANUAL && typemeter.driver_name == mfPrms.driverName)
                 {
                     int status = pollDatesRange(myEventArgs, mfPrms, pmPrms);
                     if (status == 1) goto CloseThreadPoint;                   
@@ -2461,7 +2466,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 if (!DMTCP_STATIC_METER_NUMBER)
                 {
                     MetersCounter++;
-                    if (mfPrms.mode != 1 && MetersCounter >= metersbyport.Length)
+                    if (mfPrms.mode != OperatingMode.OM_MANUAL && MetersCounter >= metersbyport.Length)
                     {
                         MetersCounter = 0;
                         //перечитать список приборов - вдруг что-то добавили или убрали
@@ -2486,7 +2491,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                         //if (m_vport.GetConnectionType() == "tcp")
                         //    m_vport.ReInitialize();
                     }
-                    else if (mfPrms.mode == 1)
+                    else if (mfPrms.mode == OperatingMode.OM_MANUAL)
                     {
                         // РЕЖИМ РУЧНОЙ ДОЧИТКИ
                         if (meterPolled != null)
