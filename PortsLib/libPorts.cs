@@ -724,13 +724,13 @@ namespace PollingLibraries.LibPorts
             byte[] cmdConnect = ASCIIEncoding.ASCII.GetBytes(at_cmd_connect);
             byte[] inAtBuffer = new byte[1];
 
-            // comLogger.LogInfo("WriteReadData, gsm connect: " + BitConverter.ToString(cmdConnect));
+            comLogger.LogInfo("WriteReadData, gsm connect: " + BitConverter.ToString(cmdConnect));
             readTimeout = 30000;
             int _rTimeout = readTimeout;
             WriteReadData(FindATSignature, cmdConnect, ref inAtBuffer, cmdConnect.Length, -1);
             readTimeout = _rTimeout;
             string answ = ASCIIEncoding.ASCII.GetString(inAtBuffer);
-            // comLogger.LogInfo("WriteReadData, gsm connect answ: " + answ);
+            comLogger.LogInfo("WriteReadData, gsm connect answ: " + answ);
 
             if (answ.IndexOf("CONNECT") != -1)
             {
@@ -745,6 +745,7 @@ namespace PollingLibraries.LibPorts
 
         private bool DisconnectFromAt()
         {
+            comLogger.LogError("WriteReadData, gsm disconnect: старт +++");
             byte[] at_cmd_plus = new byte[] { 0x2b, 0x2b, 0x2b };
             string at_cmd_hang = "ATH0\r";
             byte[] cmdHang= ASCIIEncoding.ASCII.GetBytes(at_cmd_hang);
@@ -754,18 +755,18 @@ namespace PollingLibraries.LibPorts
             string answ = ASCIIEncoding.ASCII.GetString(inAtBuffer);
             if (answ.IndexOf("OK") == -1)
             {
-                //comLogger.LogError("WriteReadData, gsm disconnect: реакция на команду " + BitConverter.ToString(at_cmd_plus) + ": " + answ);
-              //  comLogger.LogError("WriteReadData, gsm disconnect: выход");
+               comLogger.LogError("WriteReadData, gsm disconnect: реакция на команду " + BitConverter.ToString(at_cmd_plus) + ": " + answ);
+               comLogger.LogError("WriteReadData, gsm disconnect: выход");
                 return false;
             }
 
-            //comLogger.LogInfo("WriteReadData, gsm disconnect: " + BitConverter.ToString(cmdHang));
+            comLogger.LogInfo("WriteReadData, gsm disconnect: " + BitConverter.ToString(cmdHang));
             WriteReadData(FindATDisconnectSignature, cmdHang, ref inAtBuffer, cmdHang.Length, -1);
             answ = ASCIIEncoding.ASCII.GetString(inAtBuffer);
             if (answ.IndexOf("OK") == -1)
             {
-                // comLogger.LogError("WriteReadData, gsm disconnect: реакция на команду " + BitConverter.ToString(cmdHang) + ": " + answ);
-                //  comLogger.LogError("WriteReadData, gsm disconnect: выход");
+                comLogger.LogError("WriteReadData, gsm disconnect: реакция на команду " + BitConverter.ToString(cmdHang) + ": " + answ);
+                comLogger.LogError("WriteReadData, gsm disconnect: выход");
                 isConnectedToAt = false;
                 return false;
             }
@@ -794,6 +795,8 @@ namespace PollingLibraries.LibPorts
                     cnt++;
                     if (cnt == secondsToDisconect)
                     {
+                        comLogger.LogInfo("idleThreadHandler: disconnect attempt");
+
                         DisconnectFromAt();
                         cnt = 0;
                         isIdle = false;
@@ -824,7 +827,7 @@ namespace PollingLibraries.LibPorts
 
                 if (!isConnectedToAt)
                 {
-                    //  comLogger.LogError("WriteReadData, gsm connect: не удалось подключиться к модему");
+                    comLogger.LogError("WriteReadData, gsm connect: не удалось подключиться к модему");
                     isIdle = true;
                     return 0;
                 }
