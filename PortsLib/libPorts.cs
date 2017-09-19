@@ -36,6 +36,7 @@ namespace PollingLibraries.LibPorts
         public string gsm_phone_number;
         public string gsm_init_string;
         public bool gsm_on;
+        public bool bDtr;
     }
 
     /// <summary>
@@ -661,6 +662,8 @@ namespace PollingLibraries.LibPorts
             serialPort.DataBits = cps.data_bits;
             serialPort.StopBits = (StopBits)cps.stop_bits;
 
+            serialPort.DtrEnable = cps.bDtr;
+
             readTimeout = cps.read_timeout;
             writeTimeout = cps.write_timeout;
             attemts = cps.attempts;
@@ -684,8 +687,8 @@ namespace PollingLibraries.LibPorts
 
             serialPort.ReadTimeout = 5000;
             serialPort.WriteTimeout = 1000;
+
             serialPort.DtrEnable = true;
-            serialPort.RtsEnable = true;
         }
 
         ~ComPort()

@@ -227,6 +227,8 @@ namespace Prizmer.PoolServer.DataBase
             if (ColumnExists(dr, "gsm_phone_number"))
                 cps.gsm_phone_number = Convert.ToString(dr["gsm_phone_number"]);
 
+            cps.bDtr = false;
+
             return (Object)cps;
         }
 
