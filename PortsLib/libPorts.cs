@@ -1014,6 +1014,12 @@ namespace PollingLibraries.LibPorts
         {
             if (serialPort != null && serialPort.IsOpen)
             {
+                if (_cps.gsm_on)
+                {
+                    DisconnectFromAt();
+                    Thread.Sleep(1000);
+                }
+
                 idleThreadOnGo = false;
                 serialPort.Close();
             }
