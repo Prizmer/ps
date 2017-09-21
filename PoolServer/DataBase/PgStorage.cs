@@ -216,15 +216,15 @@ namespace Prizmer.PoolServer.DataBase
 
             //gsm
             cps.gsm_init_string = "";
-            if (ColumnExists(dr, "gsm_init_string"))
+           // if (ColumnExists(dr, "gsm_init_string"))
                 cps.gsm_init_string = Convert.ToString(dr["gsm_init_string"]);
 
             cps.gsm_on = false;
-            if (ColumnExists(dr, "gsm_on"))
+          //  if (ColumnExists(dr, "gsm_on"))
                 cps.gsm_on = Convert.ToBoolean(dr["gsm_on"]);
 
             cps.gsm_phone_number = "";
-            if (ColumnExists(dr, "gsm_phone_number"))
+          //  if (ColumnExists(dr, "gsm_phone_number"))
                 cps.gsm_phone_number = Convert.ToString(dr["gsm_phone_number"]);
 
             cps.bDtr = false;
