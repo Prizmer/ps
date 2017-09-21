@@ -1016,6 +1016,7 @@ namespace PollingLibraries.LibPorts
             {
                 if (_cps.gsm_on)
                 {
+                    idleThreadOnGo = false;
                     DisconnectFromAt();
                     Thread.Sleep(1000);
                 }
