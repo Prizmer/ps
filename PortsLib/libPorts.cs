@@ -760,6 +760,7 @@ namespace PollingLibraries.LibPorts
             if (answ.IndexOf("OK") == -1)
             {
                comLogger.LogError("WriteReadData, gsm disconnect: выход, ответ неверный");
+                this.Close();
                 return false;
             }
 
@@ -771,8 +772,11 @@ namespace PollingLibraries.LibPorts
             {
                 comLogger.LogError("WriteReadData, gsm disconnect: выход, ответ неверный");
                 isConnectedToAt = false;
+                this.Close();
                 return false;
             }
+
+            this.Close();
 
             return true;
         }
@@ -808,8 +812,6 @@ namespace PollingLibraries.LibPorts
                         isConnectedToAt = false;
                         isTryingToPerformATConnect = false;
                         isTryingToPerformATDisconnect = false;
-
-                        Close();
                     }
                 }
 
@@ -835,6 +837,10 @@ namespace PollingLibraries.LibPorts
                     comLogger.LogError("WriteReadData, gsm connect: не удалось подключиться к модему");
                     isIdle = true;
                     return 0;
+                }
+                else
+                {
+                    isIdle = false;
                 }
             }
 
@@ -864,7 +870,11 @@ namespace PollingLibraries.LibPorts
                         tmpQ.Enqueue(inList[j]);
 
                     int packageSign = func(tmpQ);
-                    if (packageSign == 1) break;
+                    if (packageSign == 1)
+                    {
+                        in_buffer = inList.ToArray();
+                        break;                      
+                    }
                 }
 
                 in_buffer = inList.ToArray();
