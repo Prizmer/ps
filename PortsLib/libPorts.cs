@@ -633,12 +633,12 @@ namespace PollingLibraries.LibPorts
         {
             _cps = cps;
 
-            comLogger.LogInfo("_cps: " + _cps.gsm_on);
-
             comLogger = new Logger();
             comLogger.Initialize(Logger.DIR_LOGS_PORTS, false, "COM" + cps.name);
 
             comLogger.LogInfo("This is test msg");
+
+            comLogger.LogInfo("_cps: " + _cps.gsm_on);
 
             //если не передано настроек, создадим рандомный порт
             if (cps.name == "")
