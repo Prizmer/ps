@@ -216,19 +216,15 @@ namespace Prizmer.PoolServer.DataBase
 
             //gsm
             cps.gsm_init_string = "";
-           // if (ColumnExists(dr, "gsm_init_string"))
+            if (ColumnExists(dr, "gsm_init_string"))
                 cps.gsm_init_string = Convert.ToString(dr["gsm_init_string"]);
-            loggerStorage.LogInfo(cps.gsm_init_string);
-
             cps.gsm_on = false;
-          //  if (ColumnExists(dr, "gsm_on"))
+            if (ColumnExists(dr, "gsm_on"))
                 cps.gsm_on = Convert.ToBoolean(dr["gsm_on"]);
-            loggerStorage.LogInfo(cps.gsm_on.ToString());
-
             cps.gsm_phone_number = "";
-          //  if (ColumnExists(dr, "gsm_phone_number"))
+            if (ColumnExists(dr, "gsm_phone_number"))
                 cps.gsm_phone_number = Convert.ToString(dr["gsm_phone_number"]);
-            loggerStorage.LogInfo(cps.gsm_phone_number);
+
             cps.bDtr = false;
 
             return (Object)cps;
@@ -610,7 +606,7 @@ namespace Prizmer.PoolServer.DataBase
 
         public ComPortSettings[] GetComportSettings()
         {
-            string query = "SELECT guid, name, baudrate, data_bits, parity, stop_bits, write_timeout,read_timeout, attempts, delay_between_sending FROM comport_settings";
+            string query = "SELECT guid, name, baudrate, data_bits, parity, stop_bits, write_timeout,read_timeout, attempts, delay_between_sending, gsm_init_string, gsm_on, gsm_phone_number FROM comport_settings";
 
             List<Object> list = GetRecordsFromReader(query, RetrieveComPortSettings);
 
@@ -646,7 +642,7 @@ namespace Prizmer.PoolServer.DataBase
 
         public ComPortSettings GetComportByMeterGUID(Guid guid_meters)
         {
-            string query = "SELECT comport_settings.guid, comport_settings.name, baudrate, data_bits, parity, stop_bits, write_timeout,read_timeout, attempts, delay_between_sending FROM comport_settings " +
+            string query = "SELECT comport_settings.guid, comport_settings.name, baudrate, data_bits, parity, stop_bits, write_timeout,read_timeout, attempts, delay_between_sending, gsm_init_string,gsm_on,gsm_phone_number FROM comport_settings " +
                             "JOIN link_meters_comport_settings ON link_meters_comport_settings.guid_meters = '" + guid_meters.ToString() + "' " +
                             "WHERE comport_settings.guid = link_meters_comport_settings.guid_comport_settings";
 

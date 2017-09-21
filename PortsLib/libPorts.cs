@@ -715,11 +715,19 @@ namespace PollingLibraries.LibPorts
         private int FindATDisconnectSignature(Queue<byte> queue)
         {
             byte[] qArr = queue.ToArray();
-            for (int i = 0; i < qArr.Length; i++)
+            Array.Reverse(qArr);
+            string answ = ASCIIEncoding.ASCII.GetString(qArr);
+            comLogger.LogInfo("FindATDisconnectSignature: answ: " + answ);
+            if (answ.IndexOf("OK") != -1)
             {
-                if (qArr[i] == 0x4f && i < qArr.Length - 1 && qArr[i + 1] == 0x4b)
-                    return 1;
+                return 1;
             }
+
+            //for (int i = 0; i < qArr.Length; i++)
+            //{
+            //    if (qArr[i] == 0x4f && i < qArr.Length - 1 && qArr[i + 1] == 0x4b)
+            //        return 1;
+            //}
 
             return 0;
         }
@@ -751,6 +759,8 @@ namespace PollingLibraries.LibPorts
 
         private bool DisconnectFromAt()
         {
+            isTryingToPerformATDisconnect = true;
+
             comLogger.LogInfo("WriteReadData, gsm disconnect +++: старт");
             byte[] at_cmd_plus = new byte[] { 0x2b, 0x2b, 0x2b };
             string at_cmd_hang = "ATH0\r";
@@ -763,10 +773,12 @@ namespace PollingLibraries.LibPorts
             if (answ.IndexOf("OK") == -1)
             {
                comLogger.LogError("WriteReadData, gsm disconnect: выход, ответ неверный");
+                isTryingToPerformATDisconnect = false;
                 this.Close();
                 return false;
             }
 
+            isTryingToPerformATDisconnect = true;
             comLogger.LogInfo("WriteReadData, gsm disconnect hang: старт" + BitConverter.ToString(cmdHang));
             WriteReadData(FindATDisconnectSignature, cmdHang, ref inAtBuffer, cmdHang.Length, -1);
             answ = ASCIIEncoding.ASCII.GetString(inAtBuffer);
@@ -775,10 +787,12 @@ namespace PollingLibraries.LibPorts
             {
                 comLogger.LogError("WriteReadData, gsm disconnect: выход, ответ неверный");
                 isConnectedToAt = false;
+                isTryingToPerformATDisconnect = false;
                 this.Close();
                 return false;
             }
 
+            isTryingToPerformATDisconnect = false;
             this.Close();
 
             return true;
