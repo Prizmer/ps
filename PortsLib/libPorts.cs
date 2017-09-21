@@ -669,6 +669,7 @@ namespace PollingLibraries.LibPorts
             attemts = cps.attempts;
 
             idleThread = new Thread(idleThreadHandler);
+            idleThread.IsBackground = true;
             idleThread.Start();
         }
 
@@ -791,11 +792,12 @@ namespace PollingLibraries.LibPorts
         private volatile bool isIdle = false;
         private volatile int secondsToDisconect = 10;
         private volatile int idleThreadHandlerCnt = 0;
+        private volatile bool idleThreadOnGo = true;
 
         public void idleThreadHandler()
         {
             idleThreadHandlerCnt = 0;
-            while (true)
+            while (idleThreadOnGo)
             {
                 Thread.Sleep(1000);
 
@@ -916,12 +918,14 @@ namespace PollingLibraries.LibPorts
         {
             if (serialPort != null)
             {
+  
 
                 if (!serialPort.IsOpen)
                 {
                     try
                     {
                         serialPort.Open();
+                        idleThreadOnGo = true;
                     }
                     catch (Exception ex)
                     {
@@ -949,6 +953,7 @@ namespace PollingLibraries.LibPorts
                 }
                 else
                 {
+                    idleThreadOnGo = true;
                     try
                     {
                         serialPort.DiscardOutBuffer();
@@ -968,6 +973,7 @@ namespace PollingLibraries.LibPorts
 
         public void Dispose()
         {
+            idleThreadOnGo = false;
             serialPort.Close();
         }
 
@@ -992,6 +998,7 @@ namespace PollingLibraries.LibPorts
         {
             if (serialPort != null && serialPort.IsOpen)
             {
+                idleThreadOnGo = false;
                 serialPort.Close();
             }
         }
