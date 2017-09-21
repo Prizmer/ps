@@ -774,7 +774,6 @@ namespace PollingLibraries.LibPorts
             {
                comLogger.LogError("WriteReadData, gsm disconnect: выход, ответ неверный");
                 isTryingToPerformATDisconnect = false;
-                this.Close();
                 return false;
             }
 
@@ -788,12 +787,10 @@ namespace PollingLibraries.LibPorts
                 comLogger.LogError("WriteReadData, gsm disconnect: выход, ответ неверный");
                 isConnectedToAt = false;
                 isTryingToPerformATDisconnect = false;
-                this.Close();
                 return false;
             }
 
             isTryingToPerformATDisconnect = false;
-            this.Close();
 
             return true;
         }
@@ -826,6 +823,7 @@ namespace PollingLibraries.LibPorts
 
                         DisconnectFromAt();
                         idleThreadHandlerCnt = 0;
+
                         isIdle = false;
                         isConnectedToAt = false;
                         isTryingToPerformATConnect = false;
