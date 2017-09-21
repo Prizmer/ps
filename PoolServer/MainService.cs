@@ -2501,8 +2501,10 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                         {
                             if (pollingEnded != null)
                             {
+                                m_vport.Close();
                                 pollingEnded(this, myEventArgs);
                                 bStopServer = true;
+
                             }
 
                             break;
