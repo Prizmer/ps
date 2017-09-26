@@ -774,7 +774,7 @@ namespace PollingLibraries.LibPorts
             {
                comLogger.LogError("WriteReadData, gsm disconnect: выход, ответ неверный");
                 isTryingToPerformATDisconnect = false;
-                return false;
+               // return false;
             }
 
             isTryingToPerformATDisconnect = true;
