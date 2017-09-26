@@ -5,3 +5,4 @@ obj/*
 Release
 logs
 /PoolServer.suo
+/.vs
