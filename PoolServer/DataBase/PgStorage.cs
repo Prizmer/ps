@@ -975,6 +975,28 @@ namespace Prizmer.PoolServer.DataBase
         {
             throw new NotImplementedException();
         }
+
+        //Новая функция для MetersSearchForm
+        /// <summary>
+        /// Возвращает таблицу с информацией о счётчиках с серийными номерами, содержащими строку
+        /// </summary>
+        /// <param name="factory_number">Искомая строка</param>
+        /// <param name="table">Возвращаемая таблица</param>
+        public void FindMetersWithSerial(string factory_number, DataTable table)
+        {
+            NpgsqlCommand command = new NpgsqlCommand("SELECT guid, name, factory_number_manual, factory_number_readed, address, password, dt_install, dt_last_read, time_delay_current FROM meters WHERE factory_number_manual LIKE @number OR factory_number_readed LIKE @number", m_pg_con);
+            command.Parameters.AddWithValue("@number", "%" + factory_number + "%");
+            NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command);
+            table.Clear();
+            try
+            {
+                adapter.Fill(table);
+            }
+            catch (Exception e)
+            {
+                System.Windows.Forms.MessageBox.Show(e.Message, "Ошибка чтения");
+            }
+        }
     }
 }
 
