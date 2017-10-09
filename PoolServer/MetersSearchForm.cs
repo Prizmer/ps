@@ -73,25 +73,26 @@ namespace Prizmer.PoolServer
                 {
                     is_linked = true;
                     Param param = storage.GetParamByGUID(taken.guid_params);
+                    meterInfoTextBox.Text += "Имя: " + param.name + "; Тип: ";
                     switch (param.type)
                     {
                         case 0:
-                            meterInfoTextBox.Text += "Текущий";
+                            meterInfoTextBox.Text += "текущий";
                             break;
                         case 2:
-                            meterInfoTextBox.Text += "Месячный";
+                            meterInfoTextBox.Text += "месячный";
                             break;
                         case 3:
-                            meterInfoTextBox.Text += "Архивный";
+                            meterInfoTextBox.Text += "архивный";
                             break;
                         case 1:
-                            meterInfoTextBox.Text += "Суточный";
+                            meterInfoTextBox.Text += "суточный";
                             break;
                         case 4:
-                            meterInfoTextBox.Text += "Получасовой";
+                            meterInfoTextBox.Text += "получасовой";
                             break;
                     }
-                    meterInfoTextBox.Text += ": " + param.name + Environment.NewLine;
+                    meterInfoTextBox.Text += "; Адрес: " + param.param_address.ToString() + "; Канал: " + param.channel.ToString() + ";" + Environment.NewLine;
                 }
                 if (!is_linked) MessageBox.Show("Прибор не имеет считываемых параметров", "Ошибка");
             }
