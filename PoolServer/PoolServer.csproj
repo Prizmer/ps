@@ -98,6 +98,12 @@
     </Compile>
     <Compile Include="DataBase\DBInterface.cs" />
     <Compile Include="DataBase\PgStorage.cs" />
+    <Compile Include="MetersSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MetersSearchForm.Designer.cs">
+      <DependentUpon>MetersSearchForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -122,6 +128,9 @@
     <Compile Include="Settings.cs" />
     <EmbeddedResource Include="Analizator.resx">
       <DependentUpon>Analizator.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MetersSearchForm.resx">
+      <DependentUpon>MetersSearchForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>

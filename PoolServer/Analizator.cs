@@ -266,7 +266,6 @@ namespace Prizmer.PoolServer
 
         private void Analizator_FormClosing(object sender, FormClosingEventArgs e)
         {
-
             this.Hide();
             e.Cancel = true;
         }
