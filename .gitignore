@@ -9,3 +9,5 @@ logs
 .vs
 /.vs/PoolServer/v15/.suo
 /.vs/PoolServer/v15
+/LibMeter/bin/Debug/*.pdb
+*.pdb
