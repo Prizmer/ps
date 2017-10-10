@@ -18,7 +18,8 @@ namespace Prizmer.PoolServer
     {
         MainService ms = new MainService();
         Analizator frmAnalizator = new Analizator();
-        
+        MetersSearchForm DevSearchForm = new MetersSearchForm();
+
         public FormMain()
         {
             frmAnalizator = new Analizator();
@@ -26,6 +27,7 @@ namespace Prizmer.PoolServer
         }
 
         PgStorage storage = new PgStorage();
+
         string connectionStr = "";
         private void FormMain_Load(object sender, EventArgs e)
         {
@@ -84,6 +86,9 @@ namespace Prizmer.PoolServer
             {
                 MessageBox.Show(ex.Message);
             }
+
+            //делимся экземпляром storage с дочерней формой
+            DevSearchForm.storage = this.storage;
         }
 
         bool _bThreadsAreClosing = false;
@@ -432,6 +437,12 @@ namespace Prizmer.PoolServer
         private void timerLogsDeletion_Tick(object sender, EventArgs e)
         {
 
+        }
+
+        private void DeviceSearchMenuItem_Click(object sender, EventArgs e)
+        {
+            this.DevSearchForm.Show();
+            this.DevSearchForm.Focus();
         }
     }
 

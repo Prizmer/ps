@@ -159,6 +159,14 @@ namespace Prizmer.PoolServer.DataBase
         /// <returns></returns>
         int UpdateMeterFactoryNumber(Guid guid, string factoryNumber, string isEqual);
 
+        //Новая функция для MetersSearchForm
+        /// <summary>
+        /// Возвращает таблицу с информацией о счётчиках с серийными номерами, содержащими строку
+        /// </summary>
+        /// <param name="factory_number">Искомая строка</param>
+        /// <param name="table">Возвращаемая таблица</param>
+        void FindMetersWithSerial(string factory_number, DataTable table);
+
         #endregion
 
         #region CommunicationSettings
