@@ -23,11 +23,6 @@ namespace Prizmer.PoolServer
             MetersGrid.DataSource = metersTable.DefaultView;
         }
 
-        private void SearchButton_Click(object sender, EventArgs e)
-        {
-            storage.FindMetersWithSerial(SerialNumBox.Text, metersTable);
-        }
-
         private void PortButton_Click(object sender, EventArgs e)
         {
             if (MetersGrid.CurrentRow != null)
@@ -110,11 +105,6 @@ namespace Prizmer.PoolServer
         {
             this.Hide();
             e.Cancel = true;
-        }
-
-        private void DevicesGrid_SelectionChanged(object sender, EventArgs e)
-        {
-            MetersGrid.CurrentRow.Selected = true;
         }
     }
 }
