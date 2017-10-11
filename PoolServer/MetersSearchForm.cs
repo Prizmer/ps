@@ -95,10 +95,7 @@ namespace Prizmer.PoolServer
 
         private void SerialNumBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (((byte)e.KeyChar) == 13)
-            {
                 storage.FindMetersWithSerial(SerialNumBox.Text, metersTable);
-            }
         }
 
         private void MetersSearchForm_FormClosing(object sender, FormClosingEventArgs e)
