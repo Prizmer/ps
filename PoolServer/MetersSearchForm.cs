@@ -64,7 +64,7 @@ namespace Prizmer.PoolServer
             {
                 meterInfoTextBox.Text = String.Empty;
                 bool is_linked = false;
-                foreach(TakenParams taken in storage.GetTakenParamByMetersGUID(Guid.Parse(metersTable.Rows[MetersGrid.CurrentRow.Index]["guid"].ToString())))
+                foreach (TakenParams taken in storage.GetTakenParamByMetersGUID(Guid.Parse(metersTable.Rows[MetersGrid.CurrentRow.Index]["guid"].ToString())))
                 {
                     is_linked = true;
                     Param param = storage.GetParamByGUID(taken.guid_params);
@@ -93,15 +93,15 @@ namespace Prizmer.PoolServer
             }
         }
 
-        private void SerialNumBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-                storage.FindMetersWithSerial(SerialNumBox.Text, metersTable);
-        }
-
         private void MetersSearchForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             this.Hide();
             e.Cancel = true;
+        }
+
+        private void SerialNumBox_TextChanged(object sender, EventArgs e)
+        {
+            storage.FindMetersWithSerial(SerialNumBox.Text, metersTable);
         }
     }
 }

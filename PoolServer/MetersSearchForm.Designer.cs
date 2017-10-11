@@ -48,29 +48,26 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 10);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Location = new System.Drawing.Point(9, 12);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(96, 13);
+            this.label1.Size = new System.Drawing.Size(124, 17);
             this.label1.TabIndex = 1;
             this.label1.Text = "Серийный номер:";
             // 
             // SerialNumBox
             // 
-            this.SerialNumBox.Location = new System.Drawing.Point(104, 7);
-            this.SerialNumBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.SerialNumBox.Location = new System.Drawing.Point(139, 9);
             this.SerialNumBox.Name = "SerialNumBox";
-            this.SerialNumBox.Size = new System.Drawing.Size(165, 20);
+            this.SerialNumBox.Size = new System.Drawing.Size(219, 22);
             this.SerialNumBox.TabIndex = 2;
-            this.SerialNumBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SerialNumBox_KeyPress);
+            this.SerialNumBox.TextChanged += new System.EventHandler(this.SerialNumBox_TextChanged);
             // 
             // MetersGrid
             // 
             this.MetersGrid.AllowUserToAddRows = false;
             this.MetersGrid.AllowUserToDeleteRows = false;
             this.MetersGrid.AllowUserToResizeColumns = false;
-            this.MetersGrid.AllowUserToResizeRows = false;
-            this.MetersGrid.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
+            this.MetersGrid.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
             this.MetersGrid.ColumnHeadersHeight = 37;
             this.MetersGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.MetersGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -82,17 +79,13 @@
             this.dt_install,
             this.dt_last_read,
             this.time_delay_current});
-            this.MetersGrid.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
-            this.MetersGrid.Location = new System.Drawing.Point(9, 34);
-            this.MetersGrid.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.MetersGrid.Location = new System.Drawing.Point(12, 42);
             this.MetersGrid.MultiSelect = false;
             this.MetersGrid.Name = "MetersGrid";
-            this.MetersGrid.ReadOnly = true;
             this.MetersGrid.RowHeadersVisible = false;
             this.MetersGrid.RowTemplate.Height = 24;
-            this.MetersGrid.RowTemplate.ReadOnly = true;
-            this.MetersGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.MetersGrid.Size = new System.Drawing.Size(482, 244);
+            this.MetersGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.MetersGrid.Size = new System.Drawing.Size(643, 300);
             this.MetersGrid.TabIndex = 3;
             // 
             // name
@@ -100,7 +93,6 @@
             this.name.DataPropertyName = "name";
             this.name.HeaderText = "Имя устройства";
             this.name.Name = "name";
-            this.name.ReadOnly = true;
             this.name.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.name.Width = 125;
             // 
@@ -109,7 +101,6 @@
             this.address.DataPropertyName = "address";
             this.address.HeaderText = "Адрес";
             this.address.Name = "address";
-            this.address.ReadOnly = true;
             this.address.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.address.Width = 50;
             // 
@@ -118,7 +109,6 @@
             this.factory_number_manual.DataPropertyName = "factory_number_manual";
             this.factory_number_manual.HeaderText = "Введённый серийный номер";
             this.factory_number_manual.Name = "factory_number_manual";
-            this.factory_number_manual.ReadOnly = true;
             this.factory_number_manual.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.factory_number_manual.Width = 150;
             // 
@@ -127,7 +117,6 @@
             this.factory_number_readed.DataPropertyName = "factory_number_readed";
             this.factory_number_readed.HeaderText = "Считанный серийный номер";
             this.factory_number_readed.Name = "factory_number_readed";
-            this.factory_number_readed.ReadOnly = true;
             this.factory_number_readed.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.factory_number_readed.Width = 150;
             // 
@@ -136,7 +125,6 @@
             this.password.DataPropertyName = "password";
             this.password.HeaderText = "Пароль";
             this.password.Name = "password";
-            this.password.ReadOnly = true;
             this.password.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.password.Width = 80;
             // 
@@ -145,7 +133,6 @@
             this.dt_install.DataPropertyName = "dt_install";
             this.dt_install.HeaderText = "Дата установки";
             this.dt_install.Name = "dt_install";
-            this.dt_install.ReadOnly = true;
             this.dt_install.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             // 
             // dt_last_read
@@ -153,7 +140,6 @@
             this.dt_last_read.DataPropertyName = "dt_last_read";
             this.dt_last_read.HeaderText = "Дата последнего считывания";
             this.dt_last_read.Name = "dt_last_read";
-            this.dt_last_read.ReadOnly = true;
             this.dt_last_read.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             // 
             // time_delay_current
@@ -161,15 +147,13 @@
             this.time_delay_current.DataPropertyName = "time_delay_current";
             this.time_delay_current.HeaderText = "Текущая задержка";
             this.time_delay_current.Name = "time_delay_current";
-            this.time_delay_current.ReadOnly = true;
             this.time_delay_current.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             // 
             // PortButton
             // 
-            this.PortButton.Location = new System.Drawing.Point(273, 4);
-            this.PortButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.PortButton.Location = new System.Drawing.Point(364, 5);
             this.PortButton.Name = "PortButton";
-            this.PortButton.Size = new System.Drawing.Size(57, 25);
+            this.PortButton.Size = new System.Drawing.Size(76, 31);
             this.PortButton.TabIndex = 5;
             this.PortButton.Text = "Порт";
             this.PortButton.UseVisualStyleBackColor = true;
@@ -177,10 +161,9 @@
             // 
             // readParamsButton
             // 
-            this.readParamsButton.Location = new System.Drawing.Point(334, 4);
-            this.readParamsButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.readParamsButton.Location = new System.Drawing.Point(446, 5);
             this.readParamsButton.Name = "readParamsButton";
-            this.readParamsButton.Size = new System.Drawing.Size(157, 25);
+            this.readParamsButton.Size = new System.Drawing.Size(209, 31);
             this.readParamsButton.TabIndex = 6;
             this.readParamsButton.Text = "Считываемые параметры";
             this.readParamsButton.UseVisualStyleBackColor = true;
@@ -188,19 +171,18 @@
             // 
             // meterInfoTextBox
             // 
-            this.meterInfoTextBox.Location = new System.Drawing.Point(9, 283);
-            this.meterInfoTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.meterInfoTextBox.Location = new System.Drawing.Point(12, 348);
             this.meterInfoTextBox.Name = "meterInfoTextBox";
             this.meterInfoTextBox.ReadOnly = true;
-            this.meterInfoTextBox.Size = new System.Drawing.Size(483, 92);
+            this.meterInfoTextBox.Size = new System.Drawing.Size(643, 112);
             this.meterInfoTextBox.TabIndex = 7;
             this.meterInfoTextBox.Text = "";
             // 
             // MetersSearchForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(500, 380);
+            this.ClientSize = new System.Drawing.Size(667, 468);
             this.Controls.Add(this.meterInfoTextBox);
             this.Controls.Add(this.readParamsButton);
             this.Controls.Add(this.PortButton);
@@ -208,7 +190,6 @@
             this.Controls.Add(this.SerialNumBox);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "MetersSearchForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Поиск счётчиков";
