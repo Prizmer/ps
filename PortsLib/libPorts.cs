@@ -53,6 +53,20 @@ namespace PollingLibraries.LibPorts
         public UInt16 delay_between_sending;
     }
 
+    /// <summary>
+    /// Структура хранит данные о расписании опроса порта
+    /// </summary>
+    public struct PortSchedule
+    {
+        public Guid guid;
+        public Guid guid_tcpip_settings;
+        public Guid guid_comport_settings;
+        public DateTime[] days;
+        public bool PollAM;
+        public bool PollPM;
+        public bool UseSchedule;
+    }
+
     public interface VirtualPort
     {
         int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0);

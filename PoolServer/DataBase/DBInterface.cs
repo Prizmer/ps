@@ -199,6 +199,39 @@ namespace Prizmer.PoolServer.DataBase
         /// <returns></returns>
         TCPIPSettings GetTCPIPByMeterGUID(Guid guid_meters);
 
+        /// <summary>
+        /// Проверяет, существует ли таблица ports_schedule, и если нет, создаём таковую
+        /// </summary>
+        /// <returns>Возвращает "true", если таблица была успешно создана или уже существует</returns>
+        bool CreateScheduleTableIfNotExists();
+
+        /// <summary>
+        /// Создаёт запись в таблице расписаний опроса портов для порта с данным guid и указанными параметрами
+        /// </summary>
+        /// <param name="guid">GUID порта</param>
+        /// <param name="pollam">Опрос до 12</param>
+        /// <param name="pollpm">Опрос после 12</param>
+        /// <param name="useschedule">Опрос по расписанию</param>
+        /// <param name="isTCPIP">Тип порта: "true" для TCPIP, "false" для Com</param>
+        /// <returns>Возвращает структуру расписания опроса с заданными параметрами</returns>
+        PortSchedule CreatePortScheduleForGUID(Guid guid, bool pollam, bool pollpm, bool useschedule, bool isTCPIP);
+
+        /// <summary>
+        /// Возвращает расписание по guid порта
+        /// </summary>
+        /// <param name="guid">GUID порта</param>
+        /// <param name="isTCPIP">Тип порта: "true" для TCPIP, "false" для Com</param>
+        /// <returns>Возвращает структуру расписания опроса</returns>
+        PortSchedule GetPortScheduleByGUID(Guid guid, bool isTCPIP);
+
+        /// <summary>
+        /// Изменяет расписание опроса порта
+        /// </summary>
+        /// <param name="portSchedule">Структура расписания опроса</param>
+        /// <param name="isTCPIP">Тип порта: "true" для TCPIP, "false" для Com</param>
+        /// <returns>Возвращает "true" в случае успешного изменения записи</returns>
+        bool ChangePortSchedule(PortSchedule portSchedule, bool isTCPIP);
+
         #endregion
 
         #region Params

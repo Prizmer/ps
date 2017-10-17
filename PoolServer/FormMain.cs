@@ -19,6 +19,7 @@ namespace Prizmer.PoolServer
         MainService ms = new MainService();
         Analizator frmAnalizator = new Analizator();
         MetersSearchForm DevSearchForm = new MetersSearchForm();
+        ScheduleForm scheduleForm = new ScheduleForm();
 
         public FormMain()
         {
@@ -87,8 +88,11 @@ namespace Prizmer.PoolServer
                 MessageBox.Show(ex.Message);
             }
 
-            //делимся экземпляром storage с дочерней формой
+            storage.CreateScheduleTableIfNotExists();
+
+            //делимся экземпляром storage с дочерними формами
             DevSearchForm.storage = this.storage;
+            scheduleForm.storage = this.storage;
         }
 
         bool _bThreadsAreClosing = false;
@@ -443,6 +447,12 @@ namespace Prizmer.PoolServer
         {
             this.DevSearchForm.Show();
             this.DevSearchForm.Focus();
+        }
+
+        private void ScheduleMenuItem_Click(object sender, EventArgs e)
+        {
+            this.scheduleForm.Show();
+            this.scheduleForm.Focus();
         }
     }
 

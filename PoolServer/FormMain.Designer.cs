@@ -53,21 +53,22 @@
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.cbServerStarted = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.ctxMenuAnalizator = new System.Windows.Forms.ToolStripMenuItem();
             this.конфигураторToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ScheduleMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxMenuShowLogsDir = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxMenuDeleteLogs = new System.Windows.Forms.ToolStripMenuItem();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.pbPreloader = new System.Windows.Forms.PictureBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tsLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.pbPreloader = new System.Windows.Forms.PictureBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.ctxMenuAnalizator = new System.Windows.Forms.ToolStripMenuItem();
             this.DeviceSearchMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbPreloader)).BeginInit();
             this.statusStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pbPreloader)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -93,9 +94,9 @@
             this.groupBox1.Controls.Add(this.btnStartReading);
             this.groupBox1.Controls.Add(this.comboBox1);
             this.groupBox1.Location = new System.Drawing.Point(0, 139);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox1.Size = new System.Drawing.Size(365, 292);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
@@ -105,7 +106,7 @@
             // 
             this.comboBox3.FormattingEnabled = true;
             this.comboBox3.Location = new System.Drawing.Point(109, 192);
-            this.comboBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBox3.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox3.Name = "comboBox3";
             this.comboBox3.Size = new System.Drawing.Size(241, 24);
             this.comboBox3.TabIndex = 17;
@@ -133,7 +134,7 @@
             "Архивный",
             "Получасовой"});
             this.comboBox2.Location = new System.Drawing.Point(207, 113);
-            this.comboBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBox2.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(144, 24);
             this.comboBox2.TabIndex = 15;
@@ -174,7 +175,7 @@
             // tbPort
             // 
             this.tbPort.Location = new System.Drawing.Point(267, 166);
-            this.tbPort.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tbPort.Margin = new System.Windows.Forms.Padding(4);
             this.tbPort.Name = "tbPort";
             this.tbPort.Size = new System.Drawing.Size(84, 22);
             this.tbPort.TabIndex = 12;
@@ -194,7 +195,7 @@
             // tbAddress
             // 
             this.tbAddress.Location = new System.Drawing.Point(109, 166);
-            this.tbAddress.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tbAddress.Margin = new System.Windows.Forms.Padding(4);
             this.tbAddress.Name = "tbAddress";
             this.tbAddress.Size = new System.Drawing.Size(148, 22);
             this.tbAddress.TabIndex = 11;
@@ -205,7 +206,7 @@
             this.rbTCP.AutoSize = true;
             this.rbTCP.Checked = true;
             this.rbTCP.Location = new System.Drawing.Point(20, 193);
-            this.rbTCP.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.rbTCP.Margin = new System.Windows.Forms.Padding(4);
             this.rbTCP.Name = "rbTCP";
             this.rbTCP.Size = new System.Drawing.Size(56, 21);
             this.rbTCP.TabIndex = 10;
@@ -219,7 +220,7 @@
             // 
             this.rbCom.AutoSize = true;
             this.rbCom.Location = new System.Drawing.Point(20, 170);
-            this.rbCom.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.rbCom.Margin = new System.Windows.Forms.Padding(4);
             this.rbCom.Name = "rbCom";
             this.rbCom.Size = new System.Drawing.Size(60, 21);
             this.rbCom.TabIndex = 9;
@@ -231,7 +232,7 @@
             // progressBar1
             // 
             this.progressBar1.Location = new System.Drawing.Point(20, 228);
-            this.progressBar1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.progressBar1.Margin = new System.Windows.Forms.Padding(4);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(205, 28);
             this.progressBar1.TabIndex = 8;
@@ -250,7 +251,7 @@
             // 
             this.dateTimePicker2.Format = System.Windows.Forms.DateTimePickerFormat.Short;
             this.dateTimePicker2.Location = new System.Drawing.Point(207, 53);
-            this.dateTimePicker2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dateTimePicker2.Margin = new System.Windows.Forms.Padding(4);
             this.dateTimePicker2.Name = "dateTimePicker2";
             this.dateTimePicker2.Size = new System.Drawing.Size(144, 22);
             this.dateTimePicker2.TabIndex = 6;
@@ -280,7 +281,7 @@
             // 
             this.dateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.Short;
             this.dateTimePicker1.Location = new System.Drawing.Point(207, 23);
-            this.dateTimePicker1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dateTimePicker1.Margin = new System.Windows.Forms.Padding(4);
             this.dateTimePicker1.Name = "dateTimePicker1";
             this.dateTimePicker1.Size = new System.Drawing.Size(144, 22);
             this.dateTimePicker1.TabIndex = 3;
@@ -291,7 +292,7 @@
             this.btnEndReading.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnEndReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEndReading.Location = new System.Drawing.Point(319, 226);
-            this.btnEndReading.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnEndReading.Margin = new System.Windows.Forms.Padding(4);
             this.btnEndReading.Name = "btnEndReading";
             this.btnEndReading.Size = new System.Drawing.Size(33, 30);
             this.btnEndReading.TabIndex = 2;
@@ -304,7 +305,7 @@
             this.btnStartReading.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnStartReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnStartReading.Location = new System.Drawing.Point(237, 226);
-            this.btnStartReading.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnStartReading.Margin = new System.Windows.Forms.Padding(4);
             this.btnStartReading.Name = "btnStartReading";
             this.btnStartReading.Size = new System.Drawing.Size(83, 30);
             this.btnStartReading.TabIndex = 1;
@@ -318,7 +319,7 @@
             this.comboBox1.Items.AddRange(new object[] {
             "m230"});
             this.comboBox1.Location = new System.Drawing.Point(207, 82);
-            this.comboBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBox1.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(144, 24);
             this.comboBox1.TabIndex = 0;
@@ -328,7 +329,7 @@
             // 
             this.cbServerStarted.AutoSize = true;
             this.cbServerStarted.Location = new System.Drawing.Point(15, 111);
-            this.cbServerStarted.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cbServerStarted.Margin = new System.Windows.Forms.Padding(4);
             this.cbServerStarted.Name = "cbServerStarted";
             this.cbServerStarted.Size = new System.Drawing.Size(139, 21);
             this.cbServerStarted.TabIndex = 2;
@@ -343,72 +344,49 @@
             this.ctxMenuAnalizator,
             this.конфигураторToolStripMenuItem,
             this.DeviceSearchMenuItem,
+            this.ScheduleMenuItem,
             this.toolStripMenuItem1,
             this.ctxMenuShowLogsDir,
             this.ctxMenuDeleteLogs});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(256, 168);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(270, 166);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening_1);
-            // 
-            // ctxMenuAnalizator
-            // 
-            this.ctxMenuAnalizator.Image = ((System.Drawing.Image)(resources.GetObject("ctxMenuAnalizator.Image")));
-            this.ctxMenuAnalizator.Name = "ctxMenuAnalizator";
-            this.ctxMenuAnalizator.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.ctxMenuAnalizator.Size = new System.Drawing.Size(255, 26);
-            this.ctxMenuAnalizator.Text = "Анализатор";
-            this.ctxMenuAnalizator.Click += new System.EventHandler(this.ctxMenuAnalizator_Click);
             // 
             // конфигураторToolStripMenuItem
             // 
             this.конфигураторToolStripMenuItem.Name = "конфигураторToolStripMenuItem";
             this.конфигураторToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.K)));
-            this.конфигураторToolStripMenuItem.Size = new System.Drawing.Size(255, 26);
+            this.конфигураторToolStripMenuItem.Size = new System.Drawing.Size(269, 26);
             this.конфигураторToolStripMenuItem.Text = "Конфигуратор";
+            // 
+            // ScheduleMenuItem
+            // 
+            this.ScheduleMenuItem.Image = global::PoolServer.Properties.Resources.schedule_icon_gray;
+            this.ScheduleMenuItem.Name = "ScheduleMenuItem";
+            this.ScheduleMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.ScheduleMenuItem.Size = new System.Drawing.Size(269, 26);
+            this.ScheduleMenuItem.Text = "Расписание опроса";
+            this.ScheduleMenuItem.Click += new System.EventHandler(this.ScheduleMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(252, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(266, 6);
             // 
             // ctxMenuShowLogsDir
             // 
             this.ctxMenuShowLogsDir.Name = "ctxMenuShowLogsDir";
             this.ctxMenuShowLogsDir.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.L)));
-            this.ctxMenuShowLogsDir.Size = new System.Drawing.Size(255, 26);
+            this.ctxMenuShowLogsDir.Size = new System.Drawing.Size(269, 26);
             this.ctxMenuShowLogsDir.Text = "Открыть логи";
             this.ctxMenuShowLogsDir.Click += new System.EventHandler(this.ctxMenuShowLogsDir_Click);
             // 
             // ctxMenuDeleteLogs
             // 
             this.ctxMenuDeleteLogs.Name = "ctxMenuDeleteLogs";
-            this.ctxMenuDeleteLogs.Size = new System.Drawing.Size(255, 26);
+            this.ctxMenuDeleteLogs.Size = new System.Drawing.Size(269, 26);
             this.ctxMenuDeleteLogs.Text = "Стереть логи";
             this.ctxMenuDeleteLogs.Click += new System.EventHandler(this.ctxMenuDeleteLogs_Click);
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.ContextMenuStrip = this.contextMenuStrip1;
-            this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pictureBox1.Image = global::PoolServer.Properties.Resources.logo2;
-            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(369, 101);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
-            // 
-            // pbPreloader
-            // 
-            this.pbPreloader.Image = ((System.Drawing.Image)(resources.GetObject("pbPreloader.Image")));
-            this.pbPreloader.Location = new System.Drawing.Point(333, 105);
-            this.pbPreloader.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.pbPreloader.Name = "pbPreloader";
-            this.pbPreloader.Size = new System.Drawing.Size(32, 30);
-            this.pbPreloader.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pbPreloader.TabIndex = 18;
-            this.pbPreloader.TabStop = false;
             // 
             // statusStrip1
             // 
@@ -427,11 +405,45 @@
             this.tsLabel1.Name = "tsLabel1";
             this.tsLabel1.Size = new System.Drawing.Size(0, 17);
             // 
+            // pbPreloader
+            // 
+            this.pbPreloader.Image = ((System.Drawing.Image)(resources.GetObject("pbPreloader.Image")));
+            this.pbPreloader.Location = new System.Drawing.Point(333, 105);
+            this.pbPreloader.Margin = new System.Windows.Forms.Padding(4);
+            this.pbPreloader.Name = "pbPreloader";
+            this.pbPreloader.Size = new System.Drawing.Size(32, 30);
+            this.pbPreloader.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pbPreloader.TabIndex = 18;
+            this.pbPreloader.TabStop = false;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.ContextMenuStrip = this.contextMenuStrip1;
+            this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pictureBox1.Image = global::PoolServer.Properties.Resources.logo2;
+            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(369, 101);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
+            // 
+            // ctxMenuAnalizator
+            // 
+            this.ctxMenuAnalizator.Image = ((System.Drawing.Image)(resources.GetObject("ctxMenuAnalizator.Image")));
+            this.ctxMenuAnalizator.Name = "ctxMenuAnalizator";
+            this.ctxMenuAnalizator.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
+            this.ctxMenuAnalizator.Size = new System.Drawing.Size(269, 26);
+            this.ctxMenuAnalizator.Text = "Анализатор";
+            this.ctxMenuAnalizator.Click += new System.EventHandler(this.ctxMenuAnalizator_Click);
+            // 
             // DeviceSearchMenuItem
             // 
+            this.DeviceSearchMenuItem.Image = global::PoolServer.Properties.Resources.search_icon_white;
             this.DeviceSearchMenuItem.Name = "DeviceSearchMenuItem";
             this.DeviceSearchMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.M)));
-            this.DeviceSearchMenuItem.Size = new System.Drawing.Size(255, 26);
+            this.DeviceSearchMenuItem.Size = new System.Drawing.Size(269, 26);
             this.DeviceSearchMenuItem.Text = "Поиск приборов";
             this.DeviceSearchMenuItem.Click += new System.EventHandler(this.DeviceSearchMenuItem_Click);
             // 
@@ -447,7 +459,7 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.Name = "FormMain";
             this.ShowIcon = false;
@@ -457,10 +469,10 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.contextMenuStrip1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pbPreloader)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pbPreloader)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -501,6 +513,7 @@
         private System.Windows.Forms.ToolStripMenuItem ctxMenuShowLogsDir;
         private System.Windows.Forms.ToolStripMenuItem ctxMenuDeleteLogs;
         private System.Windows.Forms.ToolStripMenuItem DeviceSearchMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ScheduleMenuItem;
     }
 }
 

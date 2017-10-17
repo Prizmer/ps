@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
-using Npgsql;
 using Prizmer.PoolServer.DataBase;
 using PollingLibraries.LibPorts;
 
@@ -17,10 +16,17 @@ namespace Prizmer.PoolServer
             InitializeComponent();
         }
 
+        private void metersTable_RowChanged(object sender, DataRowChangeEventArgs e)
+        {
+            if (e.Action == DataRowAction.Change)
+                e.Row.RejectChanges();
+        }
+
         private void MetersSearchForm_Load(object sender, EventArgs e)
         {
             MetersGrid.AutoGenerateColumns = false;
             MetersGrid.DataSource = metersTable.DefaultView;
+            metersTable.RowChanged += metersTable_RowChanged;
         }
 
         private void PortButton_Click(object sender, EventArgs e)
@@ -96,12 +102,22 @@ namespace Prizmer.PoolServer
         private void MetersSearchForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             this.Hide();
+            foreach (Form win in Application.OpenForms)
+            {
+                if (win.Name == "FormMain") win.Focus();
+            }
             e.Cancel = true;
         }
 
         private void SerialNumBox_TextChanged(object sender, EventArgs e)
         {
             storage.FindMetersWithSerial(SerialNumBox.Text, metersTable);
+        }
+
+        private void MetersGrid_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            MetersGrid.CancelEdit();
+            e.Cancel = true;
         }
     }
 }

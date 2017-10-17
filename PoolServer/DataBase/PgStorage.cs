@@ -12,7 +12,7 @@ namespace Prizmer.PoolServer.DataBase
     public class PgStorage : DBInterface, IDisposable
     {
         private string m_connection_string;
-        private Npgsql.NpgsqlConnection m_pg_con = null;
+        private NpgsqlConnection m_pg_con = null;
 
         Logger loggerStorage = new Logger();
 
@@ -102,7 +102,6 @@ namespace Prizmer.PoolServer.DataBase
             }
             catch (Exception e)
             {
-                
             }
             finally
             {
@@ -242,6 +241,27 @@ namespace Prizmer.PoolServer.DataBase
             tis.delay_between_sending = Convert.ToUInt16(dr["delay_between_sending"]);
 
             return (Object)tis;
+        }
+
+        private Object RetrievePortSchedule(NpgsqlDataReader dr)
+        {
+            PortSchedule ps = new PortSchedule
+            {
+                guid = Guid.Parse(dr["guid"].ToString()),
+                PollAM = Convert.ToBoolean(dr["pollam"]),
+                PollPM = Convert.ToBoolean(dr["pollpm"]),
+                UseSchedule = Convert.ToBoolean(dr["UseSchedule"])
+            };
+            List<DateTime> dayslist = new List<DateTime>();
+            NpgsqlTypes.NpgsqlTimeStampTZ[] ts = (NpgsqlTypes.NpgsqlTimeStampTZ[])dr["days"];
+            foreach (NpgsqlTypes.NpgsqlTimeStampTZ tt in ts)
+            {
+                dayslist.Add(new DateTime(tt.Ticks));
+            }
+            ps.days = dayslist.ToArray();
+            Guid.TryParse(dr["guid_tcpip_settings"].ToString(), out ps.guid_tcpip_settings);
+            Guid.TryParse(dr["guid_comport_settings"].ToString(), out ps.guid_comport_settings);
+            return (Object)ps;
         }
 
         private Object RetrieveParam(NpgsqlDataReader dr)
@@ -606,7 +626,8 @@ namespace Prizmer.PoolServer.DataBase
 
         public ComPortSettings[] GetComportSettings()
         {
-            string query = "SELECT guid, name, baudrate, data_bits, parity, stop_bits, write_timeout,read_timeout, attempts, delay_between_sending, gsm_init_string, gsm_on, gsm_phone_number FROM comport_settings";
+            //string query = "SELECT guid, name, baudrate, data_bits, parity, stop_bits, write_timeout,read_timeout, attempts, delay_between_sending, gsm_init_string, gsm_on, gsm_phone_number FROM comport_settings";
+            string query = "SELECT guid, name, baudrate, data_bits, parity, stop_bits, write_timeout,read_timeout, attempts, delay_between_sending FROM comport_settings";
 
             List<Object> list = GetRecordsFromReader(query, RetrieveComPortSettings);
 
@@ -660,6 +681,131 @@ namespace Prizmer.PoolServer.DataBase
             Object o = GetRecordFromReader(query, RetrieveTcpIPSettings);
 
             return (o != null) ? (TCPIPSettings)o : new TCPIPSettings();
+        }
+
+        //Проверяет, существует ли таблица ports_schedule, и если нет, создаём таковую
+        public bool CreateScheduleTableIfNotExists()
+        {
+            bool result;
+            NpgsqlCommand NewTableCmd = new NpgsqlCommand("SELECT EXISTS (SELECT 1 FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relname = 'ports_schedule' AND c.relkind = 'r')", m_pg_con);
+            if (!((bool)NewTableCmd.ExecuteScalar()))
+            {
+                NewTableCmd.CommandText = "CREATE TABLE public.ports_schedule (" +
+                    "guid character varying(38) NOT NULL, " +
+                    "guid_tcpip_settings character varying(38), " +
+                    "guid_comport_settings character varying(38), " +
+                    "days timestamp with time zone[], " +
+                    "PollAM boolean NOT NULL, " +
+                    "PollPM boolean NOT NULL, " +
+                    "UseSchedule boolean NOT NULL, " +
+                    "CONSTRAINT ports_schedule_pkey PRIMARY KEY(guid), " +
+                    "CONSTRAINT lin_guid_tcpip_settings_fk_tcpip_settings_guid FOREIGN KEY(guid_tcpip_settings) " +
+                    "REFERENCES public.tcpip_settings(guid) MATCH SIMPLE " +
+                    "ON UPDATE NO ACTION ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED, " +
+                    "CONSTRAINT lin_guid_comport_settings_fk_comport_settings_guid FOREIGN KEY(guid_comport_settings) " +
+                    "REFERENCES public.comport_settings(guid) MATCH SIMPLE " +
+                    "ON UPDATE NO ACTION ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED) " +
+                    "WITH(OIDS= FALSE); " +
+                    "ALTER TABLE public.ports_schedule " +
+                    "OWNER TO postgres; " +
+                    "CREATE INDEX ports_schedule_2267508f " +
+                    "ON public.ports_schedule " +
+                    "USING btree (guid_comport_settings COLLATE pg_catalog.\"default\"); " +
+                    "CREATE INDEX ports_schedule_ddfdcebb " +
+                    "ON public.ports_schedule " +
+                    "USING btree (guid_tcpip_settings COLLATE pg_catalog.\"default\");";
+                try
+                {
+                    NewTableCmd.ExecuteNonQuery();
+                    result = true;
+                }
+                catch
+                {
+                    result = false;
+                }
+            }
+            else
+                result = true;
+
+            return result;
+        }
+
+        //Создаёт запись в таблице расписаний опроса портов для порта с данным guid и указанными параметрами
+        public PortSchedule CreatePortScheduleForGUID(Guid guid, bool pollam, bool pollpm, bool useschedule, bool isTCPIP)
+        {
+            PortSchedule ps = new PortSchedule
+            {
+                guid = new Guid(Guid.NewGuid().ToString()),
+                PollAM = pollam,
+                PollPM = pollpm,
+                UseSchedule = useschedule
+            };
+            NpgsqlCommand command;
+            if (isTCPIP)
+            {
+                command = new NpgsqlCommand("INSERT INTO ports_schedule(guid, guid_tcpip_settings, days, pollam, pollpm, useschedule) VALUES (@guid, @guid_tcpip_settings, @days, @pollam, @pollpm, @useschedule)", m_pg_con);
+                command.Parameters.AddWithValue("@guid_tcpip_settings", guid);
+                ps.guid_tcpip_settings = guid;
+            }
+            else
+            {
+                command = new NpgsqlCommand("INSERT INTO ports_schedule(guid, guid_comport_settings, days, pollam, pollpm, useschedule) VALUES (@guid, @guid_comport_settings, @days, @pollam, @pollpm, @useschedule)", m_pg_con);
+                command.Parameters.AddWithValue("@guid_comport_settings", guid);
+                ps.guid_comport_settings = guid;
+            }
+            command.Parameters.AddWithValue("@guid", ps.guid);
+            command.Parameters.AddWithValue("@days", "{}");
+            command.Parameters.AddWithValue("@pollam", ps.PollAM);
+            command.Parameters.AddWithValue("@pollpm", ps.PollPM);
+            command.Parameters.AddWithValue("@useschedule", ps.UseSchedule);
+            command.ExecuteNonQuery();
+            return ps;
+        }
+
+        //Возвращает расписание по guid порта
+        public PortSchedule GetPortScheduleByGUID(Guid guid, bool isTCPIP)
+        {
+            string query = "SELECT guid, guid_tcpip_settings, guid_comport_settings, days, pollam, pollpm, useschedule FROM ports_schedule WHERE ";
+
+            if (isTCPIP)
+                query += "guid_tcpip_settings = '" + guid.ToString() + "'";
+            else
+                query += "guid_comport_settings = '" + guid.ToString() + "'";
+
+            Object o = GetRecordFromReader(query, RetrievePortSchedule);
+
+            return (o != null) ? (PortSchedule)o : new PortSchedule();
+        }
+
+        //Изменяет расписание опроса порта
+        public bool ChangePortSchedule(PortSchedule portSchedule, bool isTCPIP)
+        {
+            NpgsqlCommand command;
+            if (isTCPIP)
+            {
+                command = new NpgsqlCommand("UPDATE ports_schedule SET guid_tcpip_settings = @guid_tcpip_settings, days = @days, pollam = @pollam, pollpm = @pollpm, useschedule = @useschedule WHERE guid = @guid", m_pg_con);
+                command.Parameters.AddWithValue("@guid_tcpip_settings", portSchedule.guid_tcpip_settings);
+            }
+            else
+            {
+                command = new NpgsqlCommand("UPDATE ports_schedule SET guid_comport_settings = @guid_comport_settings, days = @days, pollam = @pollam, pollpm = @pollpm, useschedule = @useschedule WHERE guid = @guid", m_pg_con);
+                command.Parameters.AddWithValue("@guid_comport_settings", portSchedule.guid_comport_settings);
+            }
+            command.Parameters.AddWithValue("@guid", portSchedule.guid);
+            command.Parameters.AddWithValue("@days", portSchedule.days);
+            command.Parameters.AddWithValue("@pollam", portSchedule.PollAM);
+            command.Parameters.AddWithValue("@pollpm", portSchedule.PollPM);
+            command.Parameters.AddWithValue("@useschedule", portSchedule.UseSchedule);
+            bool result = true;
+            try
+            {
+                command.ExecuteNonQuery();
+            }
+            catch
+            {
+                result = false;
+            }
+            return result;
         }
 
         public Param GetParamByGUID(Guid guid)

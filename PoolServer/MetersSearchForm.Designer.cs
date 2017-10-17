@@ -56,6 +56,8 @@
             // 
             // SerialNumBox
             // 
+            this.SerialNumBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.SerialNumBox.Location = new System.Drawing.Point(139, 9);
             this.SerialNumBox.Name = "SerialNumBox";
             this.SerialNumBox.Size = new System.Drawing.Size(219, 22);
@@ -67,6 +69,9 @@
             this.MetersGrid.AllowUserToAddRows = false;
             this.MetersGrid.AllowUserToDeleteRows = false;
             this.MetersGrid.AllowUserToResizeColumns = false;
+            this.MetersGrid.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.MetersGrid.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
             this.MetersGrid.ColumnHeadersHeight = 37;
             this.MetersGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
@@ -87,6 +92,7 @@
             this.MetersGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.MetersGrid.Size = new System.Drawing.Size(643, 300);
             this.MetersGrid.TabIndex = 3;
+            this.MetersGrid.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.MetersGrid_DataError);
             // 
             // name
             // 
@@ -151,6 +157,7 @@
             // 
             // PortButton
             // 
+            this.PortButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.PortButton.Location = new System.Drawing.Point(364, 5);
             this.PortButton.Name = "PortButton";
             this.PortButton.Size = new System.Drawing.Size(76, 31);
@@ -161,6 +168,7 @@
             // 
             // readParamsButton
             // 
+            this.readParamsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.readParamsButton.Location = new System.Drawing.Point(446, 5);
             this.readParamsButton.Name = "readParamsButton";
             this.readParamsButton.Size = new System.Drawing.Size(209, 31);
@@ -171,6 +179,8 @@
             // 
             // meterInfoTextBox
             // 
+            this.meterInfoTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.meterInfoTextBox.Location = new System.Drawing.Point(12, 348);
             this.meterInfoTextBox.Name = "meterInfoTextBox";
             this.meterInfoTextBox.ReadOnly = true;
@@ -189,7 +199,8 @@
             this.Controls.Add(this.MetersGrid);
             this.Controls.Add(this.SerialNumBox);
             this.Controls.Add(this.label1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+            this.MinimumSize = new System.Drawing.Size(685, 515);
             this.Name = "MetersSearchForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Поиск счётчиков";

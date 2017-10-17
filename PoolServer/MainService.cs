@@ -2242,6 +2242,26 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
             }
 
+            //Получет расписание опроса порта и решает, нужно ли опрашивать его сейчас
+            PortSchedule portSchedule = ServerStorage.GetPortScheduleByGUID(PortGUID, data.GetType().Name == "TCPIPSettings");
+            bool pollNow = false;
+            if (portSchedule.UseSchedule)
+            {
+                bool pollToday = false;
+                string dtNow = DateTime.Now.ToShortDateString();
+                foreach (DateTime dt in portSchedule.days)
+                {
+                    if (dt.ToShortDateString() == dtNow)
+                        pollToday = true;
+                    if (pollToday)
+                        break;
+                }
+                if (pollToday)
+                    pollNow = ((portSchedule.PollAM && (DateTime.Now.Hour < 12)) || (portSchedule.PollPM && (DateTime.Now.Hour > 12)));
+            }
+            else
+                pollNow = true;
+
             AnalizatorPollThreadInfo apti = new AnalizatorPollThreadInfo(portFullName);
             apti.metersByPort = metersbyport.Length;
             apti.thread = (Thread)prmsList[1];
@@ -2274,7 +2294,31 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             if (mfPrms.mode == OperatingMode.OM_MANUAL && pollingStarted != null)
                 pollingStarted(this, myEventArgs);
 
-
+            if (!pollNow) //в случае, если опрос порта сейчас не запланирован
+            {
+                DateTime nextPoll = new DateTime(0);
+                foreach (DateTime dt in portSchedule.days)
+                {
+                    if (dt.CompareTo(DateTime.Now) > 0)
+                        nextPoll = dt;
+                    if (dt.CompareTo(DateTime.Now) > 0)
+                        break;
+                }
+                string logString;
+                if (nextPoll.Ticks != 0)
+                {
+                    logString = "Данный порт будет опрошен " + nextPoll.ToShortDateString();
+                    if (portSchedule.PollAM)
+                        logString += " до полудня";
+                    else
+                        if (portSchedule.PollPM)
+                        logString += " после полудня";
+                }
+                else
+                    logString = "Следующая дата опроса порта не назначена";
+                apti.commentList.Add(logString);
+                goto CloseThreadPoint;
+            }
 
             while (!bStopServer)
             {
