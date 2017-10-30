@@ -1808,9 +1808,20 @@ namespace Prizmer.Meters
                 diff_minutes = span.Minutes;
             }
 
-            //Вычисляем разницу в срезах
-            diff = Convert.ToUInt16(diff_minutes / period);
-            ushort diff2 = Convert.ToUInt16((diff_minutes2 / period)+1);
+            ushort diff2 = 0;
+            try
+            {
+                //Вычисляем разницу в срезах
+                diff = Convert.ToUInt16(diff_minutes / period);
+                diff2 = Convert.ToUInt16((diff_minutes2 / period) + 1);
+            } catch (Exception ex)
+            {
+                WriteToLog("ReadPowerSlice: " + ex.ToString());
+                WriteToLog("ReadPowerSlice: diff_minutes2, period: " + diff_minutes2 + ", "+ period);
+                WriteToLog("ReadPowerSlice: dt_begin, dt_end: " + dt_begin + ", " + dt_end);
+                return false;
+            }
+
 
 
             ushort address_slice = diff;
