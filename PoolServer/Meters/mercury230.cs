@@ -1758,6 +1758,10 @@ namespace Prizmer.Meters
         /// <returns></returns>
         public bool ReadPowerSlice(DateTime dt_begin, DateTime dt_end, ref List<RecordPowerSlice> listRPS, byte period)
         {
+
+            WriteToLog("ReadPowerSlice (verson/variant): " + this.ReadVersionMeter() + ", " + this.ReadVariantExecute());
+            return false;
+
             ushort addr_before = 0;
             ushort addr_after = 0;
             ushort diff = 0;
