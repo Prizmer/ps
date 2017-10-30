@@ -23,6 +23,7 @@ using Drivers.LibMeter;
 using Drivers.PulsarDriver;
 using Drivers.ElfApatorDriver;
 using Drivers.UMDriver;
+using Drivers.Mercury23XDriver;
 
 namespace Prizmer.PoolServer
 {
@@ -2306,8 +2307,8 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     case "m200": meter = new Mercury200(); break;
                     case "opcretranslator": meter = new OpcRetranslator(); break;
                     case "sayani_kombik": meter = new sayani_kombik(); break;
-                    case "m230": meter = new m234(); break;
-                    case "m234": meter = new m234(); break;
+                    case "m230": meter = new Mercury23XDriver(); break;
+                    case "m234": meter = new Mercury23XDriver(); break;
                     case "m230_stable": meter = new m230(); break;
                     case "um40rtu" : meter = new UMRTU40Driver(); break;
                     case "elf108": meter = new ElfApatorDriver(); break;
