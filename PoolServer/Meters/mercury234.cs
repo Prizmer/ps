@@ -1622,6 +1622,128 @@ namespace Prizmer.Meters
         }
 
 
+        public bool ReadPowerSliceForM230AndOlder(DateTime dt_begin, DateTime dt_end, ref List<RecordPowerSlice> listRPS, byte period)
+        {
+            ushort addr_before = 0;
+            ushort addr_after = 0;
+            ushort diff = 0;
+            byte[] tmp_buf = new byte[9];
+            byte[] buf = new byte[2];
+            LastPowerSlice lps = new LastPowerSlice();
+            RecordPowerSlice record_slice = new RecordPowerSlice();
+            DateTime dt_lastslice;
+
+            // проверка: данный вариант исполнения счетчика не поддерживает учет срезов
+            if (!m_presenceProfile)
+            {
+                return false;
+            }
+
+            // читаем последний срез
+            if (!ReadLastSlice(ref lps))
+            {
+                return false;
+            }
+
+            try
+            {
+                // Время последнего среза из счётчика
+                dt_lastslice = new DateTime(lps.year, lps.month, lps.day, lps.hour, lps.minute, 0);
+            }
+            catch
+            {
+                return false;
+            }
+
+            if (dt_begin >= dt_lastslice)
+                return false;
+
+            // Вычисляем разницу в минутах
+            TimeSpan span = dt_lastslice - dt_begin;
+            TimeSpan span2 = dt_lastslice - dt_end;
+
+            int diff_minutes = Convert.ToInt32(span.TotalMinutes);
+            int diff_minutes2 = Convert.ToInt32(span2.TotalMinutes);
+
+
+            // если разница > max кол-ва хранящихся записей в счётчике, то не вычитываем их из счётчика
+            while (diff_minutes >= (4096 * period))
+            {
+                dt_begin = dt_begin.AddMinutes(period);
+                span = dt_lastslice - dt_begin;
+                diff_minutes = span.Minutes;
+            }
+
+            ushort diff2 = 0;
+            try
+            {
+                //Вычисляем разницу в срезах
+                diff = Convert.ToUInt16(diff_minutes / period);
+                diff2 = Convert.ToUInt16((diff_minutes2 / period) + 1);
+            }
+            catch (Exception ex)
+            {
+                WriteToLog("ReadPowerSlice: " + ex.ToString());
+                WriteToLog("ReadPowerSlice: diff_minutes2, period: " + diff_minutes2 + ", " + period);
+                WriteToLog("ReadPowerSlice: dt_begin, dt_end: " + dt_begin + ", " + dt_end);
+                return false;
+            }
+
+
+
+            ushort address_slice = diff;
+
+            // Увеличиваем время на 30 минут
+            //dt_begin = dt_begin.AddMinutes(30);
+            // Уменьшаем адрес среза
+            //address_slice--;
+
+            for (ushort i = diff2; i <= diff; i++)
+            {
+                // меняем байты в слове местами
+                addr_before = Convert.ToUInt16(((lps.addr & 0xff) << 8) | ((lps.addr & 0xFF00) >> 8));
+                // делаем смещение
+                addr_before -= Convert.ToUInt16(address_slice * 0x10);
+                // возвращаем байты на прежнее положение
+                addr_after = Convert.ToUInt16(((addr_before & 0xff) << 8) | ((addr_before & 0xFF00) >> 8));
+
+                // чтение среза по рассчитанному адресу
+                bool res_read_slice = ReadSlice(addr_after, ref record_slice, period);
+                //  this.Open();
+                //  bool res_read_slice = ReadSlice(0x10f0, ref record_slice, period);
+
+                // Если при чтении не было ошибок
+                if (res_read_slice)
+                {
+                    // проверка на то, что прочитанный срез старый
+                    if (dt_begin > record_slice.date_time)
+                        record_slice.status = 0xFE;
+                    else
+                        listRPS.Add(record_slice);
+
+                    /*
+                    else if (dt_begin == record_slice.date_time)
+                    {
+                        listRPS.Add(record_slice);
+                    }
+                    */
+                }
+
+                if (address_slice > 0)
+                {
+                    // Увеличиваем время на 30 минут
+                    dt_begin = dt_begin.AddMinutes(period);
+
+                    // Уменьшаем адрес среза
+                    address_slice--;
+                }
+
+            }
+
+            return true;
+        }
+
+
         /// <summary>
         /// Чтение срезов мощности за период времени
         /// </summary>
@@ -1632,6 +1754,14 @@ namespace Prizmer.Meters
         /// <returns></returns>
         public bool ReadPowerSlice(DateTime dt_begin, DateTime dt_end, ref List<RecordPowerSlice> listRPS, byte period)
         {
+            //
+            if (this.m_version < 90000)
+            {
+                WriteToLog("ReadPowerSlice: выполняю метод для 230х, версия " + this.m_version);
+                return this.ReadPowerSliceForM230AndOlder(dt_begin, dt_end, ref listRPS, period);
+            }
+
+            WriteToLog("ReadPowerSlice: выполняю метод для 233+, версия " + this.m_version);
             ushort addr_before = 0;
             ushort addr_after = 0;
             ushort diff = 0;
