@@ -161,11 +161,12 @@ namespace Prizmer.PoolServer.DataBase
 
         //Новая функция для MetersSearchForm
         /// <summary>
-        /// Возвращает таблицу с информацией о счётчиках с серийными номерами, содержащими строку
+        /// Возвращает таблицу с информацией о счётчиках с совпадающими серийными номерами, именами или id из таблицы taken_params. Возвращает true в случае успеха.
         /// </summary>
-        /// <param name="factory_number">Искомая строка</param>
+        /// <param name="factory_number">Строка поиска</param>
         /// <param name="table">Возвращаемая таблица</param>
-        void FindMetersWithSerial(string factory_number, DataTable table);
+        /// <param name="isSearchById">True - если поиск по taken_params; False - поиск по серийным номерам и именам</param>
+        bool FindMeters(string factory_number, DataTable table, bool isSearchById);
 
         #endregion
 

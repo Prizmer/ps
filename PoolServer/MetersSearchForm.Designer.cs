@@ -28,39 +28,27 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
             this.SerialNumBox = new System.Windows.Forms.TextBox();
             this.MetersGrid = new System.Windows.Forms.DataGridView();
             this.name = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.address = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.factory_number_manual = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.factory_number_readed = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.password = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dt_install = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dt_last_read = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.time_delay_current = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.driver_name = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.PortButton = new System.Windows.Forms.Button();
             this.readParamsButton = new System.Windows.Forms.Button();
             this.meterInfoTextBox = new System.Windows.Forms.RichTextBox();
+            this.isSearchByIdCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.MetersGrid)).BeginInit();
             this.SuspendLayout();
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 12);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(124, 17);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Серийный номер:";
             // 
             // SerialNumBox
             // 
             this.SerialNumBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.SerialNumBox.Location = new System.Drawing.Point(139, 9);
+            this.SerialNumBox.Location = new System.Drawing.Point(12, 9);
             this.SerialNumBox.Name = "SerialNumBox";
-            this.SerialNumBox.Size = new System.Drawing.Size(219, 22);
+            this.SerialNumBox.Size = new System.Drawing.Size(177, 22);
             this.SerialNumBox.TabIndex = 2;
             this.SerialNumBox.TextChanged += new System.EventHandler(this.SerialNumBox_TextChanged);
             // 
@@ -80,15 +68,13 @@
             this.address,
             this.factory_number_manual,
             this.factory_number_readed,
-            this.password,
-            this.dt_install,
-            this.dt_last_read,
-            this.time_delay_current});
+            this.driver_name});
             this.MetersGrid.Location = new System.Drawing.Point(12, 42);
             this.MetersGrid.MultiSelect = false;
             this.MetersGrid.Name = "MetersGrid";
             this.MetersGrid.RowHeadersVisible = false;
             this.MetersGrid.RowTemplate.Height = 24;
+            this.MetersGrid.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.MetersGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.MetersGrid.Size = new System.Drawing.Size(643, 300);
             this.MetersGrid.TabIndex = 3;
@@ -116,7 +102,6 @@
             this.factory_number_manual.HeaderText = "Введённый серийный номер";
             this.factory_number_manual.Name = "factory_number_manual";
             this.factory_number_manual.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.factory_number_manual.Width = 150;
             // 
             // factory_number_readed
             // 
@@ -124,36 +109,13 @@
             this.factory_number_readed.HeaderText = "Считанный серийный номер";
             this.factory_number_readed.Name = "factory_number_readed";
             this.factory_number_readed.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.factory_number_readed.Width = 150;
             // 
-            // password
+            // driver_name
             // 
-            this.password.DataPropertyName = "password";
-            this.password.HeaderText = "Пароль";
-            this.password.Name = "password";
-            this.password.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.password.Width = 80;
-            // 
-            // dt_install
-            // 
-            this.dt_install.DataPropertyName = "dt_install";
-            this.dt_install.HeaderText = "Дата установки";
-            this.dt_install.Name = "dt_install";
-            this.dt_install.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            // 
-            // dt_last_read
-            // 
-            this.dt_last_read.DataPropertyName = "dt_last_read";
-            this.dt_last_read.HeaderText = "Дата последнего считывания";
-            this.dt_last_read.Name = "dt_last_read";
-            this.dt_last_read.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            // 
-            // time_delay_current
-            // 
-            this.time_delay_current.DataPropertyName = "time_delay_current";
-            this.time_delay_current.HeaderText = "Текущая задержка";
-            this.time_delay_current.Name = "time_delay_current";
-            this.time_delay_current.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.driver_name.DataPropertyName = "driver_name";
+            this.driver_name.HeaderText = "Имя драйвера";
+            this.driver_name.Name = "driver_name";
+            this.driver_name.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             // 
             // PortButton
             // 
@@ -188,17 +150,28 @@
             this.meterInfoTextBox.TabIndex = 7;
             this.meterInfoTextBox.Text = "";
             // 
+            // isSearchByIdCheckBox
+            // 
+            this.isSearchByIdCheckBox.AutoSize = true;
+            this.isSearchByIdCheckBox.Location = new System.Drawing.Point(195, 10);
+            this.isSearchByIdCheckBox.Name = "isSearchByIdCheckBox";
+            this.isSearchByIdCheckBox.Size = new System.Drawing.Size(151, 21);
+            this.isSearchByIdCheckBox.TabIndex = 8;
+            this.isSearchByIdCheckBox.Text = "поиск параметров";
+            this.isSearchByIdCheckBox.UseVisualStyleBackColor = true;
+            this.isSearchByIdCheckBox.CheckedChanged += new System.EventHandler(this.isSearchByIdCheckBox_CheckedChanged);
+            // 
             // MetersSearchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(667, 468);
+            this.Controls.Add(this.isSearchByIdCheckBox);
             this.Controls.Add(this.meterInfoTextBox);
             this.Controls.Add(this.readParamsButton);
             this.Controls.Add(this.PortButton);
             this.Controls.Add(this.MetersGrid);
             this.Controls.Add(this.SerialNumBox);
-            this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MinimumSize = new System.Drawing.Size(685, 515);
             this.Name = "MetersSearchForm";
@@ -213,7 +186,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox SerialNumBox;
         private System.Windows.Forms.DataGridView MetersGrid;
         private System.Windows.Forms.Button PortButton;
@@ -223,10 +195,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn address;
         private System.Windows.Forms.DataGridViewTextBoxColumn factory_number_manual;
         private System.Windows.Forms.DataGridViewTextBoxColumn factory_number_readed;
-        private System.Windows.Forms.DataGridViewTextBoxColumn password;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dt_install;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dt_last_read;
-        private System.Windows.Forms.DataGridViewTextBoxColumn time_delay_current;
+        private System.Windows.Forms.DataGridViewTextBoxColumn driver_name;
+        private System.Windows.Forms.CheckBox isSearchByIdCheckBox;
     }
 }
 

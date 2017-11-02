@@ -1124,23 +1124,34 @@ namespace Prizmer.PoolServer.DataBase
 
         //Новая функция для MetersSearchForm
         /// <summary>
-        /// Возвращает таблицу с информацией о счётчиках с серийными номерами, содержащими строку
+        /// Возвращает таблицу с информацией о счётчиках с совпадающими серийными номерами, именами или id из таблицы taken_params. Возвращает true в случае успеха.
         /// </summary>
         /// <param name="factory_number">Искомая строка</param>
         /// <param name="table">Возвращаемая таблица</param>
-        public void FindMetersWithSerial(string factory_number, DataTable table)
+        /// <param name="isSearchById">True - если поиск по taken_params; False - поиск по серийным номерам и именам</param>
+        public bool FindMeters(string query, DataTable table, bool isSearchById)
         {
-            NpgsqlCommand command = new NpgsqlCommand("SELECT guid, name, factory_number_manual, factory_number_readed, address, password, dt_install, dt_last_read, time_delay_current FROM meters WHERE factory_number_manual LIKE @number OR factory_number_readed LIKE @number", m_pg_con);
-            command.Parameters.AddWithValue("@number", "%" + factory_number + "%");
+            NpgsqlCommand command;
+            if (isSearchById)
+            {
+                command = new NpgsqlCommand("SELECT meters.guid, meters.name, meters.factory_number_manual, meters.factory_number_readed, meters.address, types_meters.driver_name FROM meters JOIN taken_params ON meters.guid = taken_params.guid_meters JOIN types_meters ON meters.guid_types_meters = types_meters.guid WHERE taken_params.id = @query", m_pg_con);
+                command.Parameters.AddWithValue("@query", query);
+            }
+            else
+            {
+                command = new NpgsqlCommand("SELECT meters.guid, meters.name, meters.factory_number_manual, meters.factory_number_readed, meters.address, types_meters.driver_name FROM meters JOIN types_meters ON meters.guid_types_meters = types_meters.guid WHERE meters.factory_number_manual LIKE @query OR meters.factory_number_readed LIKE @query OR meters.name LIKE @query", m_pg_con);
+                command.Parameters.AddWithValue("@query", "%" + query + "%");
+            }
             NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command);
             table.Clear();
             try
             {
                 adapter.Fill(table);
+                return true;
             }
-            catch (Exception e)
+            catch
             {
-                System.Windows.Forms.MessageBox.Show(e.Message, "Ошибка чтения");
+                return false;
             }
         }
     }

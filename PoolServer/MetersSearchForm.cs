@@ -111,13 +111,18 @@ namespace Prizmer.PoolServer
 
         private void SerialNumBox_TextChanged(object sender, EventArgs e)
         {
-            storage.FindMetersWithSerial(SerialNumBox.Text, metersTable);
+            storage.FindMeters(SerialNumBox.Text, metersTable, isSearchByIdCheckBox.Checked);
         }
 
         private void MetersGrid_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
             MetersGrid.CancelEdit();
             e.Cancel = true;
+        }
+
+        private void isSearchByIdCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            storage.FindMeters(SerialNumBox.Text, metersTable, isSearchByIdCheckBox.Checked);
         }
     }
 }
