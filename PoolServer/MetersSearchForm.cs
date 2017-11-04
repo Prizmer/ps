@@ -111,7 +111,7 @@ namespace Prizmer.PoolServer
 
         private void SerialNumBox_TextChanged(object sender, EventArgs e)
         {
-            storage.FindMeters(SerialNumBox.Text, metersTable, isSearchByIdCheckBox.Checked);
+            storage.FindMeters(SerialNumBox.Text, metersTable, IsSearchByIdCheckBox.Checked);
         }
 
         private void MetersGrid_DataError(object sender, DataGridViewDataErrorEventArgs e)
@@ -120,9 +120,9 @@ namespace Prizmer.PoolServer
             e.Cancel = true;
         }
 
-        private void isSearchByIdCheckBox_CheckedChanged(object sender, EventArgs e)
+        private void IsSearchByIdCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            storage.FindMeters(SerialNumBox.Text, metersTable, isSearchByIdCheckBox.Checked);
+            storage.FindMeters(SerialNumBox.Text, metersTable, IsSearchByIdCheckBox.Checked);
         }
     }
 }

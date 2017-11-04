@@ -38,7 +38,7 @@
             this.PortButton = new System.Windows.Forms.Button();
             this.readParamsButton = new System.Windows.Forms.Button();
             this.meterInfoTextBox = new System.Windows.Forms.RichTextBox();
-            this.isSearchByIdCheckBox = new System.Windows.Forms.CheckBox();
+            this.IsSearchByIdCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.MetersGrid)).BeginInit();
             this.SuspendLayout();
             // 
@@ -150,23 +150,23 @@
             this.meterInfoTextBox.TabIndex = 7;
             this.meterInfoTextBox.Text = "";
             // 
-            // isSearchByIdCheckBox
+            // IsSearchByIdCheckBox
             // 
-            this.isSearchByIdCheckBox.AutoSize = true;
-            this.isSearchByIdCheckBox.Location = new System.Drawing.Point(195, 10);
-            this.isSearchByIdCheckBox.Name = "isSearchByIdCheckBox";
-            this.isSearchByIdCheckBox.Size = new System.Drawing.Size(151, 21);
-            this.isSearchByIdCheckBox.TabIndex = 8;
-            this.isSearchByIdCheckBox.Text = "поиск параметров";
-            this.isSearchByIdCheckBox.UseVisualStyleBackColor = true;
-            this.isSearchByIdCheckBox.CheckedChanged += new System.EventHandler(this.isSearchByIdCheckBox_CheckedChanged);
+            this.IsSearchByIdCheckBox.AutoSize = true;
+            this.IsSearchByIdCheckBox.Location = new System.Drawing.Point(195, 10);
+            this.IsSearchByIdCheckBox.Name = "IsSearchByIdCheckBox";
+            this.IsSearchByIdCheckBox.Size = new System.Drawing.Size(151, 21);
+            this.IsSearchByIdCheckBox.TabIndex = 8;
+            this.IsSearchByIdCheckBox.Text = "поиск параметров";
+            this.IsSearchByIdCheckBox.UseVisualStyleBackColor = true;
+            this.IsSearchByIdCheckBox.CheckedChanged += new System.EventHandler(this.IsSearchByIdCheckBox_CheckedChanged);
             // 
             // MetersSearchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(667, 468);
-            this.Controls.Add(this.isSearchByIdCheckBox);
+            this.Controls.Add(this.IsSearchByIdCheckBox);
             this.Controls.Add(this.meterInfoTextBox);
             this.Controls.Add(this.readParamsButton);
             this.Controls.Add(this.PortButton);
@@ -196,7 +196,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn factory_number_manual;
         private System.Windows.Forms.DataGridViewTextBoxColumn factory_number_readed;
         private System.Windows.Forms.DataGridViewTextBoxColumn driver_name;
-        private System.Windows.Forms.CheckBox isSearchByIdCheckBox;
+        private System.Windows.Forms.CheckBox IsSearchByIdCheckBox;
     }
 }
 
