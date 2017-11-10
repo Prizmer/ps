@@ -110,6 +110,12 @@ namespace Prizmer.PoolServer
 
         public MainService()
         {
+            if (!System.IO.File.Exists(System.AppDomain.CurrentDomain.FriendlyName + ".config"))
+            {
+                System.IO.File.Copy("config/default.config", System.AppDomain.CurrentDomain.FriendlyName + ".config");
+                System.Diagnostics.Process.Start(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName + ".config");
+            }
+
             try
             {
                 ConnectionString = ConfigurationManager.ConnectionStrings["generalConnection"].ConnectionString;

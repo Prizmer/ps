@@ -33,9 +33,9 @@ namespace Prizmer.PoolServer
         private void FormMain_Load(object sender, EventArgs e)
         {
             //SANDBOX
-           // string at_cmd_hang = "ATH0\r";
-           // byte[] cmdHang = ASCIIEncoding.ASCII.GetBytes(at_cmd_hang);
-            
+            // string at_cmd_hang = "ATH0\r";
+            // byte[] cmdHang = ASCIIEncoding.ASCII.GetBytes(at_cmd_hang);
+
 
             const string SO_VERSION = "v. 0.10.1";
             this.Text += " - " + SO_VERSION;
