@@ -31,7 +31,7 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.allPortsBox = new System.Windows.Forms.CheckBox();
             this.comboBox3 = new System.Windows.Forms.ComboBox();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
@@ -74,7 +74,7 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.checkBox1);
+            this.groupBox1.Controls.Add(this.allPortsBox);
             this.groupBox1.Controls.Add(this.comboBox3);
             this.groupBox1.Controls.Add(this.linkLabel1);
             this.groupBox1.Controls.Add(this.comboBox2);
@@ -104,16 +104,16 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Дочитка показаний";
             // 
-            // checkBox1
+            // allPortsBox
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(207, 138);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(135, 21);
-            this.checkBox1.TabIndex = 18;
-            this.checkBox1.Text = "По всем портам";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            this.allPortsBox.AutoSize = true;
+            this.allPortsBox.Location = new System.Drawing.Point(207, 138);
+            this.allPortsBox.Name = "allPortsBox";
+            this.allPortsBox.Size = new System.Drawing.Size(135, 21);
+            this.allPortsBox.TabIndex = 18;
+            this.allPortsBox.Text = "По всем портам";
+            this.allPortsBox.UseVisualStyleBackColor = true;
+            this.allPortsBox.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // comboBox3
             // 
@@ -529,7 +529,7 @@
         private System.Windows.Forms.ToolStripMenuItem ctxMenuDeleteLogs;
         private System.Windows.Forms.ToolStripMenuItem DeviceSearchMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ScheduleMenuItem;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox allPortsBox;
     }
 }
 

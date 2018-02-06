@@ -205,6 +205,7 @@ namespace Prizmer.PoolServer
                 prms.port = int.Parse(tbPort.Text);
                 prms.mode = OperatingMode.OM_MANUAL;
                 prms.paramType = comboBox2.SelectedIndex;
+                prms.allPorts = allPortsBox.Checked;
 
                 ManualStartInProcess = true;
                 ms.StartServer(prms);
@@ -470,7 +471,9 @@ namespace Prizmer.PoolServer
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-            comboBox3.Enabled = checkBox1.Checked;
+            comboBox3.Enabled = !allPortsBox.Checked;
+            tbAddress.Enabled = !allPortsBox.Checked;
+            tbPort.Enabled = !allPortsBox.Checked;
         }
     }
 
@@ -490,6 +493,7 @@ namespace Prizmer.PoolServer
         public int port;
         public bool isTcp;
         public int paramType;
+        public bool allPorts;
 
         public Analizator frmAnalizator;
     }

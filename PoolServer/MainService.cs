@@ -218,6 +218,13 @@ namespace Prizmer.PoolServer
             //нам не нужны tcp если дочитываем com
             if (prms.mode == OperatingMode.OM_MANUAL && !prms.isTcp) return tcpPortThreadsList;
 
+            List<string> allUsefulPorts = new List<string>();
+            if (prms.mode == OperatingMode.OM_MANUAL && prms.isTcp && prms.allPorts)
+                foreach (string dName in prms.driverNames)
+                {
+                    allUsefulPorts.AddRange(ServerStorageMainService.GetPortsAvailiableByDriverParamType(prms.paramType, dName));
+                }
+
             for (int i = 0; i < tcpips.Length; i++)
             {
                 if (B_DEBUG_MODE_TCP)
@@ -225,14 +232,18 @@ namespace Prizmer.PoolServer
                     if (tcpips[i].ip_address != DMTCP_IP || tcpips[i].ip_port != DMTCP_PORT)
                         continue;
                 }
-                else if (prms.mode == OperatingMode.OM_MANUAL && prms.isTcp)
+                else if (prms.mode == OperatingMode.OM_MANUAL && prms.isTcp && !prms.allPorts)
                 {
                     //WriteToLog("addr: " + tcpips[i].ip_address + "; p: " + tcpips[i].ip_port.ToString());
                     //WriteToLog("addr: " + prms.ip + "; p: " + ((ushort)prms.port).ToString());
                     if (tcpips[i].ip_address != prms.ip || tcpips[i].ip_port != (ushort)prms.port)
                         continue;
+                } else if (prms.mode == OperatingMode.OM_MANUAL && prms.isTcp && prms.allPorts)
+                {
+                    if (!allUsefulPorts.Contains(tcpips[i].ip_address + ':' + tcpips[i].ip_port))
+                        continue;
                 }
-                            
+
                 Meter[] metersbyport = ServerStorageMainService.GetMetersByTcpIPGUID(tcpips[i].guid);
 
                 Thread portThread = new Thread(new ParameterizedThreadStart(this.pollingPortThread));
