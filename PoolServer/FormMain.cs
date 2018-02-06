@@ -47,17 +47,16 @@ namespace Prizmer.PoolServer
                 //groupBox1 settings
                 ConnectionState conState = storage.Open(connectionStr);
                 List<string> driver_names = storage.GetDriverNames();
-
                 if (driver_names.Count > 0)
                 {
                     comboBox1.Items.Clear();
-                    comboBox1.Items.AddRange(driver_names.ToArray());
-                    comboBox1.SelectedItem = "m230";
+                    foreach(string driver_name in driver_names)
+                    {
+                        comboBox1.Items.Add(new CheckComboBox.CheckComboBoxItem(driver_name, false));
+                    }
                 }
-                else
-                {
-                    comboBox1.SelectedIndex = 0;
-                }
+
+                comboBox1.CheckStateChanged += new EventHandler(comboBox1_SelectedIndexChanged);
 
                 comboBox2.SelectedIndex = 4;
 
@@ -70,6 +69,7 @@ namespace Prizmer.PoolServer
                 dateTimePicker1.Value = DateTime.Now;
                 dateTimePicker2.Value = DateTime.Now;
                 MainFormParamsStructure prms = new MainFormParamsStructure();
+                prms.driverNames = new List<string>();
                 prms.frmAnalizator = this.frmAnalizator;
                 prms.mode = OperatingMode.OM_AUTO;
 
@@ -190,7 +190,14 @@ namespace Prizmer.PoolServer
 
             try
             {
-                prms.driverName = comboBox1.Text;
+                prms.driverNames.Clear();
+                foreach (CheckComboBox.CheckComboBoxItem Item in comboBox1.Items) //добавление всех портов для выбранных драйверов в список
+                {
+                    if (Item.CheckState)
+                    {
+                        prms.driverNames.Add(Item.Text);
+                    }
+                }
                 prms.dtStart = dateTimePicker1.Value;
                 prms.dtEnd = dateTimePicker2.Value;
                 prms.isTcp = _isTcpMode;
@@ -384,9 +391,15 @@ namespace Prizmer.PoolServer
 
         void comboBox3Upd()
         {
-            List<string> availiablePorts = storage.GetPortsAvailiableByDriverParamType(comboBox2.SelectedIndex, comboBox1.Text, _isTcpMode);
             comboBox3.Items.Clear();
-            comboBox3.Items.AddRange(availiablePorts.ToArray());
+            foreach (CheckComboBox.CheckComboBoxItem Item in comboBox1.Items) //добавление всех портов для выбранных драйверов в список
+            {
+                if (Item.CheckState)
+                {
+                    List<string> availiablePorts = storage.GetPortsAvailiableByDriverParamType(comboBox2.SelectedIndex, Item.Text, _isTcpMode);
+                    comboBox3.Items.AddRange(availiablePorts.ToArray());
+                }
+            }
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -454,6 +467,11 @@ namespace Prizmer.PoolServer
             this.scheduleForm.Show();
             this.scheduleForm.Focus();
         }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            comboBox3.Enabled = checkBox1.Checked;
+        }
     }
 
     public enum OperatingMode
@@ -467,7 +485,7 @@ namespace Prizmer.PoolServer
         public OperatingMode mode;
         public DateTime dtStart;
         public DateTime dtEnd;
-        public string driverName;
+        public List<string> driverNames;
         public string ip;
         public int port;
         public bool isTcp;

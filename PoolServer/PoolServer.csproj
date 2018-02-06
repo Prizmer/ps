@@ -96,6 +96,7 @@
     <Compile Include="Analizator.Designer.cs">
       <DependentUpon>Analizator.cs</DependentUpon>
     </Compile>
+    <Compile Include="CheckComboBox.cs" />
     <Compile Include="DataBase\DBInterface.cs" />
     <Compile Include="DataBase\PgStorage.cs" />
     <Compile Include="MetersSearchForm.cs">

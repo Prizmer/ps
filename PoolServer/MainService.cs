@@ -2243,7 +2243,14 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 PortGUID = portsettings.guid;
 
                 if (mfPrms.mode == OperatingMode.OM_MANUAL)
-                    metersbyport = ServerStorage.GetMetersByTcpIPGUIDAndParams(PortGUID, mfPrms.paramType, mfPrms.driverName);
+                {
+                    List<Meter> tmpMeter = new List<Meter>();
+                    foreach(string driverName in mfPrms.driverNames)
+                    {
+                        tmpMeter.AddRange(ServerStorage.GetMetersByTcpIPGUIDAndParams(PortGUID, mfPrms.paramType, driverName));
+                    }
+                    metersbyport = tmpMeter.ToArray();
+                }
                 else
                     metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
             }
@@ -2505,7 +2512,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 //********************************************************************************************************************* 
                 //***************************************| ДОЧИТКА ЗНАЧЕНИЙ |**********************************************************
                 //*********************************************************************************************************************
-                if (mfPrms.mode == OperatingMode.OM_MANUAL && typemeter.driver_name == mfPrms.driverName)
+                if (mfPrms.mode == OperatingMode.OM_MANUAL && mfPrms.driverNames.Contains(typemeter.driver_name))
                 {
                     int status = pollDatesRange(myEventArgs, mfPrms, pmPrms);
                     if (status == 1) goto CloseThreadPoint;                   

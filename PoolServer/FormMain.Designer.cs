@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.comboBox3 = new System.Windows.Forms.ComboBox();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
@@ -50,10 +51,11 @@
             this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
             this.btnEndReading = new System.Windows.Forms.Button();
             this.btnStartReading = new System.Windows.Forms.Button();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.cbServerStarted = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.ctxMenuAnalizator = new System.Windows.Forms.ToolStripMenuItem();
             this.конфигураторToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.DeviceSearchMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ScheduleMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxMenuShowLogsDir = new System.Windows.Forms.ToolStripMenuItem();
@@ -62,8 +64,7 @@
             this.tsLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.pbPreloader = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.ctxMenuAnalizator = new System.Windows.Forms.ToolStripMenuItem();
-            this.DeviceSearchMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.comboBox1 = new CheckComboBox.CheckComboBox();
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -73,6 +74,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.checkBox1);
             this.groupBox1.Controls.Add(this.comboBox3);
             this.groupBox1.Controls.Add(this.linkLabel1);
             this.groupBox1.Controls.Add(this.comboBox2);
@@ -101,6 +103,17 @@
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Дочитка показаний";
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(207, 138);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(135, 21);
+            this.checkBox1.TabIndex = 18;
+            this.checkBox1.Text = "По всем портам";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // comboBox3
             // 
@@ -313,18 +326,6 @@
             this.btnStartReading.UseVisualStyleBackColor = true;
             this.btnStartReading.Click += new System.EventHandler(this.btnStartReading_Click);
             // 
-            // comboBox1
-            // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "m230"});
-            this.comboBox1.Location = new System.Drawing.Point(207, 82);
-            this.comboBox1.Margin = new System.Windows.Forms.Padding(4);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(144, 24);
-            this.comboBox1.TabIndex = 0;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
-            // 
             // cbServerStarted
             // 
             this.cbServerStarted.AutoSize = true;
@@ -352,12 +353,30 @@
             this.contextMenuStrip1.Size = new System.Drawing.Size(270, 166);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening_1);
             // 
+            // ctxMenuAnalizator
+            // 
+            this.ctxMenuAnalizator.Image = ((System.Drawing.Image)(resources.GetObject("ctxMenuAnalizator.Image")));
+            this.ctxMenuAnalizator.Name = "ctxMenuAnalizator";
+            this.ctxMenuAnalizator.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
+            this.ctxMenuAnalizator.Size = new System.Drawing.Size(269, 26);
+            this.ctxMenuAnalizator.Text = "Анализатор";
+            this.ctxMenuAnalizator.Click += new System.EventHandler(this.ctxMenuAnalizator_Click);
+            // 
             // конфигураторToolStripMenuItem
             // 
             this.конфигураторToolStripMenuItem.Name = "конфигураторToolStripMenuItem";
             this.конфигураторToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.K)));
             this.конфигураторToolStripMenuItem.Size = new System.Drawing.Size(269, 26);
             this.конфигураторToolStripMenuItem.Text = "Конфигуратор";
+            // 
+            // DeviceSearchMenuItem
+            // 
+            this.DeviceSearchMenuItem.Image = global::PoolServer.Properties.Resources.search_icon_white;
+            this.DeviceSearchMenuItem.Name = "DeviceSearchMenuItem";
+            this.DeviceSearchMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.M)));
+            this.DeviceSearchMenuItem.Size = new System.Drawing.Size(269, 26);
+            this.DeviceSearchMenuItem.Text = "Поиск приборов";
+            this.DeviceSearchMenuItem.Click += new System.EventHandler(this.DeviceSearchMenuItem_Click);
             // 
             // ScheduleMenuItem
             // 
@@ -429,23 +448,19 @@
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
-            // ctxMenuAnalizator
+            // comboBox1
             // 
-            this.ctxMenuAnalizator.Image = ((System.Drawing.Image)(resources.GetObject("ctxMenuAnalizator.Image")));
-            this.ctxMenuAnalizator.Name = "ctxMenuAnalizator";
-            this.ctxMenuAnalizator.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.ctxMenuAnalizator.Size = new System.Drawing.Size(269, 26);
-            this.ctxMenuAnalizator.Text = "Анализатор";
-            this.ctxMenuAnalizator.Click += new System.EventHandler(this.ctxMenuAnalizator_Click);
-            // 
-            // DeviceSearchMenuItem
-            // 
-            this.DeviceSearchMenuItem.Image = global::PoolServer.Properties.Resources.search_icon_white;
-            this.DeviceSearchMenuItem.Name = "DeviceSearchMenuItem";
-            this.DeviceSearchMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.M)));
-            this.DeviceSearchMenuItem.Size = new System.Drawing.Size(269, 26);
-            this.DeviceSearchMenuItem.Text = "Поиск приборов";
-            this.DeviceSearchMenuItem.Click += new System.EventHandler(this.DeviceSearchMenuItem_Click);
+            this.comboBox1.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "m230"});
+            this.comboBox1.Location = new System.Drawing.Point(207, 82);
+            this.comboBox1.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(144, 23);
+            this.comboBox1.TabIndex = 0;
+            this.comboBox1.Text = "Выбранные драйвера";
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // FormMain
             // 
@@ -490,7 +505,7 @@
         private System.Windows.Forms.DateTimePicker dateTimePicker1;
         private System.Windows.Forms.Button btnEndReading;
         private System.Windows.Forms.Button btnStartReading;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private CheckComboBox.CheckComboBox comboBox1;
         private System.Windows.Forms.CheckBox cbServerStarted;
         private System.Windows.Forms.TextBox tbPort;
         private System.Windows.Forms.TextBox tbAddress;
@@ -514,6 +529,7 @@
         private System.Windows.Forms.ToolStripMenuItem ctxMenuDeleteLogs;
         private System.Windows.Forms.ToolStripMenuItem DeviceSearchMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ScheduleMenuItem;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }
 
