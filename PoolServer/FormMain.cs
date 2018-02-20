@@ -362,10 +362,10 @@ namespace Prizmer.PoolServer
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
             ComboBox cb = (ComboBox)sender;
-            if (cb.SelectedIndex == 2 || cb.SelectedIndex == 3)
+            if (cb.SelectedIndex == 2)
             {
                 cb.SelectedIndex = 0;
-                MessageBox.Show("Архивный и месячный временно не поддерживаются");
+                MessageBox.Show("Месячный временно не поддерживаются");
             }
 
             comboBox3Upd();

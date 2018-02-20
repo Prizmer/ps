@@ -530,7 +530,7 @@ namespace Prizmer.PoolServer
 
             return 0;
         }
-        private int pollDaily(PollMethodsParams pmPrms, DateTime date)
+        private int pollDaily(PollMethodsParams pmPrms, DateTime date, bool bArchiveType = false)
         {
             if (bStopServer) return 1;
 
@@ -542,8 +542,8 @@ namespace Prizmer.PoolServer
             DateTime startDate = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
             DateTime endDate = new DateTime(date.Year, date.Month, date.Day, 23, 59, 59);
 
-
-            TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, 1);
+            byte paramType = (byte)(bArchiveType == true ? 3 : 1);
+            TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, paramType);
             if (takenparams.Length > 0)
             {
                 string portStr = pmPrms.m_vport.GetName();
@@ -2174,7 +2174,8 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     else if (mfPrms.paramType == 3)
                     {
                         //архивный
-                        return 2;
+                        pollDaily(pmPrms, tmpDateTime, true);
+                        //return 2;
                     }
                     else if (mfPrms.paramType == 4)
                     {
