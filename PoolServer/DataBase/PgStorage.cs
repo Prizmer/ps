@@ -413,7 +413,7 @@ namespace Prizmer.PoolServer.DataBase
 
         #region Команды для режима дочики и интерфейса формы
 
-        public Meter[] GetMetersByTcpIPGUIDAndParams(Guid guid_tcpip, int paramType, string driverName)
+        public Meter[] GetMetersByTcpIPGUIDAndParams(Guid guid_tcpip, int paramType, Guid driverGuid)
         {
            string query = @"SELECT DISTINCT ON (factory_number_manual) *
                     FROM 
@@ -434,7 +434,7 @@ namespace Prizmer.PoolServer.DataBase
                       taken_params.guid_meters = meters.guid AND
                       tcpip_settings.guid = '" + guid_tcpip.ToString() + @"' AND
                       types_params.type = "+ paramType + @" AND 
-                      types_meters.driver_name = '" + driverName + "';";
+                      types_meters.guid = '" + driverGuid.ToString() + "';";
 
             List<Object> list = GetRecordsFromReader(query, RetrieveMeter);
 

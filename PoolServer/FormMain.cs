@@ -28,6 +28,10 @@ namespace Prizmer.PoolServer
 
         PgStorage storage = new PgStorage();
 
+        private string selectedDriverGuid = "";
+        private string selectedDriverName = "";
+        List<string[]> driversInfoList = new List<string[]>();
+
         string connectionStr = "";
         private void FormMain_Load(object sender, EventArgs e)
         {
@@ -49,7 +53,7 @@ namespace Prizmer.PoolServer
                 if (conState != ConnectionState.Open)
                     MessageBox.Show("Не удалось установить соединение с БД", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                List<string[]> driversInfoList = storage.GetDriverNames();
+                driversInfoList = storage.GetDriverNames();
 
                 List<string> driver_names = new List<string>();
                 foreach (string[] drInfo in driversInfoList)
@@ -194,7 +198,8 @@ namespace Prizmer.PoolServer
 
             try
             {
-                prms.driverName = comboBox1.Text;
+                prms.driverGuid = Guid.Parse(this.selectedDriverGuid);
+                prms.driverName = this.selectedDriverName;
                 prms.dtStart = dateTimePicker1.Value;
                 prms.dtEnd = dateTimePicker2.Value;
                 prms.isTcp = _isTcpMode;
@@ -386,16 +391,20 @@ namespace Prizmer.PoolServer
             dateTimePicker2.Value = dateTimePicker2.Value.AddDays(-1);
         }
 
-        void comboBox3Upd()
+        private void comboBox3Upd()
         {
-            List<string[]> driversInfoList = storage.GetDriverNames();
             int selectedDriverIndex = this.comboBox1.SelectedIndex;
             if (selectedDriverIndex > -1 && driversInfoList.Count > 0)
             {
-                string selectedDriverGuid = driversInfoList[selectedDriverIndex][0];
+                selectedDriverGuid = driversInfoList[selectedDriverIndex][0];
+                selectedDriverName = driversInfoList[selectedDriverIndex][2];
                 comboBox3.Items.Clear();
                 List<string> availiablePorts = storage.GetPortsAvailiableByDriverGuid(comboBox2.SelectedIndex, selectedDriverGuid, _isTcpMode);
                 comboBox3.Items.AddRange(availiablePorts.ToArray());
+            }
+            else
+            {
+                comboBox3.Items.Clear();
             }
         }
 
@@ -471,6 +480,7 @@ namespace Prizmer.PoolServer
         public OperatingMode mode;
         public DateTime dtStart;
         public DateTime dtEnd;
+        public Guid driverGuid;
         public string driverName;
         public string ip;
         public int port;
