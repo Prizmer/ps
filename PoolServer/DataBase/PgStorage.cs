@@ -450,11 +450,12 @@ namespace Prizmer.PoolServer.DataBase
             return result;
         }
 
-        public List<string> GetDriverNames()
+ 
+        public List<string[]> GetDriverNames()
         {
-            string query = @"SELECT driver_name FROM types_meters";
+            string query = @"SELECT * FROM types_meters";
 
-            List<string> result = new List<string>();
+            List<string[]> result = new List<string[]>();
 
             NpgsqlCommand command = new NpgsqlCommand(query, m_pg_con);
             NpgsqlDataReader dr = null;
@@ -467,8 +468,13 @@ namespace Prizmer.PoolServer.DataBase
                 {
                     while (dr.Read())
                     {
-                        string tmp = Convert.ToString(dr["driver_name"]);
-                        result.Add(tmp);
+                        string[] driverInfoArr = new string[3];
+                        driverInfoArr[0] = Convert.ToString(dr["guid"]);
+                        driverInfoArr[1] = Convert.ToString(dr["name"]);
+                        driverInfoArr[2] = Convert.ToString(dr["driver_name"]);
+
+                     //   string tmp = Convert.ToString(dr["driver_name"]);
+                        result.Add(driverInfoArr);
                     }
                 }
             }
@@ -491,7 +497,7 @@ namespace Prizmer.PoolServer.DataBase
         }
 
         //используется на форме при выборе порта под приборы указанного типа
-        public List<string> GetPortsAvailiableByDriverParamType(int paramType, string driverName, bool isTcp = true)
+        public List<string> GetPortsAvailiableByDriverGuid(int paramType, string driverGuid, bool isTcp = true)
         {
 
            string queryTcp = @"SELECT DISTINCT 
@@ -513,7 +519,7 @@ namespace Prizmer.PoolServer.DataBase
               link_meters_tcpip_settings.guid_meters = meters.guid AND
               link_meters_tcpip_settings.guid_tcpip_settings = tcpip_settings.guid AND
               types_params.type = " + paramType + @" AND 
-              types_meters.driver_name = '" + driverName + "';";
+              types_meters.guid = '" + driverGuid + "';";
 
             string queryCom = @"SELECT DISTINCT 
                   comport_settings.name
@@ -533,7 +539,7 @@ namespace Prizmer.PoolServer.DataBase
                   link_meters_comport_settings.guid_meters = meters.guid AND
                   link_meters_comport_settings.guid_comport_settings = comport_settings.guid AND
                   types_params.type = " + paramType + @" AND 
-                  types_meters.driver_name = '" + driverName + "';";
+                  types_meters.guid = '" + driverGuid + "';";
          
 
             List<string> result = new List<string>();

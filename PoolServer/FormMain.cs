@@ -36,7 +36,7 @@ namespace Prizmer.PoolServer
            // byte[] cmdHang = ASCIIEncoding.ASCII.GetBytes(at_cmd_hang);
             
 
-            const string SO_VERSION = "v. 0.10.2";
+            const string SO_VERSION = "v. 0.10.3";
             this.Text += " - " + SO_VERSION;
 
             try
@@ -45,17 +45,25 @@ namespace Prizmer.PoolServer
 
                 //groupBox1 settings
                 ConnectionState conState = storage.Open(connectionStr);
-                List<string> driver_names = storage.GetDriverNames();
+
+                if (conState != ConnectionState.Open)
+                    MessageBox.Show("Не удалось установить соединение с БД", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                List<string[]> driversInfoList = storage.GetDriverNames();
+
+                List<string> driver_names = new List<string>();
+                foreach (string[] drInfo in driversInfoList)
+                    driver_names.Add(drInfo[1] + " (" + drInfo[2] + ")");
 
                 if (driver_names.Count > 0)
                 {
                     comboBox1.Items.Clear();
                     comboBox1.Items.AddRange(driver_names.ToArray());
-                    comboBox1.SelectedItem = "m230";
+                    comboBox1.SelectedIndex = 0;
                 }
                 else
                 {
-                    comboBox1.SelectedIndex = 0;
+                    comboBox1.SelectedIndex = -1;
                 }
 
                 comboBox2.SelectedIndex = 4;
@@ -380,9 +388,15 @@ namespace Prizmer.PoolServer
 
         void comboBox3Upd()
         {
-            List<string> availiablePorts = storage.GetPortsAvailiableByDriverParamType(comboBox2.SelectedIndex, comboBox1.Text, _isTcpMode);
-            comboBox3.Items.Clear();
-            comboBox3.Items.AddRange(availiablePorts.ToArray());
+            List<string[]> driversInfoList = storage.GetDriverNames();
+            int selectedDriverIndex = this.comboBox1.SelectedIndex;
+            if (selectedDriverIndex > -1 && driversInfoList.Count > 0)
+            {
+                string selectedDriverGuid = driversInfoList[selectedDriverIndex][0];
+                comboBox3.Items.Clear();
+                List<string> availiablePorts = storage.GetPortsAvailiableByDriverGuid(comboBox2.SelectedIndex, selectedDriverGuid, _isTcpMode);
+                comboBox3.Items.AddRange(availiablePorts.ToArray());
+            }
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)

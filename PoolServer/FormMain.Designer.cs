@@ -55,6 +55,7 @@
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ctxMenuAnalizator = new System.Windows.Forms.ToolStripMenuItem();
             this.конфигураторToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.DeviceSearchMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxMenuShowLogsDir = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxMenuDeleteLogs = new System.Windows.Forms.ToolStripMenuItem();
@@ -62,7 +63,6 @@
             this.pbPreloader = new System.Windows.Forms.PictureBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tsLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.DeviceSearchMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -93,9 +93,9 @@
             this.groupBox1.Controls.Add(this.btnStartReading);
             this.groupBox1.Controls.Add(this.comboBox1);
             this.groupBox1.Location = new System.Drawing.Point(0, 139);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox1.Size = new System.Drawing.Size(365, 292);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
@@ -105,7 +105,7 @@
             // 
             this.comboBox3.FormattingEnabled = true;
             this.comboBox3.Location = new System.Drawing.Point(109, 192);
-            this.comboBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBox3.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox3.Name = "comboBox3";
             this.comboBox3.Size = new System.Drawing.Size(241, 24);
             this.comboBox3.TabIndex = 17;
@@ -133,7 +133,7 @@
             "Архивный",
             "Получасовой"});
             this.comboBox2.Location = new System.Drawing.Point(207, 113);
-            this.comboBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBox2.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(144, 24);
             this.comboBox2.TabIndex = 15;
@@ -174,7 +174,7 @@
             // tbPort
             // 
             this.tbPort.Location = new System.Drawing.Point(267, 166);
-            this.tbPort.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tbPort.Margin = new System.Windows.Forms.Padding(4);
             this.tbPort.Name = "tbPort";
             this.tbPort.Size = new System.Drawing.Size(84, 22);
             this.tbPort.TabIndex = 12;
@@ -194,7 +194,7 @@
             // tbAddress
             // 
             this.tbAddress.Location = new System.Drawing.Point(109, 166);
-            this.tbAddress.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tbAddress.Margin = new System.Windows.Forms.Padding(4);
             this.tbAddress.Name = "tbAddress";
             this.tbAddress.Size = new System.Drawing.Size(148, 22);
             this.tbAddress.TabIndex = 11;
@@ -205,7 +205,7 @@
             this.rbTCP.AutoSize = true;
             this.rbTCP.Checked = true;
             this.rbTCP.Location = new System.Drawing.Point(20, 193);
-            this.rbTCP.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.rbTCP.Margin = new System.Windows.Forms.Padding(4);
             this.rbTCP.Name = "rbTCP";
             this.rbTCP.Size = new System.Drawing.Size(56, 21);
             this.rbTCP.TabIndex = 10;
@@ -219,7 +219,7 @@
             // 
             this.rbCom.AutoSize = true;
             this.rbCom.Location = new System.Drawing.Point(20, 170);
-            this.rbCom.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.rbCom.Margin = new System.Windows.Forms.Padding(4);
             this.rbCom.Name = "rbCom";
             this.rbCom.Size = new System.Drawing.Size(60, 21);
             this.rbCom.TabIndex = 9;
@@ -231,7 +231,7 @@
             // progressBar1
             // 
             this.progressBar1.Location = new System.Drawing.Point(20, 228);
-            this.progressBar1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.progressBar1.Margin = new System.Windows.Forms.Padding(4);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(205, 28);
             this.progressBar1.TabIndex = 8;
@@ -250,7 +250,7 @@
             // 
             this.dateTimePicker2.Format = System.Windows.Forms.DateTimePickerFormat.Short;
             this.dateTimePicker2.Location = new System.Drawing.Point(207, 53);
-            this.dateTimePicker2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dateTimePicker2.Margin = new System.Windows.Forms.Padding(4);
             this.dateTimePicker2.Name = "dateTimePicker2";
             this.dateTimePicker2.Size = new System.Drawing.Size(144, 22);
             this.dateTimePicker2.TabIndex = 6;
@@ -280,7 +280,7 @@
             // 
             this.dateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.Short;
             this.dateTimePicker1.Location = new System.Drawing.Point(207, 23);
-            this.dateTimePicker1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dateTimePicker1.Margin = new System.Windows.Forms.Padding(4);
             this.dateTimePicker1.Name = "dateTimePicker1";
             this.dateTimePicker1.Size = new System.Drawing.Size(144, 22);
             this.dateTimePicker1.TabIndex = 3;
@@ -291,7 +291,7 @@
             this.btnEndReading.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnEndReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEndReading.Location = new System.Drawing.Point(319, 226);
-            this.btnEndReading.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnEndReading.Margin = new System.Windows.Forms.Padding(4);
             this.btnEndReading.Name = "btnEndReading";
             this.btnEndReading.Size = new System.Drawing.Size(33, 30);
             this.btnEndReading.TabIndex = 2;
@@ -304,7 +304,7 @@
             this.btnStartReading.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnStartReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnStartReading.Location = new System.Drawing.Point(237, 226);
-            this.btnStartReading.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnStartReading.Margin = new System.Windows.Forms.Padding(4);
             this.btnStartReading.Name = "btnStartReading";
             this.btnStartReading.Size = new System.Drawing.Size(83, 30);
             this.btnStartReading.TabIndex = 1;
@@ -315,10 +315,8 @@
             // comboBox1
             // 
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "m230"});
             this.comboBox1.Location = new System.Drawing.Point(207, 82);
-            this.comboBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.comboBox1.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(144, 24);
             this.comboBox1.TabIndex = 0;
@@ -328,7 +326,7 @@
             // 
             this.cbServerStarted.AutoSize = true;
             this.cbServerStarted.Location = new System.Drawing.Point(15, 111);
-            this.cbServerStarted.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cbServerStarted.Margin = new System.Windows.Forms.Padding(4);
             this.cbServerStarted.Name = "cbServerStarted";
             this.cbServerStarted.Size = new System.Drawing.Size(139, 21);
             this.cbServerStarted.TabIndex = 2;
@@ -347,7 +345,7 @@
             this.ctxMenuShowLogsDir,
             this.ctxMenuDeleteLogs});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(256, 168);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(256, 140);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening_1);
             // 
             // ctxMenuAnalizator
@@ -365,6 +363,14 @@
             this.конфигураторToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.K)));
             this.конфигураторToolStripMenuItem.Size = new System.Drawing.Size(255, 26);
             this.конфигураторToolStripMenuItem.Text = "Конфигуратор";
+            // 
+            // DeviceSearchMenuItem
+            // 
+            this.DeviceSearchMenuItem.Name = "DeviceSearchMenuItem";
+            this.DeviceSearchMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.M)));
+            this.DeviceSearchMenuItem.Size = new System.Drawing.Size(255, 26);
+            this.DeviceSearchMenuItem.Text = "Поиск приборов";
+            this.DeviceSearchMenuItem.Click += new System.EventHandler(this.DeviceSearchMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
@@ -403,7 +409,7 @@
             // 
             this.pbPreloader.Image = ((System.Drawing.Image)(resources.GetObject("pbPreloader.Image")));
             this.pbPreloader.Location = new System.Drawing.Point(333, 105);
-            this.pbPreloader.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pbPreloader.Margin = new System.Windows.Forms.Padding(4);
             this.pbPreloader.Name = "pbPreloader";
             this.pbPreloader.Size = new System.Drawing.Size(32, 30);
             this.pbPreloader.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -427,14 +433,6 @@
             this.tsLabel1.Name = "tsLabel1";
             this.tsLabel1.Size = new System.Drawing.Size(0, 17);
             // 
-            // DeviceSearchMenuItem
-            // 
-            this.DeviceSearchMenuItem.Name = "DeviceSearchMenuItem";
-            this.DeviceSearchMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.M)));
-            this.DeviceSearchMenuItem.Size = new System.Drawing.Size(255, 26);
-            this.DeviceSearchMenuItem.Text = "Поиск приборов";
-            this.DeviceSearchMenuItem.Click += new System.EventHandler(this.DeviceSearchMenuItem_Click);
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -447,7 +445,7 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.Name = "FormMain";
             this.ShowIcon = false;
