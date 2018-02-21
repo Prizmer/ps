@@ -87,7 +87,7 @@ namespace Prizmer.PoolServer
         bool DM_POLL_MONTH = true;
         bool DM_POLL_HOUR = false;
         bool DM_POLL_HALFANHOUR = true;
-        bool DM_POLL_ARCHIVE = false;
+        bool DM_POLL_ARCHIVE = true;
 
         #endregion
 
@@ -2406,7 +2406,9 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 }
 
                 //***************************************| Значения АРХИВНЫЕ (3) |***************************************  
+
                 if (bStopServer) goto CloseThreadPoint;
+                // TODO: refactor, убрать все архивные, оставить только последний блок
                 if (false && POLLING_ACTIVE && DM_POLL_ARCHIVE && pollingParams.b_poll_archive)
                 {
                     pollArchivesOld(pmPrms);
@@ -2414,6 +2416,13 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 if (false && POLLING_ACTIVE && DM_POLL_ARCHIVE && pollingParams.b_poll_archive)
                 {
                     pollArchivesNewActual(pmPrms);
+                }
+                if (DM_POLL_ARCHIVE && pollingParams.b_poll_archive)
+                {
+                    const bool bPollArchiveAsDaily = true;
+                    int status = pollDaily(pmPrms, DateTime.Now, bPollArchiveAsDaily);
+                    pmPrms.logger.LogInfo("Прочитал СУТОЧНЫЕ (бывш. АРХИВНЫЕ) со статусом: " + status);
+                    if (status == 1) goto CloseThreadPoint;
                 }
 
                 //***************************************| Значения ПОЛУЧАСОВЫЕ (4) |***************************************  
