@@ -427,6 +427,9 @@ namespace PollingLibraries.LibPorts
                             outDataArr[i] = temp_buffer[i];
 
                         outReadingSize = reading_size;
+
+                        WriteToLog("To driver: " + BitConverter.ToString(outDataArr));
+
                         return true;
                     }
                 }
@@ -499,7 +502,12 @@ namespace PollingLibraries.LibPorts
                                     tmpQ.Enqueue(readBytesList[j]);
 
                                 int packageSign = func(tmpQ);
-                                if (packageSign == 1) break;
+                                if (packageSign == 1)
+                                {
+                                    WriteToLog("WriteReadData: break first attempt, packageSign = " + packageSign);
+                                    break;
+                                }
+ 
                             }
 
                             elapsed_time_count += 100;
