@@ -367,7 +367,19 @@ namespace Prizmer.PoolServer
 
             for (int j = 0; j < periods; j++)
             {
-                if (frmAnalizator != null && frmAnalizator.deadThreads.Count == PortsThreads.Count)
+
+                bool allThreadsAreDead = true;
+                for (int k = 0; k < PortsThreads.Count; k++)
+                {
+                    int idx = frmAnalizator.deadThreads.FindIndex((item) => {
+                        return item.thread.ManagedThreadId == PortsThreads[k].ManagedThreadId;
+                    });
+
+                    if (idx > -1)
+                        allThreadsAreDead = false;
+                }
+
+                if (frmAnalizator != null && allThreadsAreDead == true)
                 {
                     if (stoppingEnded != null)
                     {
