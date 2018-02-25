@@ -398,7 +398,7 @@ namespace Prizmer.PoolServer
             }
 
             comboBox3Upd();
-            comboBox3.SelectedIndex = comboBox3.Items.Count - 1;
+            //comboBox3.SelectedIndex = comboBox3.Items.Count - 1;
         }
 
         private void btnEndReading_Click(object sender, EventArgs e)
@@ -421,7 +421,7 @@ namespace Prizmer.PoolServer
             }
 
             comboBox3Upd();
-            comboBox3.SelectedIndex = comboBox3.Items.Count - 1; 
+            //comboBox3.SelectedIndex = comboBox3.Items.Count - 1; 
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -440,6 +440,9 @@ namespace Prizmer.PoolServer
                 comboBox3.Items.Clear();
                 List<string> availiablePorts = storage.GetPortsAvailiableByDriverGuid(comboBox2.SelectedIndex, selectedDriverGuid, _isTcpMode);
                 comboBox3.Items.AddRange(availiablePorts.ToArray());
+
+                if (comboBox3.Items.Count > 0)
+                    comboBox3.SelectedIndex = 0;
             }
             else
             {
@@ -533,14 +536,14 @@ namespace Prizmer.PoolServer
             if (cbSender.Checked)
             {
                 this.comboBox3.Enabled = false;
-            } else
-            {
-                this.comboBox3.Enabled = true;
                 if (this.comboBox3.Items.Count > 0)
                 {
                     this.currentPortIndex = 0;
                     this.comboBox3.SelectedIndex = this.currentPortIndex;
                 }
+            } else
+            {
+                this.comboBox3.Enabled = true;
             }
         }
     }
