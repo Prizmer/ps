@@ -300,29 +300,29 @@ namespace Prizmer.PoolServer
 
         public void pollEnded()
         {
-            pbPreloader.Hide();
-            ManualStartInProcess = false;
-            progressBar1.Value = 0;
-            lblCnt.Text = "";
-            lblCurCnt.Text = "";
+            //pbPreloader.Hide();
+            //ManualStartInProcess = false;
+            //progressBar1.Value = 0;
+            //lblCnt.Text = "";
+            //lblCurCnt.Text = "";
 
 
-            if (cbEachPort.Checked)
-            {
-                if (this.currentPortIndex < this.comboBox3.Items.Count - 1)
-                {
-                    this.currentPortIndex++;
-                    this.startReading();
-                }
-                else
-                {
-                    this.currentPortIndex = 0;
-                    MessageBox.Show("Опрос по всем портам завершен!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            } else
-            {
-                MessageBox.Show("Опрос завершен", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            //if (cbEachPort.Checked)
+            //{
+            //    if (this.currentPortIndex < this.comboBox3.Items.Count - 1)
+            //    {
+            //        this.currentPortIndex++;
+            //        this.startReading();
+            //    }
+            //    else
+            //    {
+            //        this.currentPortIndex = 0;
+            //        MessageBox.Show("Опрос по всем портам завершен!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //    }
+            //} else
+            //{
+            //    MessageBox.Show("Опрос завершен", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //}
 
         }
 
@@ -341,6 +341,30 @@ namespace Prizmer.PoolServer
             {
                 tsLabel1.Text = "Режим: полностью остановлен";
                 ManualStartInProcess = false;
+
+
+                pbPreloader.Hide();
+                ManualStartInProcess = false;
+                progressBar1.Value = 0;
+                lblCnt.Text = "";
+                lblCurCnt.Text = "";
+                if (cbEachPort.Checked)
+                {
+                    if (this.currentPortIndex < this.comboBox3.Items.Count - 1)
+                    {
+                        this.currentPortIndex++;
+                        this.startReading();
+                    }
+                    else
+                    {
+                        this.currentPortIndex = 0;
+                        MessageBox.Show("Опрос по всем портам завершен!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Опрос завершен", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             else
             {
