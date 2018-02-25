@@ -237,7 +237,6 @@ namespace Prizmer.PoolServer
         private int currentPortIndex = 0;
         private void btnStartReading_Click(object sender, EventArgs e)
         {
-            this.currentPortIndex = 0;
             this.startReading();
         }
 
@@ -431,6 +430,7 @@ namespace Prizmer.PoolServer
 
         private void btnEndReading_Click(object sender, EventArgs e)
         {
+            this.cbEachPort.Checked = false;
             ms.StopServer(false);
             progressBar1.Value = 0;
             lblCnt.Text = "";
