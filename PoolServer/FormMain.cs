@@ -355,6 +355,7 @@ namespace Prizmer.PoolServer
                     if (this.currentPortIndex < this.comboBox3.Items.Count - 1)
                     {
                         this.currentPortIndex++;
+                        frmAnalizator = new Analizator();
                         this.startReading();
                     }
                     else
@@ -565,8 +566,8 @@ namespace Prizmer.PoolServer
                 this.comboBox3.Enabled = false;
                 if (this.comboBox3.Items.Count > 0)
                 {
-                    this.currentPortIndex = 0;
-                    this.comboBox3.SelectedIndex = this.currentPortIndex;
+                    this.currentPortIndex = this.comboBox3.SelectedIndex;
+                    //this.comboBox3.SelectedIndex = this.currentPortIndex;
                 }
             } else
             {
