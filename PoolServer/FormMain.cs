@@ -300,6 +300,8 @@ namespace Prizmer.PoolServer
 
         public void pollEnded()
         {
+
+            ms.StopServer();
             //pbPreloader.Hide();
             //ManualStartInProcess = false;
             //progressBar1.Value = 0;
