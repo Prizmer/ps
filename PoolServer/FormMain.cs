@@ -191,10 +191,26 @@ namespace Prizmer.PoolServer
             }
         }
 
-        private void btnStartReading_Click(object sender, EventArgs e)
+
+
+
+        private void startReading()
         {
             MainFormParamsStructure prms = new MainFormParamsStructure();
             prms.frmAnalizator = this.frmAnalizator;
+
+            string prmsIp = "";
+            int prmsPort = -1;
+
+            if (cbEachPort.Checked)
+            {
+                comboBox3.SelectedIndex = this.currentPortIndex;
+            }
+
+
+            prmsIp = _isTcpMode ? tbAddress.Text : tbAddress.Text.Replace("COM", "");
+            prmsPort = int.Parse(tbPort.Text);
+ 
 
             try
             {
@@ -203,8 +219,8 @@ namespace Prizmer.PoolServer
                 prms.dtStart = dateTimePicker1.Value;
                 prms.dtEnd = dateTimePicker2.Value;
                 prms.isTcp = _isTcpMode;
-                prms.ip = _isTcpMode ? tbAddress.Text : tbAddress.Text.Replace("COM", "");
-                prms.port = int.Parse(tbPort.Text);
+                prms.ip = prmsIp;
+                prms.port = prmsPort;
                 prms.mode = OperatingMode.OM_MANUAL;
                 prms.paramType = comboBox2.SelectedIndex;
 
@@ -215,7 +231,13 @@ namespace Prizmer.PoolServer
             {
                 MessageBox.Show(ex.Message);
             }
+        }
 
+        private int currentPortIndex = 0;
+        private void btnStartReading_Click(object sender, EventArgs e)
+        {
+            this.currentPortIndex = 0;
+            this.startReading();
         }
 
 
@@ -278,12 +300,29 @@ namespace Prizmer.PoolServer
         public void pollEnded()
         {
             pbPreloader.Hide();
-            MessageBox.Show("Опрос завершен","Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ManualStartInProcess = false;
             progressBar1.Value = 0;
             lblCnt.Text = "";
             lblCurCnt.Text = "";
 
-            ManualStartInProcess = false;
+
+            if (cbEachPort.Checked)
+            {
+                if (this.currentPortIndex < this.comboBox3.Items.Count - 1)
+                {
+                    this.currentPortIndex++;
+                    this.startReading();
+                }
+                else
+                {
+                    this.currentPortIndex = 0;
+                    MessageBox.Show("Опрос по всем портам завершен!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            } else
+            {
+                MessageBox.Show("Опрос завершен", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
         }
 
         public void threadClosingStart(object sender, MyEventArgs e)
@@ -413,22 +452,42 @@ namespace Prizmer.PoolServer
             comboBox3Upd();
         }
 
-        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
+
+        private string[] getAddressAndPortFromString(string str)
+        {
+            string[] res = new string[2];
+            if (_isTcpMode)
+            {
+                res[0] = str.Split(':')[0];
+                res[1] = str.Split(':')[1];
+            }
+            else
+            {
+                res[0] = str;
+                res[1] = "0";
+            }
+
+            return res;
+        }
+
+        private void fillTbAddressAndTbPort()
         {
             if (comboBox3.Text.Length > 0)
             {
-                if (_isTcpMode)
-                {
-                    tbAddress.Text = comboBox3.Text.Split(':')[0];
-                    tbPort.Text = comboBox3.Text.Split(':')[1];
-                }
-                else
-                {
-                    tbAddress.Text = comboBox3.Text;
-                    tbPort.Text = "0";
-                }
+                string[] res = getAddressAndPortFromString(comboBox3.Text);
 
+                tbAddress.Text = res[0];
+                tbPort.Text = res[1];
+            } else
+            {
+                tbAddress.Text = "";
+                tbPort.Text = "";
             }
+        }
+
+        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            fillTbAddressAndTbPort();
         }
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
@@ -466,6 +525,23 @@ namespace Prizmer.PoolServer
         {
             this.DevSearchForm.Show();
             this.DevSearchForm.Focus();
+        }
+
+        private void cbEachPort_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox cbSender = (CheckBox)sender;
+            if (cbSender.Checked)
+            {
+                this.comboBox3.Enabled = false;
+            } else
+            {
+                this.comboBox3.Enabled = true;
+                if (this.comboBox3.Items.Count > 0)
+                {
+                    this.currentPortIndex = 0;
+                    this.comboBox3.SelectedIndex = this.currentPortIndex;
+                }
+            }
         }
     }
 

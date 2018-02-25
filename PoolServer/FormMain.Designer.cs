@@ -63,6 +63,8 @@
             this.pbPreloader = new System.Windows.Forms.PictureBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tsLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.cbEachPort = new System.Windows.Forms.CheckBox();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -72,6 +74,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.cbEachPort);
             this.groupBox1.Controls.Add(this.comboBox3);
             this.groupBox1.Controls.Add(this.linkLabel1);
             this.groupBox1.Controls.Add(this.comboBox2);
@@ -96,7 +99,7 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox1.Size = new System.Drawing.Size(365, 292);
+            this.groupBox1.Size = new System.Drawing.Size(388, 304);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Дочитка показаний";
@@ -104,17 +107,17 @@
             // comboBox3
             // 
             this.comboBox3.FormattingEnabled = true;
-            this.comboBox3.Location = new System.Drawing.Point(109, 192);
+            this.comboBox3.Location = new System.Drawing.Point(86, 202);
             this.comboBox3.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox3.Name = "comboBox3";
-            this.comboBox3.Size = new System.Drawing.Size(241, 24);
+            this.comboBox3.Size = new System.Drawing.Size(255, 24);
             this.comboBox3.TabIndex = 17;
             this.comboBox3.SelectedIndexChanged += new System.EventHandler(this.comboBox3_SelectedIndexChanged);
             // 
             // linkLabel1
             // 
             this.linkLabel1.AutoSize = true;
-            this.linkLabel1.Location = new System.Drawing.Point(147, 39);
+            this.linkLabel1.Location = new System.Drawing.Point(171, 39);
             this.linkLabel1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.linkLabel1.Name = "linkLabel1";
             this.linkLabel1.Size = new System.Drawing.Size(49, 17);
@@ -132,7 +135,7 @@
             "Месячный",
             "Архивный",
             "Получасовой"});
-            this.comboBox2.Location = new System.Drawing.Point(207, 113);
+            this.comboBox2.Location = new System.Drawing.Point(231, 113);
             this.comboBox2.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(144, 24);
@@ -153,7 +156,7 @@
             // 
             this.lblCnt.AutoSize = true;
             this.lblCnt.BackColor = System.Drawing.Color.Transparent;
-            this.lblCnt.Location = new System.Drawing.Point(145, 260);
+            this.lblCnt.Location = new System.Drawing.Point(145, 274);
             this.lblCnt.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblCnt.Name = "lblCnt";
             this.lblCnt.Size = new System.Drawing.Size(16, 17);
@@ -164,7 +167,7 @@
             // 
             this.label5.AutoSize = true;
             this.label5.BackColor = System.Drawing.Color.Transparent;
-            this.label5.Location = new System.Drawing.Point(73, 260);
+            this.label5.Location = new System.Drawing.Point(73, 274);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(23, 17);
@@ -173,7 +176,7 @@
             // 
             // tbPort
             // 
-            this.tbPort.Location = new System.Drawing.Point(267, 166);
+            this.tbPort.Location = new System.Drawing.Point(257, 176);
             this.tbPort.Margin = new System.Windows.Forms.Padding(4);
             this.tbPort.Name = "tbPort";
             this.tbPort.Size = new System.Drawing.Size(84, 22);
@@ -184,7 +187,7 @@
             // 
             this.lblCurCnt.AutoSize = true;
             this.lblCurCnt.BackColor = System.Drawing.Color.Transparent;
-            this.lblCurCnt.Location = new System.Drawing.Point(17, 260);
+            this.lblCurCnt.Location = new System.Drawing.Point(17, 274);
             this.lblCurCnt.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblCurCnt.Name = "lblCurCnt";
             this.lblCurCnt.Size = new System.Drawing.Size(16, 17);
@@ -193,10 +196,10 @@
             // 
             // tbAddress
             // 
-            this.tbAddress.Location = new System.Drawing.Point(109, 166);
+            this.tbAddress.Location = new System.Drawing.Point(86, 176);
             this.tbAddress.Margin = new System.Windows.Forms.Padding(4);
             this.tbAddress.Name = "tbAddress";
-            this.tbAddress.Size = new System.Drawing.Size(148, 22);
+            this.tbAddress.Size = new System.Drawing.Size(163, 22);
             this.tbAddress.TabIndex = 11;
             this.tbAddress.Text = "192.168.23.52";
             // 
@@ -204,7 +207,7 @@
             // 
             this.rbTCP.AutoSize = true;
             this.rbTCP.Checked = true;
-            this.rbTCP.Location = new System.Drawing.Point(20, 193);
+            this.rbTCP.Location = new System.Drawing.Point(18, 206);
             this.rbTCP.Margin = new System.Windows.Forms.Padding(4);
             this.rbTCP.Name = "rbTCP";
             this.rbTCP.Size = new System.Drawing.Size(56, 21);
@@ -218,7 +221,7 @@
             // rbCom
             // 
             this.rbCom.AutoSize = true;
-            this.rbCom.Location = new System.Drawing.Point(20, 170);
+            this.rbCom.Location = new System.Drawing.Point(18, 177);
             this.rbCom.Margin = new System.Windows.Forms.Padding(4);
             this.rbCom.Name = "rbCom";
             this.rbCom.Size = new System.Drawing.Size(60, 21);
@@ -230,10 +233,10 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(20, 228);
+            this.progressBar1.Location = new System.Drawing.Point(20, 242);
             this.progressBar1.Margin = new System.Windows.Forms.Padding(4);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(205, 28);
+            this.progressBar1.Size = new System.Drawing.Size(230, 28);
             this.progressBar1.TabIndex = 8;
             // 
             // label3
@@ -249,7 +252,7 @@
             // dateTimePicker2
             // 
             this.dateTimePicker2.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dateTimePicker2.Location = new System.Drawing.Point(207, 53);
+            this.dateTimePicker2.Location = new System.Drawing.Point(231, 53);
             this.dateTimePicker2.Margin = new System.Windows.Forms.Padding(4);
             this.dateTimePicker2.Name = "dateTimePicker2";
             this.dateTimePicker2.Size = new System.Drawing.Size(144, 22);
@@ -279,7 +282,7 @@
             // dateTimePicker1
             // 
             this.dateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dateTimePicker1.Location = new System.Drawing.Point(207, 23);
+            this.dateTimePicker1.Location = new System.Drawing.Point(231, 23);
             this.dateTimePicker1.Margin = new System.Windows.Forms.Padding(4);
             this.dateTimePicker1.Name = "dateTimePicker1";
             this.dateTimePicker1.Size = new System.Drawing.Size(144, 22);
@@ -290,7 +293,7 @@
             // 
             this.btnEndReading.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnEndReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnEndReading.Location = new System.Drawing.Point(319, 226);
+            this.btnEndReading.Location = new System.Drawing.Point(340, 240);
             this.btnEndReading.Margin = new System.Windows.Forms.Padding(4);
             this.btnEndReading.Name = "btnEndReading";
             this.btnEndReading.Size = new System.Drawing.Size(33, 30);
@@ -303,7 +306,7 @@
             // 
             this.btnStartReading.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnStartReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnStartReading.Location = new System.Drawing.Point(237, 226);
+            this.btnStartReading.Location = new System.Drawing.Point(258, 240);
             this.btnStartReading.Margin = new System.Windows.Forms.Padding(4);
             this.btnStartReading.Name = "btnStartReading";
             this.btnStartReading.Size = new System.Drawing.Size(83, 30);
@@ -315,7 +318,7 @@
             // comboBox1
             // 
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(207, 82);
+            this.comboBox1.Location = new System.Drawing.Point(231, 82);
             this.comboBox1.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(144, 24);
@@ -400,7 +403,7 @@
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(369, 101);
+            this.pictureBox1.Size = new System.Drawing.Size(395, 101);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
@@ -421,10 +424,10 @@
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 447);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 453);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(369, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(395, 22);
             this.statusStrip1.TabIndex = 19;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -433,12 +436,23 @@
             this.tsLabel1.Name = "tsLabel1";
             this.tsLabel1.Size = new System.Drawing.Size(0, 17);
             // 
+            // cbEachPort
+            // 
+            this.cbEachPort.AutoSize = true;
+            this.cbEachPort.Location = new System.Drawing.Point(357, 206);
+            this.cbEachPort.Name = "cbEachPort";
+            this.cbEachPort.Size = new System.Drawing.Size(18, 17);
+            this.cbEachPort.TabIndex = 18;
+            this.toolTip1.SetToolTip(this.cbEachPort, "Опрос по всем портам");
+            this.cbEachPort.UseVisualStyleBackColor = true;
+            this.cbEachPort.CheckedChanged += new System.EventHandler(this.cbEachPort_CheckedChanged);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(369, 469);
+            this.ClientSize = new System.Drawing.Size(395, 475);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.pbPreloader);
             this.Controls.Add(this.cbServerStarted);
@@ -499,6 +513,8 @@
         private System.Windows.Forms.ToolStripMenuItem ctxMenuShowLogsDir;
         private System.Windows.Forms.ToolStripMenuItem ctxMenuDeleteLogs;
         private System.Windows.Forms.ToolStripMenuItem DeviceSearchMenuItem;
+        private System.Windows.Forms.CheckBox cbEachPort;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
 
