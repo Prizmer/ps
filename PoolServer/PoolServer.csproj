@@ -187,6 +187,10 @@
       <Project>{d20d8acb-ad07-4e7f-a99e-47f4113b32ea}</Project>
       <Name>LibLogger</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PollServerCfg\PollServerCfg.csproj">
+      <Project>{f42c603d-b57c-429d-9152-f1bc58e6407c}</Project>
+      <Name>PollServerCfg</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PortsLib\LibPorts.csproj">
       <Project>{13571fb0-472f-43b0-947d-64c5d1f2b4a4}</Project>
       <Name>LibPorts</Name>
