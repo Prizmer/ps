@@ -40,7 +40,7 @@ namespace Prizmer.PoolServer
            // byte[] cmdHang = ASCIIEncoding.ASCII.GetBytes(at_cmd_hang);
             
 
-            const string SO_VERSION = "v. 0.10.3";
+            const string SO_VERSION = "v. 0.10.4";
             this.Text += " - " + SO_VERSION;
 
             try
@@ -205,6 +205,7 @@ namespace Prizmer.PoolServer
             if (cbEachPort.Checked)
             {
                 comboBox3.SelectedIndex = this.currentPortIndex;
+                this.fillTbAddressAndTbPort();
             }
 
 
