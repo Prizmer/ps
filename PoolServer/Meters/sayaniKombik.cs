@@ -1030,14 +1030,14 @@ namespace Prizmer.Meters
             MeterInfo tmpMi = new MeterInfo();
             Params tmpPrms = new Params();
 
-             if (!ParseDumpFile(batchConnList[0].FileNameDump, ref tmpMi, ref tmpPrms, true))
             //if (!ParseDumpFile(@"C:\Users\ikhromov\Desktop\2RMD\58831_retr.dat", ref tmpMi, ref tmpPrms, true))
+            if (!ParseDumpFile(batchConnList[0].FileNameDump, ref tmpMi, ref tmpPrms, false))
                 return false;
 
             if (!GetParamValueFromParams(tmpPrms, param, tarif, tmpMi, out recordValue))
                 return false;
 
-            DeleteDumpFileAndLogs(batchConnList[0].FileNameDump);
+          //  DeleteDumpFileAndLogs(batchConnList[0].FileNameDump);
 
             return true;
         }
