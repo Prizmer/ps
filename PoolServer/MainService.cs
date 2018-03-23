@@ -2350,7 +2350,12 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 else if (m_vport == null && (typemeter.driver_name == "sayani_kombik"))
                 {
                     ComPortSettings tmpRdsComSettings = new ComPortSettings();
+                    tmpRdsComSettings.name = "COM250";
                     tmpRdsComSettings.baudrate = 9600;
+                    tmpRdsComSettings.data_bits = 8;
+                    tmpRdsComSettings.parity = 1;
+                    tmpRdsComSettings.stop_bits = 1;
+
                     m_vport = new ComPort(tmpRdsComSettings);
 
                     apti.vp = m_vport;
