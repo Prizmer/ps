@@ -255,7 +255,7 @@ namespace Prizmer.PoolServer
             frmAnalizator = mfPrms.frmAnalizator;
 
             #region Блок особых действий
-                sayani_kombik.DeleteDumpDirectory();
+                // sayani_kombik.DeleteDumpDirectory();
             #endregion
 
             System.Data.ConnectionState conState = ServerStorageMainService.Open(ConnectionString);
