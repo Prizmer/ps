@@ -48,7 +48,7 @@ namespace Prizmer.Meters
     {
         public string serialNumber;
         public int sayaniMeterTypeInt;
-
+        
     };
 
     [Serializable]
@@ -58,7 +58,7 @@ namespace Prizmer.Meters
     }
 
 
-    public class sayani_kombik : CMeter, IMeter
+    public class sayani_kombik : Drivers.LibMeter.CMeter, Drivers.LibMeter.IMeter
     {
         public sayani_kombik()
         {
@@ -80,7 +80,7 @@ namespace Prizmer.Meters
             psiOpt.CreateNoWindow = true;
 
             bool baseReplaceRes = BaseReplace();
-        }
+          }
 
         ~sayani_kombik()
         {
@@ -90,7 +90,7 @@ namespace Prizmer.Meters
         public void Init(uint address, string pass, VirtualPort data_vport)
         {
             this.m_address = address;
-
+            
             int tmp = 0;
             if (pass != "" && int.TryParse(pass, out tmp) && tmp > 0)
                 readDailyTimeoutInDays = tmp;
@@ -98,7 +98,7 @@ namespace Prizmer.Meters
                 readDailyTimeoutInDays = 3;
 
             directoryBase = AppDomain.CurrentDomain.BaseDirectory;
-
+   
         }
 
 
@@ -208,14 +208,14 @@ namespace Prizmer.Meters
         private string GetNSDescription(int NC)
         {
             string sNCDescription = "";
-            if (((NC >> 0) & 0x01) == 0x01) sNCDescription += "Ошибка термодатчика 1;";
-            if (((NC >> 1) & 0x01) == 0x01) sNCDescription += "Ошибка термодатчика 2;";
-            if (((NC >> 2) & 0x01) == 0x01) sNCDescription += "T1<T2 или T1-T2 меньше порога;";
-            if (((NC >> 3) & 0x01) == 0x01) sNCDescription += "Т2<Tх;";
-            if (((NC >> 4) & 0x01) == 0x01) sNCDescription += "dQ1<0;";
-            if (((NC >> 5) & 0x01) == 0x01) sNCDescription += "нет внешнего питания;";
-            if (((NC >> 6) & 0x01) == 0x01) sNCDescription += "проводилась коррекция времени;";
-            if (((NC >> 7) & 0x01) == 0x01) sNCDescription += "изменялось содержимое EEPROM;";
+            if (((NC>> 0) & 0x01) == 0x01) sNCDescription += "Ошибка термодатчика 1;";
+            if (((NC>> 1) & 0x01) == 0x01) sNCDescription += "Ошибка термодатчика 2;";
+            if (((NC>> 2) & 0x01) == 0x01) sNCDescription += "T1<T2 или T1-T2 меньше порога;";
+            if (((NC>> 3) & 0x01) == 0x01) sNCDescription += "Т2<Tх;";
+            if (((NC>> 4) & 0x01) == 0x01) sNCDescription += "dQ1<0;";
+            if (((NC>> 5) & 0x01) == 0x01) sNCDescription += "нет внешнего питания;";
+            if (((NC>> 6) & 0x01) == 0x01) sNCDescription += "проводилась коррекция времени;";
+            if (((NC>> 7) & 0x01) == 0x01) sNCDescription += "изменялось содержимое EEPROM;";
 
             if (sNCDescription == "") sNCDescription = "OK";
 
@@ -444,7 +444,7 @@ namespace Prizmer.Meters
         }
 
         private int GiveMeNextValue(FileStream fs, int valBytesCount, ref byte[] sourceBytes)
-        {
+        {      
             try
             {
                 int fsPosition = (int)fs.Position;
@@ -457,10 +457,7 @@ namespace Prizmer.Meters
 
                 sourceBytes = new byte[tmpIntBuffer.Length];
                 Array.Copy(tmpIntBuffer, sourceBytes, tmpIntBuffer.Length);
-
-                //if (BitConverter.IsLittleEndian)
-                //    Array.Reverse(tmpIntBuffer);
-
+  
                 int val = -2;
                 if (valBytesCount == 1)
                     return (int)tmpIntBuffer[0];
@@ -474,35 +471,6 @@ namespace Prizmer.Meters
             catch (Exception ex)
             {
                 return -2;
-            }
-        }
-
-        public bool IsDumpCorrect(FileStream fs)
-        {
-            /* проверяем заголовок дампа (служебная информация). Если модель и серийный номер - нули
-             * получен некорректный дамп */
-
-            int modelIdx = 0x0005;
-            int serialIdx = 0x000B;
-
-            try
-            {
-                fs.Seek(modelIdx, SeekOrigin.Begin);
-                int modelValue = (int)fs.ReadByte();
-
-                fs.Seek(serialIdx, SeekOrigin.Begin);
-                int serialValue = (int)fs.ReadByte();
-
-                // 0x30 - 0 в ASCII
-                if (modelValue == serialValue && modelValue == 0x30)
-                    return false;
-                else
-                    return true;
-            }
-            catch (Exception ex)
-            {
-                WriteToLog("Исключение при попытке чтения модели и s/n из служебного заголовка дампа: " + ex.Message);
-                return false;
             }
         }
 
@@ -524,8 +492,7 @@ namespace Prizmer.Meters
                     CreateEEPROMParamList(ref EEPROMParamList, smt);
                     CreateHourRecordParamList(ref HourRecordParamList, smt);
 
-                }
-                catch (Exception ex)
+                }catch (Exception ex)
                 {
                     WriteToLog("Исключение при попытке преобразования типа счетчика");
                 }
@@ -604,7 +571,7 @@ namespace Prizmer.Meters
                     MeterInfo testMi = new MeterInfo();
                     bool res = GetMeterInfo(testFs, ref testMi);
                     testFs.Close();
-
+                    
                     return res;
                 }
                 catch (Exception ex)
@@ -641,7 +608,7 @@ namespace Prizmer.Meters
                 return false;
 
             // запускаем процесс
-            psiOpt.FileName = "\"" + batchConn.FileNameRDSLib + "\"";
+            psiOpt.FileName = "\"" + batchConn.FileNameRDSLib + "\"";         
             psiOpt.Arguments = batchConn.ArgumentsForRDS;
 
             procCommand = Process.Start(psiOpt);
@@ -689,7 +656,7 @@ namespace Prizmer.Meters
                 procCommand.Close();
             }
             catch (Exception ex)
-            { }
+            {}
 
             return tmpRes;
         }
@@ -702,14 +669,22 @@ namespace Prizmer.Meters
 
         private void WriteToRDSLog(string logFileName, string msg)
         {
-            if (msg.Length > 0)
+            try
             {
-                FileStream fs = new FileStream(logFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
-                StreamWriter sw = new StreamWriter(fs);
-                sw.Write(msg + Environment.NewLine);
-                sw.Flush();
-                sw.Close();
+                if (msg.Length > 0)
+                {
+                    FileStream fs = new FileStream(logFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                    StreamWriter sw = new StreamWriter(fs);
+                    sw.Write(msg + Environment.NewLine);
+                    sw.Flush();
+                    sw.Close();
+                }
             }
+            catch (Exception ex)
+            {
+                WriteToLog("WriteToRDSLog: " + ex.ToString());
+            }
+
         }
 
         private bool ParseDumpFile(string fileName, ref MeterInfo mi, ref Params prms, bool deleteAfterParse = false)
@@ -727,7 +702,7 @@ namespace Prizmer.Meters
                 FileStream dumpFileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 
                 bool tmpRes = false;
-                if (IsDumpCorrect(dumpFileStream) && GetMeterInfo(dumpFileStream, ref mi))
+                if (GetMeterInfo(dumpFileStream, ref mi))
                 {
                     if (mi.sayaniMeterTypeInt == (int)SayaniMeterTypes.RMDImpulse2Channel)
                     {
@@ -920,7 +895,7 @@ namespace Prizmer.Meters
         {
             string metaFileName = "";
             ReplaceExtensionInFileName(dumpFileName, ".xml", ref metaFileName);
-
+            
             FileStream metaFileStream = null;
             try
             {
@@ -981,7 +956,7 @@ namespace Prizmer.Meters
                     string tmp = dm.paramList[i];
                     if (tmp == param + metaPairSeparator + tarif)
                         return true;
-                }
+                }          
             }
 
             return false;
@@ -1039,7 +1014,7 @@ namespace Prizmer.Meters
             string curDumpDir = directoryBase + DIR_NAME_LIB + "\\" + DIR_NAME_DUMPS;
             if (!Directory.Exists(curDumpDir))
                 Directory.CreateDirectory(curDumpDir);
-
+            
             //все готово к генерации дампа
             FileInfo batchFileInfo = new FileInfo(curBatchFilename);
             List<FileInfo> batchFIList = new List<FileInfo>();
@@ -1055,14 +1030,14 @@ namespace Prizmer.Meters
             MeterInfo tmpMi = new MeterInfo();
             Params tmpPrms = new Params();
 
-            if (!ParseDumpFile(batchConnList[0].FileNameDump, ref tmpMi, ref tmpPrms, true))
-                //if (!ParseDumpFile(@"C:\Users\ikhromov\Desktop\2RMD\58831_retr.dat", ref tmpMi, ref tmpPrms, true))
+            //if (!ParseDumpFile(@"C:\Users\ikhromov\Desktop\2RMD\58831_retr.dat", ref tmpMi, ref tmpPrms, true))
+            if (!ParseDumpFile(batchConnList[0].FileNameDump, ref tmpMi, ref tmpPrms, false))
                 return false;
 
             if (!GetParamValueFromParams(tmpPrms, param, tarif, tmpMi, out recordValue))
                 return false;
 
-            DeleteDumpFileAndLogs(batchConnList[0].FileNameDump);
+          //  DeleteDumpFileAndLogs(batchConnList[0].FileNameDump);
 
             return true;
         }
@@ -1078,7 +1053,7 @@ namespace Prizmer.Meters
         /// <param name="serialNumberDec"></param>
         /// <param name="strTerminationCode"></param>
         /// <returns></returns>
-        private bool IsReadingBlocked(int blockingTimeMinutes, string directoryPath, string serialNumberDec,
+        private bool IsReadingBlocked(int blockingTimeMinutes, string directoryPath, string serialNumberDec, 
             ref string strTerminationCode)
         {
             string latestLogFileName = "";
@@ -1171,7 +1146,7 @@ namespace Prizmer.Meters
                 latestDumpDate = latestDumpFileInfo.LastWriteTime.Date;
 
                 if (File.Exists(latestDumpFileName))
-                {
+                { 
                     DateTime dateCur = DateTime.Now.Date;
                     TimeSpan ts = dateCur - latestDumpDate;
 
@@ -1193,7 +1168,8 @@ namespace Prizmer.Meters
 
             //если мы дошли до сюда, то, либо подошло время обновить дамп, либо проблемы с разбором существующего
             //если прошло менее N дней, но искомого параметра еще нет
-            DeleteDumpFileAndLogs(latestDumpFileName);
+            // TODO: вернуть
+            // DeleteDumpFileAndLogs(latestDumpFileName);
 
             //ниже нельзя просто вызвать чтение суточных, т.к. суточные удаляют дамп сразу 
             //после разбора, поэтому дублируем
@@ -1227,11 +1203,8 @@ namespace Prizmer.Meters
             return true;
         }
 
-        public void WriteToLog(string str, bool doWrite = true)
-        {
-            return;
-        }
-
+ 
+        
         #endregion
 
         #region Unused methods
