@@ -24,6 +24,7 @@ using Drivers.PulsarDriver;
 using Drivers.ElfApatorDriver;
 using Drivers.UMDriver;
 using Drivers.Mercury23XDriver;
+using Drivers.Karat30XDriver;
 
 namespace Prizmer.PoolServer
 {
@@ -455,17 +456,19 @@ namespace Prizmer.PoolServer
         {
             if (bStopServer) return 1;
 
-            pmPrms.logger.LogInfo("Чтение серийника открыт");
+            // pmPrms.logger.LogInfo("Чтение серийника открыт");
             string serial_number = String.Empty;
             if (pmPrms.meter.OpenLinkCanal())
             {
-                pmPrms.logger.LogInfo("Канал для чтения серийника открыт");
+                // pmPrms.logger.LogInfo("Канал для чтения серийника открыт");
                 Meter mDb = pmPrms.metersbyport[pmPrms.MetersCounter];
                 string isEqual = "";
 
+                
+
                 if (pmPrms.meter.ReadSerialNumber(ref serial_number))
                 {
-                    pmPrms.logger.LogInfo("Серийник прочитан: " + serial_number);
+                    // pmPrms.logger.LogInfo("Серийник прочитан: " + serial_number);
 
                     if (mDb.factory_number_manual == serial_number)
                         isEqual = "TRUE";
@@ -2329,6 +2332,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     case "pulsar_teplo": meter = new PulsarDriver(); break;
                     case "pulsar_hvs": meter = new PulsarDriver(); break;
                     case "pulsar_gvs": meter = new PulsarDriver(); break;
+                    case "karat_23X": meter = new Karat30XDriver(); break;
                 }
 
                 if (meter == null) goto NetxMeter;
@@ -2388,7 +2392,8 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
 
                 //***************************************| Чтение S/N |***************************************    
                 if (bStopServer) goto CloseThreadPoint;
-                if (POLLING_ACTIVE && DM_POLL_ADDR)
+                // POLLING_ACTIVE && DM_POLL_ADDR
+                if (DM_POLL_ADDR)
                 {
                     int status = pollSerialNumber(pmPrms);
                     pmPrms.logger.LogInfo("Прочитал серийный номер со статусом: " + status);

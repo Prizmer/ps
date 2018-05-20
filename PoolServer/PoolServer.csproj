@@ -62,6 +62,9 @@
       <HintPath>..\packages\FirebirdSql.Data.FirebirdClient.5.0.5\lib\net40-client\FirebirdSql.Data.FirebirdClient.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Karat30XDriver">
+      <HintPath>..\..\testUtils\tu_karat\Mercury23XDriver\bin\Debug\Karat30XDriver.dll</HintPath>
+    </Reference>
     <Reference Include="Mercury23XDriver">
       <HintPath>..\..\testUtils\tu_mercury23X\Mercury23XDriver\bin\Debug\Mercury23XDriver.dll</HintPath>
     </Reference>
