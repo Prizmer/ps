@@ -614,32 +614,31 @@ namespace Prizmer.PoolServer
 
             return 0;
         }
-        private int pollMonthly(PollMethodsParams pmPrms)
+        private int pollMonthly(PollMethodsParams pmPrms, object oDate = null)
         {
             if (bStopServer) return 1;
 
-            DateTime CurTime = DateTime.Now; 
-            DateTime PrevTime = new DateTime(CurTime.Year, CurTime.Month, 1);
-            DateTime tmpDate;
+
+            DateTime dtStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+
+            if (oDate != null)
+            {
+                DateTime dt = (DateTime)oDate;
+                dtStart = new DateTime(dt.Year, dt.Month, 1);
+            }
 
             TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, 2);
             if (takenparams.Length > 0)
             {
-                //pmPrms.logger.LogInfo("Месячные: начало чтения суточных");
+
                 for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                 {
                     if (bStopServer){
                         return 1;  
                     }
 
-                    tmpDate = PrevTime;
-
-                    Value[] lastvalue = pmPrms.ServerStorage.GetExistsMonthlyValuesDT(takenparams[tpindex], tmpDate, tmpDate);
-                       
-                   // string queryExample = "SELECT date, value, status, id_taken_params FROM monthly_values " +
-            //"WHERE (id_taken_params = " + takenparams[tpindex].id + ") AND date BETWEEN '" + tmpDate.ToShortDateString() + "' AND '" + tmpDate.ToShortDateString() + "'";
-                    //pmPrms.logger.LogInfo("Месячные: запрос в базу на проверку существования: " + queryExample);
-
+                    Value[] lastvalue = pmPrms.ServerStorage.GetExistsMonthlyValuesDT(takenparams[tpindex], dtStart, dtStart);
+                                     
                     //если значение в БД уже есть, то не читать его из прибора
                     if (lastvalue.Length > 0) continue;
 
@@ -655,10 +654,10 @@ namespace Prizmer.PoolServer
                         float curvalue = 0;
 
                         //чтение месячных параметров
-                        if (pmPrms.meter.ReadMonthlyValues(tmpDate, param.param_address, param.channel, ref curvalue))
+                        if (pmPrms.meter.ReadMonthlyValues(dtStart, param.param_address, param.channel, ref curvalue))
                         {
                             Value value = new Value();
-                            value.dt = new DateTime(tmpDate.Year, tmpDate.Month, 1);
+                            value.dt = dtStart;
                             value.id_taken_params = takenparams[tpindex].id;
                             value.status = false;
                             value.value = curvalue;
@@ -672,7 +671,7 @@ namespace Prizmer.PoolServer
                         else
                         {
                             string s_log = String.Format("На начало месяца: метод драйвера ReadMonthlyValues вернул false. Параметр {0} с адресом {1} каналом {2} не прочитан. Запрашиваемая дата: {3}",
-                                param.name, param.param_address, param.channel, tmpDate.ToString());
+                                param.name, param.param_address, param.channel, dtStart.ToString());
                             pmPrms.logger.LogError(s_log);
                             //meter.WriteToLog("текущий параметр не прочитан:" + param.param_address.ToString());   
                         }
@@ -2184,7 +2183,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     else if (mfPrms.paramType == 2)
                     {
                         //месячный
-                        return 2;
+                        pollMonthly(pmPrms, tmpDateTime);
                     }
                     else if (mfPrms.paramType == 3)
                     {
