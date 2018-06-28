@@ -2336,7 +2336,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
 
                 if (meter == null) goto NetxMeter;
 
-
+    
                 /*если соединяться с конечной точкой вначале, то консольная программа rds не сможет с ней соединиться
                  * поэтому создание порта и подключение к нему осуществляется на первой итерации цикла при условии,
                  * что счетчик не саяны. Предполагаются что на одном порту будут висеть только саяны, если будут другие приборы,
@@ -2352,6 +2352,41 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 }
                 else if (m_vport == null && (typemeter.driver_name == "sayani_kombik"))
                 {
+
+                    // рассписание для саян, n дней до окончания месяца, n дней после окончания
+                    DateTime dt = DateTime.Now.Date;
+
+                    string strTmpVal = "";
+                    int daysInBegining = 0;
+                    int daysInEnd = 0;
+
+                    bool bFollowSchedule = true;
+
+                    if (!getSafeAppSettingsValue("sayaniDaysBeforeMonthEnd", ref strTmpVal) || !int.TryParse(strTmpVal, out daysInBegining))
+                        bFollowSchedule = false;
+                    if (!getSafeAppSettingsValue("sayaniDaysAfterMonthEnd", ref strTmpVal) || !int.TryParse(strTmpVal, out daysInEnd))
+                        bFollowSchedule = false;
+
+                    if (daysInBegining == 0 && daysInEnd == 0)
+                        bFollowSchedule = false;
+
+                    if (bFollowSchedule)
+                    {
+                        DateTime dtMonthBeginFrom = new DateTime(dt.Year, dt.Month, 1);
+                        DateTime dtMonthBeginTo = dtMonthBeginFrom.AddDays(daysInBegining);
+
+                        int daysInMonth = DateTime.DaysInMonth(dt.Year, dt.Month);
+                        DateTime dtMonthEndTo = new DateTime(dt.Year, dt.Month, daysInMonth);
+                        DateTime dtMonthEndFrom = dtMonthEndTo.AddDays(-daysInEnd);
+
+                        bool cond1 = (dt < dtMonthBeginFrom) || (dt > dtMonthBeginTo);
+                        bool cond2 = (dt < dtMonthEndFrom) || (dt > dtMonthEndTo);
+
+
+                        if (cond1 && cond2)
+                            goto NetxMeter;
+                    }
+
                     ComPortSettings tmpRdsComSettings = new ComPortSettings();
                     tmpRdsComSettings.name = "COM250";
                     tmpRdsComSettings.baudrate = 9600;
