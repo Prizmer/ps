@@ -2356,19 +2356,28 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     // рассписание для саян, n дней до окончания месяца, n дней после окончания
                     DateTime dt = DateTime.Now.Date;
 
-                    string strTmpVal = "";
-                    int daysInBegining = 0;
-                    int daysInEnd = 0;
 
                     bool bFollowSchedule = true;
 
-                    if (!getSafeAppSettingsValue("sayaniDaysBeforeMonthEnd", ref strTmpVal) || !int.TryParse(strTmpVal, out daysInBegining))
+
+                    string str1 = "";
+                    int daysInBegining = 0;
+
+                    string str2 = "";
+                    int daysInEnd = 0;
+
+                    if (!getSafeAppSettingsValue("sayaniDaysBeforeMonthEnd", ref str1) || !int.TryParse(str1, out daysInBegining))
                         bFollowSchedule = false;
-                    if (!getSafeAppSettingsValue("sayaniDaysAfterMonthEnd", ref strTmpVal) || !int.TryParse(strTmpVal, out daysInEnd))
+                    if (!getSafeAppSettingsValue("sayaniDaysAfterMonthEnd", ref str2) || !int.TryParse(str2, out daysInEnd))
                         bFollowSchedule = false;
+
+
+
 
                     if (daysInBegining == 0 && daysInEnd == 0)
                         bFollowSchedule = false;
+
+                    WriteToLog(String.Format("sayani schedule: {0}, {1}, {2}, {3}, {4}", str1, daysInBegining, str2, daysInEnd, bFollowSchedule));
 
                     if (bFollowSchedule)
                     {
@@ -2382,6 +2391,8 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                         bool cond1 = (dt < dtMonthBeginFrom) || (dt > dtMonthBeginTo);
                         bool cond2 = (dt < dtMonthEndFrom) || (dt > dtMonthEndTo);
 
+                        WriteToLog(String.Format("sayani schedule 2: {0}, {1}, {2}, {3}, {4}", dtMonthBeginFrom, dtMonthBeginTo, dtMonthEndFrom, dtMonthEndTo, dt));
+                        WriteToLog(String.Format("sayani schedule 3: {0}, {1}", cond1, cond2));
 
                         if (cond1 && cond2)
                             goto NetxMeter;
