@@ -468,13 +468,14 @@ namespace PollingLibraries.LibPorts
                 //2 попытки соединения или чтения данных
                 for (int i = 0; i < 2; i++)
                 {
+                    WriteToLog("Attempt: " + i);
                     readBytesList.Clear();
                     if (sender.Connected)
                     {
                         // Send the data through the socket.
                         sender.Send(out_buffer, 0, out_length, SocketFlags.None);
 
-                        WriteToLog("written data: " + BitConverter.ToString(out_buffer));
+                        WriteToLog("<< Written data: " + BitConverter.ToString(out_buffer) + "\n");
 
 
                         Thread.Sleep(10);
@@ -488,8 +489,7 @@ namespace PollingLibraries.LibPorts
                                 {
                                     byte[] tmp_buff = new byte[sender.Available];
                                     int readed_bytes = sender.Receive(tmp_buff);
-                                    WriteToLog("Received" + elapsed_time_count + ": " + BitConverter.ToString(tmp_buff));
-                                    WriteToLog("ReadedBytes: " + readed_bytes);
+                                    WriteToLog(">> received_" + elapsed_time_count + "ms ("+ readed_bytes + " bytes): " + BitConverter.ToString(tmp_buff));
                                     readBytesList.AddRange(tmp_buff);
                                 }
                                 catch (Exception ex)
@@ -504,7 +504,7 @@ namespace PollingLibraries.LibPorts
                                 int packageSign = func(tmpQ);
                                 if (packageSign == 1)
                                 {
-                                    WriteToLog("WriteReadData: break first attempt, packageSign = " + packageSign);
+                                    WriteToLog("WriteReadData: break on attempt attempt " + i + ", with packageSign; result=" + packageSign);
                                     break;
                                 }
  
@@ -515,7 +515,7 @@ namespace PollingLibraries.LibPorts
                         }
 
                         string tmpResStr = BitConverter.ToString(readBytesList.ToArray());
-                        WriteToLog("WriteReadData: received data: " + tmpResStr);
+                        WriteToLog(">> Totaly received: " + tmpResStr + "\n");
                         //  if (tmpResStr.Length < 4)
                         // WriteToLog("received data: " + tmpResStr);
 
