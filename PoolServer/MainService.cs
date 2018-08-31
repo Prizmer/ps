@@ -452,30 +452,77 @@ namespace Prizmer.PoolServer
             public DateTime common_dt_cur;
         };
 
+        private string updateMeterErrInDb(Meter mDb, string snWithErrors)
+        {
+            if (!snWithErrors.Contains("#")) return snWithErrors;
+
+            // распарсим ошибки
+            string[] errStrArr = snWithErrors.Split('#');
+            string errStr = errStrArr[0];
+
+            if (errStr.Length == 0) return errStrArr[1];
+            
+            // строка с ошибками 
+
+
+
+
+            return errStrArr[1];
+        }
+
         private int pollSerialNumber(PollMethodsParams pmPrms)
         {
             if (bStopServer) return 1;
 
             // pmPrms.logger.LogInfo("Чтение серийника открыт");
-            string serial_number = String.Empty;
+            string serial_number_with_err = String.Empty;
             if (pmPrms.meter.OpenLinkCanal())
             {
                 // pmPrms.logger.LogInfo("Канал для чтения серийника открыт");
                 Meter mDb = pmPrms.metersbyport[pmPrms.MetersCounter];
                 string isEqual = "";
 
-                
+                float localErrCode = 0;
+                if (pmPrms.meter.ReadCurrentValues(99, 0, ref localErrCode) && localErrCode > 0)
+                {
+                    Directory.CreateDirectory(Logger.BaseDirectory);
+                    string pathToDir = String.Format(Logger.BaseDirectory + "\\m_errors");
+                    Directory.CreateDirectory(pathToDir);
+                    string logFileName = DateTime.Now.Date.ToShortDateString().Replace(".", "_") + "_meterErrors_" + pmPrms.m_vport.GetName();
+                    string prefix = mDb.address + "_"+ mDb.factory_number_manual + "_"+ mDb.name;
+                    string msg = "";
+                    if (localErrCode == 1)
+                        msg += "Напряжение батареи менее 2,65В; ";
+                    else if (localErrCode == 2)
+                        msg += "Напряжение батареи менее 2,2В; ";
+                    else if (localErrCode == 4)
+                        msg += "Напряжение батареи менее 2,2В; ";
+                    else
+                        msg += "Неизвестный код ошибки: " + localErrCode + "; "; 
 
-                if (pmPrms.meter.ReadSerialNumber(ref serial_number))
+                    FileStream fs = new FileStream(pathToDir + logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+                    string resMsg = String.Format("{0}: {1}", prefix, msg);
+
+                    StreamWriter sw = new StreamWriter(fs, Encoding.Default);
+                    sw.WriteLine(resMsg);
+
+                    sw.Close();
+                    fs.Close();
+                }
+              
+                if (pmPrms.meter.ReadSerialNumber(ref serial_number_with_err))
                 {
                     // pmPrms.logger.LogInfo("Серийник прочитан: " + serial_number);
 
-                    if (mDb.factory_number_manual == serial_number)
+                    // посмотрим содержит ли строка ошибки и если да, занесем из в БД
+                    string onlySerial = updateMeterErrInDb(mDb, serial_number_with_err);
+
+                    if (mDb.factory_number_manual == onlySerial)
                         isEqual = "TRUE";
                     else
                         isEqual = "FALSE";
 
-                    pmPrms.ServerStorage.UpdateMeterFactoryNumber(mDb.guid, serial_number, isEqual);
+                    pmPrms.ServerStorage.UpdateMeterFactoryNumber(mDb.guid, onlySerial, isEqual);
                 }
                 else
                 {
