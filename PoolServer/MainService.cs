@@ -488,7 +488,7 @@ namespace Prizmer.PoolServer
                     Directory.CreateDirectory(Logger.BaseDirectory);
                     string pathToDir = String.Format(Logger.BaseDirectory + "\\m_errors");
                     Directory.CreateDirectory(pathToDir);
-                    string logFileName = DateTime.Now.Date.ToShortDateString().Replace(".", "_") + "_meterErrors_" + pmPrms.m_vport.GetName();
+                    string logFileName = DateTime.Now.Date.ToShortDateString().Replace(".", "_") + "_" + pmPrms.m_vport.GetName() + ".txt";
                     string prefix = mDb.address + "_"+ mDb.factory_number_manual + "_"+ mDb.name;
                     string msg = "";
                     if (localErrCode == 1)
