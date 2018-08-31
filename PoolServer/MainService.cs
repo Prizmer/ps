@@ -500,7 +500,7 @@ namespace Prizmer.PoolServer
                     else
                         msg += "Неизвестный код ошибки: " + localErrCode + "; "; 
 
-                    FileStream fs = new FileStream(pathToDir + logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+                    FileStream fs = new FileStream(pathToDir + "\\" +  logFileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
                     string resMsg = String.Format("{0}: {1}", prefix, msg);
 
                     StreamWriter sw = new StreamWriter(fs, Encoding.Default);
