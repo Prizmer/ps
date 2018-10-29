@@ -28,12 +28,13 @@ using Drivers.Karat30XDriver;
 
 namespace Prizmer.PoolServer
 {
-    class MainService
+    public class MainService
     {
         public delegate void MyEventHandler(object sender, MyEventArgs e);
         public event MyEventHandler pollingStarted;
         public event MyEventHandler pollingEnded;
         public event MyEventHandler meterPolled;
+
 
         public event MyEventHandler stoppingStarted;
         public event MyEventHandler stoppingEnded;
@@ -175,7 +176,7 @@ namespace Prizmer.PoolServer
             List<Thread> comPortThreadsList = new List<Thread>();
 
             //нам не нужны ком порты если дочитываем tcp
-            if (prms.mode == OperatingMode.OM_MANUAL && prms.isTcp) return comPortThreadsList;
+            if (prms.mode != OperatingMode.OM_AUTO && prms.isTcp) return comPortThreadsList;
             //нам не нужны ком порты если отлаживаем tcp
             if (B_DEBUG_MODE_TCP) return comPortThreadsList;
 
@@ -183,7 +184,7 @@ namespace Prizmer.PoolServer
             for (int i = 0; i < cps.Length; i++)
             {
                 //если дочитка, пропустим все порты кроме выбранного
-                if (prms.mode == OperatingMode.OM_MANUAL && !prms.isTcp)
+                if (prms.mode != OperatingMode.OM_AUTO && !prms.isTcp)
                 {
                     if (cps[i].name != prms.ip)
                         continue;
@@ -212,7 +213,7 @@ namespace Prizmer.PoolServer
             List<Thread> tcpPortThreadsList = new List<Thread>();
 
             //нам не нужны tcp если дочитываем com
-            if (prms.mode == OperatingMode.OM_MANUAL && !prms.isTcp) return tcpPortThreadsList;
+            if (prms.mode != OperatingMode.OM_AUTO && !prms.isTcp) return tcpPortThreadsList;
 
             for (int i = 0; i < tcpips.Length; i++)
             {
@@ -221,7 +222,7 @@ namespace Prizmer.PoolServer
                     if (tcpips[i].ip_address != DMTCP_IP || tcpips[i].ip_port != DMTCP_PORT)
                         continue;
                 }
-                else if (prms.mode == OperatingMode.OM_MANUAL && prms.isTcp)
+                else if (prms.mode != OperatingMode.OM_AUTO && prms.isTcp)
                 {
                     //WriteToLog("addr: " + tcpips[i].ip_address + "; p: " + tcpips[i].ip_port.ToString());
                     //WriteToLog("addr: " + prms.ip + "; p: " + ((ushort)prms.port).ToString());
@@ -315,7 +316,7 @@ namespace Prizmer.PoolServer
 
             if (PortsThreads.Count == 0)
             {
-                if (mfPrms.mode == OperatingMode.OM_MANUAL && pollingEnded != null)
+                if (mfPrms.mode != OperatingMode.OM_AUTO && pollingEnded != null)
                     pollingEnded(this, new MyEventArgs());
 
             }
@@ -2200,9 +2201,19 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             pmPrms.logger.LogInfo("Дата конца: " + dtEnd.ToShortDateString());
             pmPrms.logger.LogInfo("Прибор: " + mName + " порт " + pmPrms.m_vport.GetName() + " адрес " + pmPrms.metersbyport[pmPrms.MetersCounter].address.ToString());
 
-            //чтение текущих параметров, подлежащих чтению, относящихся к конкретному прибору
-            TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, (byte)mfPrms.paramType);
-            pmPrms.logger.LogInfo("Число параметров выбранного типа (" + mfPrms.paramType + "): " + takenparams.Length);
+            // чтение текущих параметров, подлежащих чтению, относящихся к конкретному прибору
+            TakenParams[] takenparams = new TakenParams[0];
+            // если опрашиваем из формы поиска, у нас уже есть набор takenparams и их нужно прочитать все
+            if (mfPrms.mode == OperatingMode.OM_MANUAL_SEARCH_FORM)
+            {
+                takenparams = mfPrms.searchFormData.takenParams;
+            }
+            else
+            {
+                takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, (byte)mfPrms.paramType);
+            }
+
+        pmPrms.logger.LogInfo("Число параметров выбранного типа (" + mfPrms.paramType + "): " + takenparams.Length);
 
 
             if (takenparams.Length > 0)
@@ -2215,37 +2226,57 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 for (int d = 0; d <= totalD; d++)
                 {
                     pmPrms.logger.LogInfo("Дата, за которую идет считывание: " + tmpDateTime.ToShortDateString());
-                    float curvalue = 0;
 
-                    if (mfPrms.paramType == 0)
+                    if (mfPrms.mode == OperatingMode.OM_MANUAL_SEARCH_FORM)
                     {
-                        //текущий
-                        pollCurrent(pmPrms, tmpDateTime);
-                    }
-                    else if (mfPrms.paramType == 1)
-                    {
-                        //суточный
-                        pollDaily(pmPrms, tmpDateTime);
-                    }
-                    else if (mfPrms.paramType == 2)
-                    {
-                        //месячный
-                        pollMonthly(pmPrms, tmpDateTime);
-                    }
-                    else if (mfPrms.paramType == 3)
-                    {
-                        //архивный
-                        pollDaily(pmPrms, tmpDateTime, true);
-                        //return 2;
-                    }
-                    else if (mfPrms.paramType == 4)
-                    {
-                        //получасовой
+                        // если дочитка с формы поиска, то у считываемых параметров разные типа
+                        // вызовем все активные методы
+                        if (pollingParams.b_poll_current)
+                            pollCurrent(pmPrms, tmpDateTime);                         
+                        if (pollingParams.b_poll_day)
+                            pollDaily(pmPrms, tmpDateTime); 
+                        if (pollingParams.b_poll_month)
+                            pollMonthly(pmPrms, tmpDateTime);
 
                         DateTime dt_start_halfs = new DateTime(tmpDateTime.Year, tmpDateTime.Month, tmpDateTime.Day, 0, 0, 0);
-                        DateTime dt_end_halfs = new DateTime(tmpDateTime.Year, tmpDateTime.Month, tmpDateTime.Day, 23, 59, 59);
+                        DateTime dt_end_halfs = new DateTime(tmpDateTime.Year, tmpDateTime.Month, tmpDateTime.Day, 23, 59, 59);    
+                        if (pollingParams.b_poll_halfanhour)
+                            pollHalfsForDate(pmPrms, tmpDateTime);       
+                    }
+                    else
+                    {
+                        // если дочитка с главной формы, мы сами указали тип считываемого параметра
+                        // вызываем нужный метод
+                        if (mfPrms.paramType == 0)
+                        {
+                            //текущий
+                            pollCurrent(pmPrms, tmpDateTime);
+                        }
+                        else if (mfPrms.paramType == 1)
+                        {
+                            //суточный
+                            pollDaily(pmPrms, tmpDateTime);
+                        }
+                        else if (mfPrms.paramType == 2)
+                        {
+                            //месячный
+                            pollMonthly(pmPrms, tmpDateTime);
+                        }
+                        else if (mfPrms.paramType == 3)
+                        {
+                            //архивный
+                            pollDaily(pmPrms, tmpDateTime, true);
+                            //return 2;
+                        }
+                        else if (mfPrms.paramType == 4)
+                        {
+                            //получасовой
 
-                        pollHalfsForDate(pmPrms, tmpDateTime);
+                            DateTime dt_start_halfs = new DateTime(tmpDateTime.Year, tmpDateTime.Month, tmpDateTime.Day, 0, 0, 0);
+                            DateTime dt_end_halfs = new DateTime(tmpDateTime.Year, tmpDateTime.Month, tmpDateTime.Day, 23, 59, 59);
+
+                            pollHalfsForDate(pmPrms, tmpDateTime);
+                        }
                     }
 
                     tmpDateTime = tmpDateTime.AddDays(1);
@@ -2300,9 +2331,23 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 PortGUID = portsettings.guid;
 
                 if (mfPrms.mode == OperatingMode.OM_MANUAL)
+                {
+                    // если вручную опрашиваем через главную форму, то получим счетчики с типом указанным типом драйвера
+                    // имеющие параметры заданного типа и висящие на выбранном порту
                     metersbyport = ServerStorage.GetMetersByTcpIPGUIDAndParams(PortGUID, mfPrms.paramType, mfPrms.driverGuid);
+                }
+                else if (mfPrms.mode == OperatingMode.OM_MANUAL_SEARCH_FORM)
+                {
+                    // если идем из формы поиска, мы уже выбрали конкретный счетчик и знаем его guid
+                    Meter m = ServerStorage.GetMeterByGUID(mfPrms.searchFormData.guidMeter);
+                    metersbyport = new Meter[]{ m };
+                }
                 else
+                {
+                    // если в авто-режиме, получим все счетчики висящие на порту n
                     metersbyport = ServerStorage.GetMetersByTcpIPGUID(PortGUID);
+                }
+
             }
 
             AnalizatorPollThreadInfo apti = new AnalizatorPollThreadInfo(portFullName);
@@ -2334,7 +2379,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             }
 
             myEventArgs.metersCount = metersbyport.Length;
-            if (mfPrms.mode == OperatingMode.OM_MANUAL && pollingStarted != null)
+            if (mfPrms.mode != OperatingMode.OM_AUTO && pollingStarted != null)
                 pollingStarted(this, myEventArgs);
 
 
@@ -2581,7 +2626,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 //********************************************************************************************************************* 
                 //***************************************| ДОЧИТКА ЗНАЧЕНИЙ |**********************************************************
                 //*********************************************************************************************************************
-                if (mfPrms.mode == OperatingMode.OM_MANUAL && typemeter.guid == mfPrms.driverGuid)
+                if (mfPrms.mode != OperatingMode.OM_AUTO && typemeter.guid == mfPrms.driverGuid)
                 {
                     int status = pollDatesRange(myEventArgs, mfPrms, pmPrms);
                     if (status == 1) goto CloseThreadPoint;                   
@@ -2592,7 +2637,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 if (!DMTCP_STATIC_METER_NUMBER)
                 {
                     MetersCounter++;
-                    if (mfPrms.mode != OperatingMode.OM_MANUAL && MetersCounter >= metersbyport.Length)
+                    if (mfPrms.mode == OperatingMode.OM_AUTO && MetersCounter >= metersbyport.Length)
                     {
                         MetersCounter = 0;
                         //перечитать список приборов - вдруг что-то добавили или убрали
@@ -2617,7 +2662,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                         //if (m_vport.GetConnectionType() == "tcp")
                         //    m_vport.ReInitialize();
                     }
-                    else if (mfPrms.mode == OperatingMode.OM_MANUAL)
+                    else if (mfPrms.mode != OperatingMode.OM_AUTO)
                     {
                         // РЕЖИМ РУЧНОЙ ДОЧИТКИ
                         if (meterPolled != null)

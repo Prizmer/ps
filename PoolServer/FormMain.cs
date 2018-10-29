@@ -16,7 +16,7 @@ namespace Prizmer.PoolServer
 {
     public partial class FormMain : Form
     {
-        MainService ms = new MainService();
+        public MainService ms = new MainService();
         Analizator frmAnalizator = new Analizator();
         MetersSearchForm DevSearchForm = new MetersSearchForm();
 
@@ -24,6 +24,18 @@ namespace Prizmer.PoolServer
         {
             frmAnalizator = new Analizator();
             InitializeComponent();
+
+            DevSearchForm.msInstance = ms;
+            DevSearchForm.pollingStart += DevSearchForm_pollingStart;
+        }
+
+        private void DevSearchForm_pollingStart(object sender, MainFormParamsStructure mfPrms)
+        {
+            // срабатывает при нажатии "Прочитать" на форме поиска устройств
+            mfPrms.frmAnalizator = this.frmAnalizator;
+            mfPrms.mode = OperatingMode.OM_MANUAL_SEARCH_FORM;
+
+            this.startReading(mfPrms);
         }
 
         PgStorage storage = new PgStorage();
@@ -40,7 +52,7 @@ namespace Prizmer.PoolServer
            // byte[] cmdHang = ASCIIEncoding.ASCII.GetBytes(at_cmd_hang);
             
 
-            const string SO_VERSION = "v. 0.14.6";
+            const string SO_VERSION = "v. 0.15.0";
             this.Text += " - " + SO_VERSION;
 
             try
@@ -83,6 +95,8 @@ namespace Prizmer.PoolServer
                 MainFormParamsStructure prms = new MainFormParamsStructure();
                 prms.frmAnalizator = this.frmAnalizator;
                 prms.mode = OperatingMode.OM_AUTO;
+
+                
 
                 ms.pollingStarted += new MainService.MyEventHandler(ms_pollingStarted);
                 ms.meterPolled += new MainService.MyEventHandler(ms_meterPolled);
@@ -194,7 +208,7 @@ namespace Prizmer.PoolServer
 
 
 
-        private void startReading()
+        private void startReading(MainFormParamsStructure? mfPrms = null)
         {
             MainFormParamsStructure prms = new MainFormParamsStructure();
             prms.frmAnalizator = this.frmAnalizator;
@@ -226,7 +240,11 @@ namespace Prizmer.PoolServer
                 prms.paramType = comboBox2.SelectedIndex;
 
                 ManualStartInProcess = true;
-                ms.StartServer(prms);
+
+                if (mfPrms != null)
+                    ms.StartServer((MainFormParamsStructure)mfPrms);
+                else
+                    ms.StartServer(prms);
             }
             catch (Exception ex)
             {
@@ -579,7 +597,8 @@ namespace Prizmer.PoolServer
     public enum OperatingMode
     {
         OM_AUTO = 0,
-        OM_MANUAL = 1
+        OM_MANUAL = 1,
+        OM_MANUAL_SEARCH_FORM = 2
     }
 
     public struct MainFormParamsStructure
@@ -593,6 +612,7 @@ namespace Prizmer.PoolServer
         public int port;
         public bool isTcp;
         public int paramType;
+        public SearchFormData searchFormData;
 
         public Analizator frmAnalizator;
     }

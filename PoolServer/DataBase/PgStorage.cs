@@ -167,8 +167,15 @@ namespace Prizmer.PoolServer.DataBase
             if (Convert.ToString(dr["dt_install"]).Length > 0) m.dt_install = Convert.ToDateTime(dr["dt_install"]);
             else m.dt_install = new DateTime(0);
 
-            if (Convert.ToString(dr["dt_last_read"]).Length > 0) m.dt_last_read = Convert.ToDateTime(dr["dt_last_read"]);
-            else m.dt_last_read = new DateTime(0);
+            if (ColumnExists(dr, "dt_last_read"))
+            {
+                if (Convert.ToString(dr["dt_last_read"]).Length > 0) m.dt_last_read = Convert.ToDateTime(dr["dt_last_read"]);
+                else m.dt_last_read = new DateTime(0);
+            } else
+            {
+                m.dt_last_read = new DateTime(0);
+            }
+
 
             m.guid_types_meters = new Guid(Convert.ToString(dr["guid_types_meters"]));
             m.guid_meters = (Convert.ToString(dr["guid_meters"]) != "") ? new Guid(Convert.ToString(dr["guid_meters"])) : m.guid;
@@ -313,7 +320,7 @@ namespace Prizmer.PoolServer.DataBase
 
         public Meter GetMeterByGUID(Guid guid)
         {
-            string query = "SELECT guid, name, address, password, password_type_hex, factory_number_manual, factory_number_readed, is_factory_numbers_equal, dt_install, dt_last_read guid_types_meters, guid_meters, time_delay_current FROM meters" +
+            string query = "SELECT guid, name, address, password, password_type_hex, factory_number_manual, factory_number_readed, is_factory_numbers_equal, dt_install, dt_last_read, guid_types_meters, guid_meters, time_delay_current FROM meters" +
                             " WHERE guid = '" + guid.ToString() + "'";
 
             Object o = GetRecordFromReader(query, RetrieveMeter);
@@ -395,11 +402,13 @@ namespace Prizmer.PoolServer.DataBase
                             "JOIN link_meters_tcpip_settings ON link_meters_tcpip_settings.guid_tcpip_settings ='" + guid_tcpip.ToString() + "' " +
                             "WHERE meters.guid = link_meters_tcpip_settings.guid_meters";
 
+            loggerStorage.LogInfo("GetMetersByTcpIPGUID:q=" + query);
+
             List<Object> list = GetRecordsFromReader(query, RetrieveMeter);
 
             Meter[] result = new Meter[list.Count];
 
-
+            loggerStorage.LogInfo("GetMetersByTcpIPGUID:listCnt=" + list.Count);
 
             for (int i = 0; i < list.Count; i++)
             {
@@ -407,6 +416,9 @@ namespace Prizmer.PoolServer.DataBase
             }
 
             list.Clear();
+
+
+            loggerStorage.LogInfo("GetMetersByTcpIPGUID:resultCnt=" + result.Length);
 
             return result;
         }
@@ -990,7 +1002,7 @@ namespace Prizmer.PoolServer.DataBase
         /// <param name="table">Возвращаемая таблица</param>
         public void FindMetersWithSerial(string factory_number, DataTable table)
         {
-            NpgsqlCommand command = new NpgsqlCommand("SELECT guid, name, factory_number_manual, factory_number_readed, address, password, dt_install, dt_last_read, time_delay_current FROM meters WHERE factory_number_manual LIKE @number OR factory_number_readed LIKE @number", m_pg_con);
+            NpgsqlCommand command = new NpgsqlCommand("SELECT guid, name, factory_number_manual, factory_number_readed, address, password, dt_install, dt_last_read, time_delay_current, guid_types_meters, guid_meters FROM meters WHERE factory_number_manual LIKE @number OR factory_number_readed LIKE @number", m_pg_con);
             command.Parameters.AddWithValue("@number", "%" + factory_number + "%");
             NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command);
             table.Clear();

@@ -28,9 +28,22 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MetersSearchForm));
             this.label1 = new System.Windows.Forms.Label();
             this.SerialNumBox = new System.Windows.Forms.TextBox();
-            this.MetersGrid = new System.Windows.Forms.DataGridView();
+            this.meterInfoTextBox = new System.Windows.Forms.RichTextBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.tbSelectedMeter = new System.Windows.Forms.TextBox();
+            this.btnCopyPrmsToBuffer = new System.Windows.Forms.Button();
+            this.btnRead = new System.Windows.Forms.Button();
+            this.cbReadAllParams = new System.Windows.Forms.CheckBox();
+            this.lbParams = new System.Windows.Forms.ListBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
+            this.MetersGrid = new Prizmer.PoolServer.MyDataGridView();
             this.name = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.address = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.factory_number_manual = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -39,9 +52,7 @@
             this.dt_install = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dt_last_read = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.time_delay_current = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.PortButton = new System.Windows.Forms.Button();
-            this.readParamsButton = new System.Windows.Forms.Button();
-            this.meterInfoTextBox = new System.Windows.Forms.RichTextBox();
+            this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MetersGrid)).BeginInit();
             this.SuspendLayout();
             // 
@@ -62,11 +73,120 @@
             this.SerialNumBox.TabIndex = 2;
             this.SerialNumBox.TextChanged += new System.EventHandler(this.SerialNumBox_TextChanged);
             // 
+            // meterInfoTextBox
+            // 
+            this.meterInfoTextBox.Location = new System.Drawing.Point(548, 348);
+            this.meterInfoTextBox.Name = "meterInfoTextBox";
+            this.meterInfoTextBox.ReadOnly = true;
+            this.meterInfoTextBox.Size = new System.Drawing.Size(327, 251);
+            this.meterInfoTextBox.TabIndex = 7;
+            this.meterInfoTextBox.Text = "";
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.dateTimePicker1);
+            this.groupBox1.Controls.Add(this.tbSelectedMeter);
+            this.groupBox1.Controls.Add(this.btnRead);
+            this.groupBox1.Controls.Add(this.btnCopyPrmsToBuffer);
+            this.groupBox1.Controls.Add(this.cbReadAllParams);
+            this.groupBox1.Controls.Add(this.lbParams);
+            this.groupBox1.Controls.Add(this.label3);
+            this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Location = new System.Drawing.Point(12, 348);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(528, 251);
+            this.groupBox1.TabIndex = 8;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Чтение ";
+            // 
+            // tbSelectedMeter
+            // 
+            this.tbSelectedMeter.Location = new System.Drawing.Point(75, 24);
+            this.tbSelectedMeter.Name = "tbSelectedMeter";
+            this.tbSelectedMeter.ReadOnly = true;
+            this.tbSelectedMeter.Size = new System.Drawing.Size(210, 22);
+            this.tbSelectedMeter.TabIndex = 7;
+            // 
+            // btnCopyPrmsToBuffer
+            // 
+            this.btnCopyPrmsToBuffer.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnCopyPrmsToBuffer.BackgroundImage")));
+            this.btnCopyPrmsToBuffer.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnCopyPrmsToBuffer.Location = new System.Drawing.Point(496, 219);
+            this.btnCopyPrmsToBuffer.Name = "btnCopyPrmsToBuffer";
+            this.btnCopyPrmsToBuffer.Size = new System.Drawing.Size(26, 27);
+            this.btnCopyPrmsToBuffer.TabIndex = 6;
+            this.toolTip1.SetToolTip(this.btnCopyPrmsToBuffer, "Копировать список параметров в буфер обмена");
+            this.btnCopyPrmsToBuffer.UseVisualStyleBackColor = true;
+            this.btnCopyPrmsToBuffer.Click += new System.EventHandler(this.btnCopyPrmsToBuffer_Click);
+            // 
+            // btnRead
+            // 
+            this.btnRead.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnRead.BackgroundImage")));
+            this.btnRead.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.btnRead.Location = new System.Drawing.Point(461, 21);
+            this.btnRead.Name = "btnRead";
+            this.btnRead.Size = new System.Drawing.Size(54, 52);
+            this.btnRead.TabIndex = 5;
+            this.toolTip1.SetToolTip(this.btnRead, "Считать параметры");
+            this.btnRead.UseVisualStyleBackColor = true;
+            this.btnRead.Click += new System.EventHandler(this.btnRead_Click);
+            // 
+            // cbReadAllParams
+            // 
+            this.cbReadAllParams.AutoSize = true;
+            this.cbReadAllParams.Location = new System.Drawing.Point(233, 52);
+            this.cbReadAllParams.Name = "cbReadAllParams";
+            this.cbReadAllParams.Size = new System.Drawing.Size(52, 21);
+            this.cbReadAllParams.TabIndex = 4;
+            this.cbReadAllParams.Text = "все";
+            this.cbReadAllParams.UseVisualStyleBackColor = true;
+            this.cbReadAllParams.CheckedChanged += new System.EventHandler(this.cbReadAllParams_CheckedChanged);
+            // 
+            // lbParams
+            // 
+            this.lbParams.FormattingEnabled = true;
+            this.lbParams.ItemHeight = 16;
+            this.lbParams.Location = new System.Drawing.Point(9, 77);
+            this.lbParams.Name = "lbParams";
+            this.lbParams.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.lbParams.Size = new System.Drawing.Size(506, 164);
+            this.lbParams.TabIndex = 3;
+            this.lbParams.SelectedIndexChanged += new System.EventHandler(this.lbParams_SelectedIndexChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(6, 53);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(182, 17);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "Считываемые параметры:";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 27);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(63, 17);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "Выбран:";
+            // 
+            // dateTimePicker1
+            // 
+            this.dateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dateTimePicker1.Location = new System.Drawing.Point(301, 24);
+            this.dateTimePicker1.Margin = new System.Windows.Forms.Padding(4);
+            this.dateTimePicker1.Name = "dateTimePicker1";
+            this.dateTimePicker1.Size = new System.Drawing.Size(144, 22);
+            this.dateTimePicker1.TabIndex = 8;
+            this.dateTimePicker1.Value = new System.DateTime(2017, 3, 2, 0, 0, 0, 0);
+            // 
             // MetersGrid
             // 
             this.MetersGrid.AllowUserToAddRows = false;
             this.MetersGrid.AllowUserToDeleteRows = false;
             this.MetersGrid.AllowUserToResizeColumns = false;
+            this.MetersGrid.AllowUserToResizeRows = false;
             this.MetersGrid.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
             this.MetersGrid.ColumnHeadersHeight = 37;
             this.MetersGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
@@ -85,8 +205,10 @@
             this.MetersGrid.RowHeadersVisible = false;
             this.MetersGrid.RowTemplate.Height = 24;
             this.MetersGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.MetersGrid.Size = new System.Drawing.Size(643, 300);
+            this.MetersGrid.Size = new System.Drawing.Size(861, 300);
             this.MetersGrid.TabIndex = 3;
+            this.MetersGrid.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.MetersGrid_CellDoubleClick);
+            this.MetersGrid.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.MetersGrid_PreviewKeyDown);
             // 
             // name
             // 
@@ -149,43 +271,13 @@
             this.time_delay_current.Name = "time_delay_current";
             this.time_delay_current.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             // 
-            // PortButton
-            // 
-            this.PortButton.Location = new System.Drawing.Point(364, 5);
-            this.PortButton.Name = "PortButton";
-            this.PortButton.Size = new System.Drawing.Size(76, 31);
-            this.PortButton.TabIndex = 5;
-            this.PortButton.Text = "Порт";
-            this.PortButton.UseVisualStyleBackColor = true;
-            this.PortButton.Click += new System.EventHandler(this.PortButton_Click);
-            // 
-            // readParamsButton
-            // 
-            this.readParamsButton.Location = new System.Drawing.Point(446, 5);
-            this.readParamsButton.Name = "readParamsButton";
-            this.readParamsButton.Size = new System.Drawing.Size(209, 31);
-            this.readParamsButton.TabIndex = 6;
-            this.readParamsButton.Text = "Считываемые параметры";
-            this.readParamsButton.UseVisualStyleBackColor = true;
-            this.readParamsButton.Click += new System.EventHandler(this.ReadParamsButton_Click);
-            // 
-            // meterInfoTextBox
-            // 
-            this.meterInfoTextBox.Location = new System.Drawing.Point(12, 348);
-            this.meterInfoTextBox.Name = "meterInfoTextBox";
-            this.meterInfoTextBox.ReadOnly = true;
-            this.meterInfoTextBox.Size = new System.Drawing.Size(643, 112);
-            this.meterInfoTextBox.TabIndex = 7;
-            this.meterInfoTextBox.Text = "";
-            // 
             // MetersSearchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(667, 468);
+            this.ClientSize = new System.Drawing.Size(887, 606);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.meterInfoTextBox);
-            this.Controls.Add(this.readParamsButton);
-            this.Controls.Add(this.PortButton);
             this.Controls.Add(this.MetersGrid);
             this.Controls.Add(this.SerialNumBox);
             this.Controls.Add(this.label1);
@@ -195,6 +287,8 @@
             this.Text = "Поиск счётчиков";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MetersSearchForm_FormClosing);
             this.Load += new System.EventHandler(this.MetersSearchForm_Load);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MetersGrid)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -204,9 +298,7 @@
         #endregion
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox SerialNumBox;
-        private System.Windows.Forms.DataGridView MetersGrid;
-        private System.Windows.Forms.Button PortButton;
-        private System.Windows.Forms.Button readParamsButton;
+        private MyDataGridView MetersGrid;
         private System.Windows.Forms.RichTextBox meterInfoTextBox;
         private System.Windows.Forms.DataGridViewTextBoxColumn name;
         private System.Windows.Forms.DataGridViewTextBoxColumn address;
@@ -216,6 +308,16 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dt_install;
         private System.Windows.Forms.DataGridViewTextBoxColumn dt_last_read;
         private System.Windows.Forms.DataGridViewTextBoxColumn time_delay_current;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.ListBox lbParams;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button btnRead;
+        private System.Windows.Forms.CheckBox cbReadAllParams;
+        private System.Windows.Forms.Button btnCopyPrmsToBuffer;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.TextBox tbSelectedMeter;
+        public System.Windows.Forms.DateTimePicker dateTimePicker1;
     }
 }
 

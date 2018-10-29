@@ -62,6 +62,7 @@ namespace PollingLibraries.LibPorts
         string GetConnectionType();
         bool ReInitialize();
         bool GetLocalEndPoint(ref IPEndPoint localEp);
+        bool OpenPort();
         void Close();
         void SetReadTimeout(int timeout = 1200);
 
@@ -608,6 +609,11 @@ namespace PollingLibraries.LibPorts
                 return m_address.ToString() + ":" + m_port;
             else
                 return "";
+        }
+
+        public bool OpenPort()
+        {
+            return true;
         }
     }
 
