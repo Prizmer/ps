@@ -52,7 +52,7 @@ namespace Prizmer.PoolServer
            // byte[] cmdHang = ASCIIEncoding.ASCII.GetBytes(at_cmd_hang);
             
 
-            const string SO_VERSION = "v. 0.15.0";
+            const string SO_VERSION = "v. 0.15.1";
             this.Text += " - " + SO_VERSION;
 
             try
@@ -557,7 +557,8 @@ namespace Prizmer.PoolServer
 
         private void ctxMenuShowLogsDir_Click(object sender, EventArgs e)
         {
-            Process.Start("explorer.exe", @Logger.BaseDirectory);
+            string exeLocation = AppDomain.CurrentDomain.BaseDirectory + @Logger.BaseDirectory;
+            Process.Start("explorer.exe", exeLocation);
         }
 
         private void ctxMenuDeleteLogs_Click(object sender, EventArgs e)

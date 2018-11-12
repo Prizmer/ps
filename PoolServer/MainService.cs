@@ -26,10 +26,16 @@ using Drivers.UMDriver;
 using Drivers.Mercury23XDriver;
 using Drivers.Karat30XDriver;
 
+
+
 namespace Prizmer.PoolServer
 {
     public class MainService
     {
+        Helper helper = new Helper();
+        Type resultEnumType = typeof(PollingResultStatus);
+
+
         public delegate void MyEventHandler(object sender, MyEventArgs e);
         public event MyEventHandler pollingStarted;
         public event MyEventHandler pollingEnded;
@@ -342,7 +348,7 @@ namespace Prizmer.PoolServer
                 stoppingStarted(this, mea);
 
 
-            int periods = 120;
+            int periods = 30;
 
 
             if (doAbort)
@@ -471,9 +477,9 @@ namespace Prizmer.PoolServer
             return errStrArr[1];
         }
 
-        private int pollSerialNumber(PollMethodsParams pmPrms)
+        private PollingResultStatus pollSerialNumber(PollMethodsParams pmPrms)
         {
-            if (bStopServer) return 1;
+            if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
             // pmPrms.logger.LogInfo("Чтение серийника открыт");
             string serial_number_with_err = String.Empty;
@@ -534,15 +540,15 @@ namespace Prizmer.PoolServer
             else
             {
                 //связь с прибором не установлена
-                return 3;
+                return PollingResultStatus.OPEN_LINK_CHANNEL_FAULT;
             }
 
-            return 0;
+            return PollingResultStatus.OK;
         }
 
-        private int pollCurrent(PollMethodsParams pmPrms, DateTime currentDT)
+        private PollingResultStatus pollCurrent(PollMethodsParams pmPrms, DateTime currentDT)
         {
-            if (bStopServer) return 1;
+            if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
             //чтение текущих параметров, подлежащих чтению, относящихся к конкретному прибору
             TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid, 0);
@@ -554,7 +560,7 @@ namespace Prizmer.PoolServer
                 {
                     for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                     {
-                        if (bStopServer) return 1;
+                        if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
                         Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
                         if (param.guid == Guid.Empty) continue;
@@ -582,20 +588,20 @@ namespace Prizmer.PoolServer
                 else
                 {
                     //связь с прибором не установлена
-                    return 3;
+                    return PollingResultStatus.OPEN_LINK_CHANNEL_FAULT;
                 }
             }
             else
             {
                 //параметры данного типа не считываются
-                return 2;
+                return PollingResultStatus.NO_TAKEN_PARAMS;
             }
 
-            return 0;
+            return PollingResultStatus.OK;
         }
-        private int pollDaily(PollMethodsParams pmPrms, DateTime date, bool bArchiveType = false)
+        private PollingResultStatus pollDaily(PollMethodsParams pmPrms, DateTime date, bool bArchiveType = false)
         {
-            if (bStopServer) return 1;
+            if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
             //pmPrms.logger.LogInfo("Polling daily...");
 
@@ -615,7 +621,7 @@ namespace Prizmer.PoolServer
 
                 for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                 {
-                    if (bStopServer) return 1;
+                    if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
                     Value[] lastvalue = pmPrms.ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], startDate, endDate);
                     if (lastvalue.Length > 0) continue;
@@ -657,14 +663,14 @@ namespace Prizmer.PoolServer
             }
             else
             {
-                return 2;
+                return PollingResultStatus.NO_TAKEN_PARAMS;
             }
 
-            return 0;
+            return PollingResultStatus.OK;
         }
-        private int pollMonthly(PollMethodsParams pmPrms, object oDate = null)
+        private PollingResultStatus pollMonthly(PollMethodsParams pmPrms, object oDate = null)
         {
-            if (bStopServer) return 1;
+            if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
 
             DateTime dtStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
@@ -682,7 +688,7 @@ namespace Prizmer.PoolServer
                 for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                 {
                     if (bStopServer){
-                        return 1;  
+                        return PollingResultStatus.STOP_SERVER_REQUEST;
                     }
 
                     Value[] lastvalue = pmPrms.ServerStorage.GetExistsMonthlyValuesDT(takenparams[tpindex], dtStart, dtStart);
@@ -732,15 +738,15 @@ namespace Prizmer.PoolServer
             }
             else
             {
-                return 2;
+                return PollingResultStatus.NO_TAKEN_PARAMS;
             }
 
-            return 0;
+            return PollingResultStatus.OK;
         }
 
-        private int pollArchivesOld(PollMethodsParams pmPrms)
+        private PollingResultStatus pollArchivesOld(PollMethodsParams pmPrms)
         {
-            if (bStopServer) return 1;
+            if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
             DateTime cur_date = DateTime.Now.Date;
             DateTime dt_install = pmPrms.metersbyport[pmPrms.MetersCounter].dt_install.Date;
@@ -756,7 +762,7 @@ namespace Prizmer.PoolServer
 
                 for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                 {
-                    if (bStopServer) return 1;
+                    if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
                     //получим все записи в интервале от даты установки (если нет, от начала НЭ) до текущего момента
                     Value[] valueArr = pmPrms.ServerStorage.GetExistsDailyValuesDT(takenparams[tpindex], dt_install, cur_date);
@@ -827,11 +833,11 @@ namespace Prizmer.PoolServer
                 }
 
             }
-            return 0;
+            return PollingResultStatus.OK;
         }
-        private int pollArchivesNewActual(PollMethodsParams pmPrms)
+        private PollingResultStatus pollArchivesNewActual(PollMethodsParams pmPrms)
         {
-            if (bStopServer) return 1;
+            if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
             bool doArchLog = true;
 
@@ -853,7 +859,7 @@ namespace Prizmer.PoolServer
                 for (int tpindex = 0; tpindex < takenparams.Length; tpindex++)
                 {
                     if (doArchLog) pmPrms.logger.LogInfo("Архивные: параметр: " + tpindex.ToString());
-                    if (bStopServer) return 1;
+                    if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
                     Param param = pmPrms.ServerStorage.GetParamByGUID(takenparams[tpindex].guid_params);
                     if (param.guid == Guid.Empty) continue;
 
@@ -923,7 +929,7 @@ namespace Prizmer.PoolServer
                     }
                 }
             }
-            return 0;
+            return PollingResultStatus.OK;
         }
 
         #region Методы чтения получасовок (старые)
@@ -1648,13 +1654,12 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
         //TODO: refactor 
         #endregion
 
-        private int pollHalfsAutomatically(PollMethodsParams pmPrms)
+        private PollingResultStatus pollHalfsAutomatically(PollMethodsParams pmPrms)
         {
-            if (bStopServer) return 1;
+            if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
             const byte SLICE_PER_HALF_AN_HOUR_TYPE = 4;                         //тип значения в БД (получасовой)
             const byte SLICE_PER_HALF_AN_HOUR_PERIOD = 30;                      //интервал записи срезов
-            bool successFlag = false;
             bool lFlag = true;
 
             //чтение получасовых срезов, подлежащих чтению, относящихся к конкретному прибору
@@ -1716,13 +1721,13 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     if (!res)
                     {
                         if (lFlag) pmPrms.logger.LogInfo("Получасовки: метод ReadPowerSlice вернул 0 значений, выход");
-                        return 0;
+                        return PollingResultStatus.OK;
                     }
 
                     //если срезы из указанного диапазона дат прочитаны успешно
                     foreach (RecordPowerSlice rps in lrps)
                     {
-                        if (bStopServer) return 1;
+                        if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
 
                         for (int tpInd = 0; tpInd < takenparams.Length; tpInd++)
@@ -1763,23 +1768,22 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 else
                 {
                     if (lFlag) pmPrms.logger.LogInfo("Получасовки: не удалось открыть канал...");
-                    return 3;
+                    return PollingResultStatus.OPEN_LINK_CHANNEL_FAULT;
                 }
             }
             else
             {
-                return 2;
+                return PollingResultStatus.NO_TAKEN_PARAMS;
             }
 
-            return successFlag ? 10 : 0;
+            return PollingResultStatus.OK;
         }
-        private int pollHalfsForDate(PollMethodsParams pmPrms, DateTime date)
+        private PollingResultStatus pollHalfsForDate(PollMethodsParams pmPrms, DateTime date)
         {
-            if (bStopServer) return 1;
+            if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
             const byte SLICE_PER_HALF_AN_HOUR_TYPE = 4;                         //тип значения в БД (получасовой)
             const byte SLICE_PER_HALF_AN_HOUR_PERIOD = 30;                      //интервал записи срезов
-            bool successFlag = false;
             bool lFlag = true;
 
             //чтение получасовых срезов, подлежащих чтению, относящихся к конкретному прибору
@@ -1828,7 +1832,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     if (leastValueCnt == slicesNumber)
                     {
                         if (lFlag) pmPrms.logger.LogInfo("Получасовки:  за данный период УЖЕ получено " + leastValueCnt + " значений, выход");
-                        return 10;
+                        return PollingResultStatus.SEE_DETAILS_IN_CODE_1;
                     }
   
                     //прочитаем срезы от самого раннего до date_to
@@ -1843,13 +1847,13 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     if (!res)
                     {
                         if (lFlag) pmPrms.logger.LogInfo("Получасовки: метод ReadPowerSlice вернул 0 значений, выход");
-                        return 0;
+                        return PollingResultStatus.OK;
                     }
 
                     //если срезы из указанного диапазона дат прочитаны успешно
                     foreach (RecordPowerSlice rps in lrps)
                     {
-                        if (bStopServer) return 1;
+                        if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
 
                         for (int tpInd = 0; tpInd < takenparams.Length; tpInd++)
@@ -1890,25 +1894,22 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 else
                 {
                     if (lFlag) pmPrms.logger.LogInfo("Получасовки: не удалось открыть канал...");
-                    return 3;
+                    return PollingResultStatus.OPEN_LINK_CHANNEL_FAULT;
                 }
             }
             else
             {
-                return 2;
+                return PollingResultStatus.NO_TAKEN_PARAMS;
             }
 
-            return successFlag ? 10 : 0;
+            return PollingResultStatus.OK;
         }
 
-        private int pollHours(PollMethodsParams pmPrms)
+        private PollingResultStatus pollHours(PollMethodsParams pmPrms)
         {
             #region ЧАСОВЫЕ СРЕЗЫ
-            if (bStopServer) return 1;
+            if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
-            const bool LOG_SLICES = false;
-            const bool LOG_HOURSLICES_ERRORS = true;
-            const bool SEL_DATE_REGION_LOGGING = false;
 
             const byte SLICE_TYPE = 5;                         //тип значения в БД (получасовой/часовой)
             const SlicePeriod SLICE_PERIOD = SlicePeriod.Hour;
@@ -1922,7 +1923,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                  * блока чтения срезов в случае ошибки*/
                 while (true)
                 {
-                    if (bStopServer) return 1;
+                    if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
                     //чтение 'дескрипторов' считываемых параметров указанного типа
                     TakenParams[] takenparams = pmPrms.ServerStorage.GetTakenParamByMetersGUIDandParamsType(pmPrms.metersbyport[pmPrms.MetersCounter].guid,
@@ -1948,7 +1949,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                         break;
                     }
 
-                    if (bStopServer) return 1;
+                    if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
                     //некоторые счетчики хранят дату инициализации архива (начала учета)
                     DateTime dt_last_slice_arr_init = new DateTime();
@@ -1962,10 +1963,10 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     Dictionary<DateTime, List<TakenParams>> dt_param_dict = new Dictionary<DateTime, List<TakenParams>>();
                     for (int i = 0; i < takenparams.Length; i++)
                     {
-                        if (bStopServer) return 1;
+                        if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
                         string paramName = pmPrms.ServerStorage.GetParamByGUID(takenparams[i].guid_params).name;
-                        if (bStopServer) return 1;
+                        if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
                         //получим последний (по дате) срез для читаемого параметра i
                         Value latestSliceVal = pmPrms.ServerStorage.GetLatestVariousValue(takenparams[i]);
 
@@ -2079,7 +2080,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
 
                     foreach (KeyValuePair<DateTime, List<TakenParams>> pair in dt_param_dict)
                     {
-                        if (bStopServer) return 1;
+                        if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
                         DateTime tmpDate = pair.Key;
                         List<TakenParams> tmpTpList = pair.Value;
@@ -2119,7 +2120,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                         //meter.WriteToLog("RSL: Данные прочитаны, осталось занести в базу", LOG_SLICES);
                         foreach (SliceDescriptor su in sliceDescrList)
                         {
-                            if (bStopServer) return 1;
+                            if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
                             for (uint i = 0; i < su.ValuesCount; i++)
                             {
@@ -2173,16 +2174,17 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             else
             {
                 //ошибка Связь неустановлена
+                return PollingResultStatus.OPEN_LINK_CHANNEL_FAULT;
             }
             #endregion     
-            return 0;
+            return PollingResultStatus.OK;
         }
 
 
 
 
         // Обеспечивает ручное дочитывание
-        private int pollDatesRange(MyEventArgs myEventArgs, MainFormParamsStructure mfPrms, PollMethodsParams pmPrms)
+        private PollingResultStatus pollDatesRange(MyEventArgs myEventArgs, MainFormParamsStructure mfPrms, PollMethodsParams pmPrms)
         {
 
             myEventArgs.metersCount = pmPrms.metersbyport.Length;
@@ -2196,6 +2198,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
             DateTime dtEnd = mfPrms.dtEnd.Date;
             TimeSpan diff = dtEnd - dtStart;
 
+            pmPrms.logger.LogInfo("*** РУЧНАЯ ДОЧИТКА (метод pollDatesRange) ***");
             pmPrms.logger.LogInfo("Вычитка данных за интервал дат для " + mName);
             pmPrms.logger.LogInfo("Дата начала: " + dtStart.ToShortDateString());
             pmPrms.logger.LogInfo("Дата конца: " + dtEnd.ToShortDateString());
@@ -2218,10 +2221,15 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
 
             if (takenparams.Length > 0)
             {
-                if (bStopServer) return 1;
+                if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
                 DateTime tmpDateTime = new DateTime(dtStart.Ticks);
                 int totalD = (int)diff.TotalDays;
+
+                if (mfPrms.mode == OperatingMode.OM_MANUAL_SEARCH_FORM)
+                    pmPrms.logger.LogInfo("Инициатор: форма поиска приборов");
+                else
+                    pmPrms.logger.LogInfo("Инициатор: главная форма");
 
                 for (int d = 0; d <= totalD; d++)
                 {
@@ -2229,43 +2237,67 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
 
                     if (mfPrms.mode == OperatingMode.OM_MANUAL_SEARCH_FORM)
                     {
+                        PollingResultStatus[] statusArr = new PollingResultStatus[] { PollingResultStatus.UNDEFINED, PollingResultStatus.UNDEFINED,
+                            PollingResultStatus.UNDEFINED, PollingResultStatus.UNDEFINED };
+                        string statusStr = String.Empty;
+
                         // если дочитка с формы поиска, то у считываемых параметров разные типа
                         // вызовем все активные методы
                         if (pollingParams.b_poll_current)
-                            pollCurrent(pmPrms, tmpDateTime);                         
+                        {
+                            statusArr[0] = pollCurrent(pmPrms, tmpDateTime);
+                            statusStr += "Текущие: " + helper.GetEnumKeyAsString(resultEnumType, statusArr[0]) + "; ";
+                        }
+                  
                         if (pollingParams.b_poll_day)
-                            pollDaily(pmPrms, tmpDateTime); 
-                        if (pollingParams.b_poll_month)
-                            pollMonthly(pmPrms, tmpDateTime);
+                        {
+                            statusArr[1] = pollDaily(pmPrms, tmpDateTime);
+                            statusStr += "Суточные: " + helper.GetEnumKeyAsString(resultEnumType, statusArr[1]) + "; ";
+                        }
 
-                        DateTime dt_start_halfs = new DateTime(tmpDateTime.Year, tmpDateTime.Month, tmpDateTime.Day, 0, 0, 0);
-                        DateTime dt_end_halfs = new DateTime(tmpDateTime.Year, tmpDateTime.Month, tmpDateTime.Day, 23, 59, 59);    
+                        if (pollingParams.b_poll_month)
+                        {
+                            statusArr[2] = pollMonthly(pmPrms, tmpDateTime);
+                            statusStr += "Месячные: " + helper.GetEnumKeyAsString(resultEnumType, statusArr[1]) + "; ";
+                        }
+
                         if (pollingParams.b_poll_halfanhour)
-                            pollHalfsForDate(pmPrms, tmpDateTime);       
+                        {
+                            DateTime dt_start_halfs = new DateTime(tmpDateTime.Year, tmpDateTime.Month, tmpDateTime.Day, 0, 0, 0);
+                            DateTime dt_end_halfs = new DateTime(tmpDateTime.Year, tmpDateTime.Month, tmpDateTime.Day, 23, 59, 59);
+                            statusArr[3] = pollHalfsForDate(pmPrms, tmpDateTime);
+                            statusStr += "Получасовые: " + helper.GetEnumKeyAsString(resultEnumType, statusArr[1]) + ";";
+                        }
+
+                        pmPrms.logger.LogInfo(statusStr + "\n");
                     }
                     else
                     {
                         // если дочитка с главной формы, мы сами указали тип считываемого параметра
                         // вызываем нужный метод
+
+                        PollingResultStatus prSt = PollingResultStatus.UNDEFINED;
+
+
                         if (mfPrms.paramType == 0)
                         {
                             //текущий
-                            pollCurrent(pmPrms, tmpDateTime);
+                            prSt = pollCurrent(pmPrms, tmpDateTime);
                         }
                         else if (mfPrms.paramType == 1)
                         {
                             //суточный
-                            pollDaily(pmPrms, tmpDateTime);
+                            prSt = pollDaily(pmPrms, tmpDateTime);
                         }
                         else if (mfPrms.paramType == 2)
                         {
                             //месячный
-                            pollMonthly(pmPrms, tmpDateTime);
+                            prSt = pollMonthly(pmPrms, tmpDateTime);
                         }
                         else if (mfPrms.paramType == 3)
                         {
                             //архивный
-                            pollDaily(pmPrms, tmpDateTime, true);
+                            prSt = pollDaily(pmPrms, tmpDateTime, true);
                             //return 2;
                         }
                         else if (mfPrms.paramType == 4)
@@ -2275,7 +2307,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                             DateTime dt_start_halfs = new DateTime(tmpDateTime.Year, tmpDateTime.Month, tmpDateTime.Day, 0, 0, 0);
                             DateTime dt_end_halfs = new DateTime(tmpDateTime.Year, tmpDateTime.Month, tmpDateTime.Day, 23, 59, 59);
 
-                            pollHalfsForDate(pmPrms, tmpDateTime);
+                            prSt = pollHalfsForDate(pmPrms, tmpDateTime);
                         }
                     }
 
@@ -2283,7 +2315,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 }
             }
 
-            return 0;
+            return PollingResultStatus.OK;
         }
 
         #endregion
@@ -2532,9 +2564,10 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 // POLLING_ACTIVE && DM_POLL_ADDR
                 if (DM_POLL_ADDR)
                 {
-                    int status = pollSerialNumber(pmPrms);
-                    pmPrms.logger.LogInfo("Прочитал серийный номер со статусом: " + status);
-                    if (status == 1) goto CloseThreadPoint;
+                    PollingResultStatus status = pollSerialNumber(pmPrms);
+                    string statusStr = helper.GetEnumKeyAsString(resultEnumType, status);
+                    pmPrms.logger.LogInfo("Прочитал серийный номер со статусом: " + statusStr);
+                    if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
                 }
 
 
@@ -2542,27 +2575,30 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 if (bStopServer) goto CloseThreadPoint;
                 if (POLLING_ACTIVE && DM_POLL_CURR && pollingParams.b_poll_current)
                 {
-                    int status = pollCurrent(pmPrms, DateTime.Now);
-                    pmPrms.logger.LogInfo("Прочитал ТЕКУЩИЕ со статусом: " + status);
-                    if (status == 1) goto CloseThreadPoint;
+                    PollingResultStatus status = pollCurrent(pmPrms, DateTime.Now);
+                    string statusStr = helper.GetEnumKeyAsString(resultEnumType, status);
+                    pmPrms.logger.LogInfo("Прочитал ТЕКУЩИЕ со статусом: " + statusStr);
+                    if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
                 }
 
                 //***************************************| На начало СУТОК (1) |***************************************   
                 if (bStopServer) goto CloseThreadPoint;
                 if (POLLING_ACTIVE && DM_POLL_DAY && pollingParams.b_poll_day)
                 {
-                    int status = pollDaily(pmPrms, DateTime.Now);
-                    pmPrms.logger.LogInfo("Прочитал СУТОЧНЫЕ со статусом: " + status);
-                    if (status == 1) goto CloseThreadPoint;
+                    PollingResultStatus status = pollDaily(pmPrms, DateTime.Now);
+                    string statusStr = helper.GetEnumKeyAsString(resultEnumType, status);
+                    pmPrms.logger.LogInfo("Прочитал СУТОЧНЫЕ со статусом: " + statusStr);
+                    if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
                 }
 
                 //***************************************| На начало МЕСЯЦА (2) |***************************************  
                 if (bStopServer) goto CloseThreadPoint;
                 if (POLLING_ACTIVE && DM_POLL_MONTH && pollingParams.b_poll_month)
                 {
-                    int status = pollMonthly(pmPrms);
-                    pmPrms.logger.LogInfo("Прочитал МЕСЯЧНЫЕ со статусом: " + status);
-                    if (status == 1) goto CloseThreadPoint;
+                    PollingResultStatus status = pollMonthly(pmPrms);
+                    string statusStr = helper.GetEnumKeyAsString(resultEnumType, status);
+                    pmPrms.logger.LogInfo("Прочитал МЕСЯЧНЫЕ со статусом: " + statusStr);
+                    if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
                 }
 
                 //***************************************| Значения АРХИВНЫЕ (3) |***************************************  
@@ -2577,12 +2613,13 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 {
                     pollArchivesNewActual(pmPrms);
                 }
-                if (DM_POLL_ARCHIVE && pollingParams.b_poll_archive)
+                if (POLLING_ACTIVE && DM_POLL_ARCHIVE && pollingParams.b_poll_archive)
                 {
                     const bool bPollArchiveAsDaily = true;
-                    int status = pollDaily(pmPrms, DateTime.Now, bPollArchiveAsDaily);
-                    pmPrms.logger.LogInfo("Прочитал СУТОЧНЫЕ (бывш. АРХИВНЫЕ) со статусом: " + status);
-                    if (status == 1) goto CloseThreadPoint;
+                    PollingResultStatus status = pollDaily(pmPrms, DateTime.Now, bPollArchiveAsDaily);
+                    string statusStr = helper.GetEnumKeyAsString(resultEnumType, status);
+                    pmPrms.logger.LogInfo("Прочитал СУТОЧНЫЕ (бывш. АРХИВНЫЕ) со статусом: " + statusStr);
+                    if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
                 }
 
                 //***************************************| Значения ПОЛУЧАСОВЫЕ (4) |***************************************  
@@ -2600,16 +2637,16 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                         DateTime dtCur = DateTime.Now;
                         DateTime dtStartY = new DateTime(dtCur.Year, dtCur.Month, dtCur.Day, 0, 0, 0).AddDays(-1);
 
-                        int status = pollHalfsForDate(pmPrms, dtStartY);
-                        if (status == 1) goto CloseThreadPoint;
+                        PollingResultStatus status = pollHalfsForDate(pmPrms, dtStartY);
+                        if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
 
                         status = pollHalfsAutomatically(pmPrms);
-                        if (status == 1) goto CloseThreadPoint;
+                        if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
                     }
                     else
                     {
-                        int status = pollHalfsAutomatically(pmPrms);
-                        if (status == 1) goto CloseThreadPoint;
+                        PollingResultStatus status = pollHalfsAutomatically(pmPrms);
+                        if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
                     }
                 }
 
@@ -2617,8 +2654,8 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 if (bStopServer) goto CloseThreadPoint;
                 if (false && POLLING_ACTIVE && DM_POLL_HOUR && pollingParams.b_poll_hour)
                 {
-                    int status = pollHours(pmPrms);
-                    if (status == 1) goto CloseThreadPoint;
+                    PollingResultStatus status = pollHours(pmPrms);
+                    if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
                 }
                 
 
@@ -2628,8 +2665,8 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 //*********************************************************************************************************************
                 if (mfPrms.mode != OperatingMode.OM_AUTO && typemeter.guid == mfPrms.driverGuid)
                 {
-                    int status = pollDatesRange(myEventArgs, mfPrms, pmPrms);
-                    if (status == 1) goto CloseThreadPoint;                   
+                    PollingResultStatus status = pollDatesRange(myEventArgs, mfPrms, pmPrms);
+                    if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
                 }
 
             NetxMeter:
@@ -2703,10 +2740,23 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
         }
     }
 
+    public enum PollingResultStatus
+    {
+        UNDEFINED = -1,
+        OK = 0,
+        STOP_SERVER_REQUEST = 1,
+        NO_TAKEN_PARAMS = 2,
+        OPEN_LINK_CHANNEL_FAULT = 3,
+
+        SEE_DETAILS_IN_CODE_1 = 10
+    }
+
     public class MyEventArgs:EventArgs
     {
         public int metersCount;
         public bool success;
         public int currentCount;
     }
+
+
 }

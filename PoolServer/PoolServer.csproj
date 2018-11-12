@@ -104,6 +104,7 @@
     </Compile>
     <Compile Include="DataBase\DBInterface.cs" />
     <Compile Include="DataBase\PgStorage.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="MetersSearchForm.cs">
       <SubType>Form</SubType>
     </Compile>
