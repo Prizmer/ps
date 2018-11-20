@@ -495,7 +495,7 @@ namespace PollingLibraries.LibPorts
                                 }
                                 catch (Exception ex)
                                 {
-                                    WriteToLog("WriteReadData: Read from port error: " + ex.Message);
+                                    WriteToLog("WriteReadData: Reading from port error: " + ex.Message);
                                 }
 
                                 Queue<byte> tmpQ = new Queue<byte>();
@@ -566,18 +566,6 @@ namespace PollingLibraries.LibPorts
 
         public void WriteToLog(string str)
         {
-            //if (areLogsRestricted) return;
-            //try
-            //{
-            //    using (StreamWriter sw = new StreamWriter(@"logs\tcp_ports.log", true, Encoding.Default))
-            //    {
-            //        sw.WriteLine(DateTime.Now.ToString() + ": " + GetName() + ": " + str);
-            //    }
-            //}
-            //catch
-            //{
-            //}
-
             tcpLogger.LogWarn(str);
         }
 
@@ -627,22 +615,6 @@ namespace PollingLibraries.LibPorts
         ComPortSettings _cps = new ComPortSettings();
         Logger comLogger;
 
-        //public ComPort(byte number, int baudrate, byte data_bits, byte parity, byte stop_bits, ushort write_timeout, ushort read_timeout, byte attemts)
-        //{
-        //    serialPort = new SerialPort("COM" + number);
-
-
-        //    serialPort.BaudRate = baudrate;
-        //    serialPort.Parity = (Parity)parity;
-
-        //    serialPort.DataBits = data_bits;
-        //    serialPort.StopBits = (StopBits)stop_bits;
-
-        //    readTimeout = read_timeout;
-        //    writeTimeout = write_timeout;
-        //}
-
-
         public ComPort(ComPortSettings cps)
         {
             _cps = cps;
@@ -691,21 +663,20 @@ namespace PollingLibraries.LibPorts
 
         public ComPort(SerialPort sp, byte attempts, ushort read_timeout, ushort write_timeout)
         {
-            //comLogger = new Logger();
-            //comLogger.Initialize(Logger.DIR_LOGS_PORTS, false, GetName());
-
             comLogger = new Logger();
             comLogger.Initialize(Logger.DIR_LOGS_PORTS, false, "COM" + sp.PortName);
 
             serialPort = new SerialPort(sp.PortName, sp.BaudRate, sp.Parity, sp.DataBits, sp.StopBits);
+            serialPort.DtrEnable = sp.DtrEnable;
 
             readTimeout = read_timeout;
             writeTimeout = write_timeout;
 
-            serialPort.ReadTimeout = 5000;
-            serialPort.WriteTimeout = 1000;
+            //serialPort.ReadTimeout = readTimeout;
+            //serialPort.WriteTimeout = writeTimeout;
 
-            serialPort.DtrEnable = true;
+            serialPort.RtsEnable = true;
+            serialPort.Handshake = Handshake.None;
         }
 
         ~ComPort()
@@ -852,10 +823,8 @@ namespace PollingLibraries.LibPorts
         public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
             isIdle = false;
-
             if (!OpenPort()) return 0;
-
-            
+     
             if (_cps.gsm_on && !isConnectedToAt && !isTryingToPerformATConnect && !isTryingToPerformATDisconnect)
             {
                 isTryingToPerformATConnect = true;
@@ -874,40 +843,59 @@ namespace PollingLibraries.LibPorts
                 }
             }
 
-            // Thread.Sleep(10);
-            serialPort.Write(out_buffer, 0, out_buffer.Length);
-            comLogger.LogInfo("OutData: " + BitConverter.ToString(out_buffer));
 
-            Thread.Sleep(10);
-            if (serialPort.BytesToRead == 0)
-                Thread.Sleep(1200);
+            string infStrCustom = String.Format("Custom: RTimeout: {0}; WTimeout: {1};", readTimeout, writeTimeout);
+            string infStrPort = String.Format("PortInfo: NAME: {0}; Parity: {1}; DTR: {2}; STOP: {3}; BITES: {4}; RTS: {5};", 
+                serialPort.PortName.ToString(), serialPort.Parity, serialPort.DtrEnable.ToString(), serialPort.StopBits, serialPort.DataBits, serialPort.RtsEnable.ToString());
+            string infStrArg = String.Format("WriteReadDataArg: out_length (properCMDLength): {0};", out_length);
+            WriteToLog("START with:" + Environment.NewLine + infStrCustom + Environment.NewLine + infStrPort + 
+                Environment.NewLine + infStrArg);
+
+
+            serialPort.Write(out_buffer, 0, out_buffer.Length);
+            WriteToLog("<< Written data: " + BitConverter.ToString(out_buffer) + "\n");
+
+            //Thread.Sleep(10);
+            //if (serialPort.BytesToRead == 0)
+            //    Thread.Sleep(writeTimeout);
 
             int elapsedTime = 0;
 
-            List<byte> inList = new List<byte>();
+            List<byte> inBufferList = new List<byte>();
 
             while (elapsedTime < readTimeout)
             {
                 if (serialPort.BytesToRead > 0)
                 {
-                    in_buffer = new byte[serialPort.BytesToRead];
-                    serialPort.Read(in_buffer, 0, in_buffer.Length);
-                    if (in_buffer.Length > 0)
-                        inList.AddRange(in_buffer);
+                    try
+                    {
+                        byte[] tmp_buff = new byte[serialPort.BytesToRead];
+                        serialPort.Read(tmp_buff, 0, tmp_buff.Length);
+
+                        if (tmp_buff.Length > 0)
+                            inBufferList.AddRange(tmp_buff);
+
+                        WriteToLog(">> received_" + elapsedTime + "ms (" + tmp_buff.Length + " bytes): " + BitConverter.ToString(inBufferList.ToArray()));
+
+                    } catch (Exception ex)
+                    {
+                        WriteToLog("WriteReadData: Reading from port error: " + ex.Message);
+                    }
 
                     Queue<byte> tmpQ = new Queue<byte>();
-                    for (int j = inList.Count - 1; j >= 0; j--)
-                        tmpQ.Enqueue(inList[j]);
+                    for (int j = inBufferList.Count - 1; j >= 0; j--)
+                        tmpQ.Enqueue(inBufferList[j]);
 
                     int packageSign = func(tmpQ);
                     if (packageSign == 1)
                     {
-                        in_buffer = inList.ToArray();
+                        in_buffer = inBufferList.ToArray();
+                        WriteToLog("WriteReadData: break with packageSign; result=" + packageSign);
                         break;                      
                     }
                 }
 
-                in_buffer = inList.ToArray();
+                in_buffer = inBufferList.ToArray();
 
 
                 Thread.Sleep(100);
@@ -915,7 +903,11 @@ namespace PollingLibraries.LibPorts
             }
 
 
-            comLogger.LogInfo("ReceivedData: " + BitConverter.ToString(in_buffer));
+            string tmpResStr = BitConverter.ToString(in_buffer);
+            WriteToLog(">> Totaly received: " + tmpResStr + "\n");
+
+            if (in_buffer.Length == 0)
+                WriteToLog("RESULT: no bytes received with custom reading timeout: " + readTimeout);
 
             idleThreadHandlerCnt = 0;
             isIdle = true;
@@ -1005,6 +997,10 @@ namespace PollingLibraries.LibPorts
             serialPort.Close();
         }
 
+        public void WriteToLog(string str)
+        {
+            comLogger.LogWarn(str);
+        }
 
         public string GetConnectionType()
         {

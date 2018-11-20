@@ -52,7 +52,7 @@ namespace Prizmer.PoolServer
            // byte[] cmdHang = ASCIIEncoding.ASCII.GetBytes(at_cmd_hang);
             
 
-            const string SO_VERSION = "v. 0.15.1";
+            const string SO_VERSION = "v. 0.16.0";
             this.Text += " - " + SO_VERSION;
 
             try
