@@ -266,6 +266,11 @@ namespace Prizmer.PoolServer
                 MessageBox.Show("Прибор или параметры для чтения не выбраны");
             }
         }
+
+        private void linkDeleteData_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+
+        }
     }
 
     public class SearchFormData

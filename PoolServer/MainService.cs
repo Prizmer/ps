@@ -75,6 +75,11 @@ namespace Prizmer.PoolServer
             public bool b_poll_archive;
 
             public TimeSpan ts_current_period;
+            
+            /* задержка перед началом опроса месячных и суточных в минутах
+             * на случай, если часы прибора отставют
+             */
+            public int daily_monthly_delay_minutes;
         }
         PollingParams pollingParams;
 
@@ -139,6 +144,7 @@ namespace Prizmer.PoolServer
             pollingParams.b_poll_halfanhour = true;
             pollingParams.b_poll_archive = true;
             pollingParams.ts_current_period = new TimeSpan(DateTime.Now.Ticks);
+            pollingParams.daily_monthly_delay_minutes = 0;
 
             DMTCP_STATIC_METER_NUMBER = B_DEBUG_MODE_TCP ? DMTCP_STATIC_METER_NUMBER : false;
 
@@ -170,6 +176,9 @@ namespace Prizmer.PoolServer
 
                 if (getSafeAppSettingsValue("b_auto_start", ref strTmpVal))
                     bool.TryParse(strTmpVal, out SO_AUTO_START);
+
+                if (getSafeAppSettingsValue("daily_monthly_delay_minutes", ref strTmpVal))
+                    int.TryParse(strTmpVal, out pollingParams.daily_monthly_delay_minutes);
             }
             catch (Exception ex)
             {
@@ -2585,8 +2594,16 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 if (bStopServer) goto CloseThreadPoint;
                 if (POLLING_ACTIVE && DM_POLL_DAY && pollingParams.b_poll_day)
                 {
-                    PollingResultStatus status = pollDaily(pmPrms, DateTime.Now);
+                    PollingResultStatus status = PollingResultStatus.UNDEFINED;
+                    bool delayCondition = pollingParams.daily_monthly_delay_minutes > 0 && DateTime.Now.Minute < pollingParams.daily_monthly_delay_minutes;
+
+                    if (!delayCondition)
+                        status = pollDaily(pmPrms, DateTime.Now);
+                    else
+                        status = PollingResultStatus.DELAYED_BY_TIMEOUT;
+
                     string statusStr = helper.GetEnumKeyAsString(resultEnumType, status);
+
                     pmPrms.logger.LogInfo("Прочитал СУТОЧНЫЕ со статусом: " + statusStr);
                     if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
                 }
@@ -2595,7 +2612,14 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 if (bStopServer) goto CloseThreadPoint;
                 if (POLLING_ACTIVE && DM_POLL_MONTH && pollingParams.b_poll_month)
                 {
-                    PollingResultStatus status = pollMonthly(pmPrms);
+                    PollingResultStatus status = PollingResultStatus.UNDEFINED;
+                    bool delayCondition = pollingParams.daily_monthly_delay_minutes > 0 && DateTime.Now.Minute < pollingParams.daily_monthly_delay_minutes;
+
+                    if (!delayCondition)
+                        status = pollMonthly(pmPrms);
+                    else
+                        status = PollingResultStatus.DELAYED_BY_TIMEOUT;
+
                     string statusStr = helper.GetEnumKeyAsString(resultEnumType, status);
                     pmPrms.logger.LogInfo("Прочитал МЕСЯЧНЫЕ со статусом: " + statusStr);
                     if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
@@ -2747,6 +2771,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
         STOP_SERVER_REQUEST = 1,
         NO_TAKEN_PARAMS = 2,
         OPEN_LINK_CHANNEL_FAULT = 3,
+        DELAYED_BY_TIMEOUT = 4,
 
         SEE_DETAILS_IN_CODE_1 = 10
     }
