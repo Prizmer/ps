@@ -105,6 +105,7 @@ namespace Prizmer.PoolServer
         #endregion
 
         public bool SO_AUTO_START = false;
+        public bool LOGGER_GLOBAL_RESTRICTION = false;
 
         Logger loggerMainService = new Logger();
         NameValueCollection ApplicationParamsCollection = null;
@@ -176,6 +177,12 @@ namespace Prizmer.PoolServer
 
                 if (getSafeAppSettingsValue("b_auto_start", ref strTmpVal))
                     bool.TryParse(strTmpVal, out SO_AUTO_START);
+
+                if (getSafeAppSettingsValue("b_restrict_logs", ref strTmpVal))
+                {
+                    if (bool.TryParse(strTmpVal, out LOGGER_GLOBAL_RESTRICTION))
+                        Logger.bRestrict = LOGGER_GLOBAL_RESTRICTION;
+                }
 
                 if (getSafeAppSettingsValue("daily_monthly_delay_minutes", ref strTmpVal))
                     int.TryParse(strTmpVal, out pollingParams.daily_monthly_delay_minutes);

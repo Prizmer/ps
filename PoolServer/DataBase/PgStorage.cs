@@ -267,13 +267,24 @@ namespace Prizmer.PoolServer.DataBase
 
         private Object RetrieveTakenParams(NpgsqlDataReader dr)
         {
-            TakenParams tp;
-            tp.id = Convert.ToUInt32(dr["id"]);
-            tp.guid = new Guid(Convert.ToString(dr["guid"]));
-            tp.guid_params = new Guid(Convert.ToString(dr["guid_params"]));
-            tp.guid_meters = new Guid(Convert.ToString(dr["guid_meters"]));
+            TakenParams tp = new TakenParams();
 
-            return (Object)tp;
+            try
+            {
+                tp.id = Convert.ToUInt32(dr["id"]);
+                tp.guid = new Guid(Convert.ToString(dr["guid"]));
+                tp.guid_params = new Guid(Convert.ToString(dr["guid_params"]));
+                tp.guid_meters = new Guid(Convert.ToString(dr["guid_meters"]));
+
+                return (Object)tp;
+            }
+            catch (Exception ex)
+            {
+                loggerStorage.LogError("RetrieveTakenParams: ошибка преобразования, проверьте валидность значений: " + ex.ToString());
+            }
+
+
+            return tp;
         }
 
         private Object RetrieveValueWithDateTime(NpgsqlDataReader dr)
