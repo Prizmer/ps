@@ -207,7 +207,9 @@ namespace PollingLibraries.LibPorts
                 byte[] ipAddrLocalArr = { 192, 168, 0, 1 };
                 ipLocalAddr = new IPAddress(ipAddrLocalArr);
 
-                bool bRes = GetLocalEndPointIp(ref ipLocalAddr);
+                // bool bRes = GetLocalEndPointIp(ref ipLocalAddr);
+                bool bRes = GetLocalEndPointIpByRemote(m_address, ref ipLocalAddr);
+
                 ipLocalEndpoint = new IPEndPoint(ipLocalAddr, GetFreeTcpPort());
                 remoteEndPoint = new IPEndPoint(IPAddress.Parse(m_address), (int)m_port);
 
@@ -357,6 +359,66 @@ namespace PollingLibraries.LibPorts
             {
                 strIpConfig = GetLocalIPAddress();
                 return parsingResult = IPAddress.TryParse(strIpConfig, out localEndpointIp);
+            }
+        }
+
+        bool GetLocalEndPointIpByRemote(string remoteAddrWithoutPort, ref IPAddress localEndpointIp)
+        {
+            string resultLocalIp = "";
+
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            string[] remoteIpGroups = remoteAddrWithoutPort.Split('.');
+            string ipStart = "";
+            string infoAvailiablePorts = "";
+            
+            foreach (var ip in host.AddressList)
+            {       
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    infoAvailiablePorts += ip.ToString() + "; ";
+                    if (resultLocalIp == "")
+                    {
+                        // возьмем сеть и подсеть у целевого адреса и выберем доступный
+                        if (remoteIpGroups.Length > 1)
+                            ipStart = remoteIpGroups[0] + "." + remoteIpGroups[1];
+
+                        if (ip.ToString().StartsWith(ipStart))
+                            resultLocalIp = ip.ToString();
+                    }
+                }
+            }
+
+            // если не удалось выбрать ip из доступных в системе
+            if (resultLocalIp == "")
+            {
+                WriteToLog("GetLocalEndPointIpByRemote: не удалось выбрать ip из доступных в системе...");
+                WriteToLog("GetLocalEndPointIpByRemote: искали по " + ipStart + "; доступные порты: " + infoAvailiablePorts + "; целевой адрес: " + remoteAddrWithoutPort);
+                // попробуем взять из конфига
+                try
+                {
+                    object tmp = loadedAppSettings.GetValues("localEndPointIp");
+                    if (tmp != null)
+                        resultLocalIp = ((string[])tmp)[0];
+                    //WriteToLog("GetLocalEndPointIp: IP прочитанный из конфигурации: " + strIpConfig);
+                }
+                catch (Exception ex)
+                {
+                    WriteToLog("GetLocalEndPointIpByRemote: " + ex.ToString());
+                }
+            }
+
+            bool parsingResult = false;
+            if (resultLocalIp.Length > 0)
+                parsingResult = IPAddress.TryParse(resultLocalIp, out localEndpointIp);
+
+            if (parsingResult)
+            {
+                return true;
+            }
+            else
+            {
+                resultLocalIp = GetLocalIPAddress();
+                return parsingResult = IPAddress.TryParse(resultLocalIp, out localEndpointIp);
             }
         }
 

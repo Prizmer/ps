@@ -16,6 +16,8 @@ using System.Configuration;
 
 using System.Diagnostics;
 
+using System.Reflection;
+
 
 namespace PollServerCfg
 {
@@ -39,10 +41,18 @@ namespace PollServerCfg
         private void Form1_Load(object sender, EventArgs e)
         {
             //default paths 
-            PathToPollServerCfg = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName + 
+            PathToPollServerCfg = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName +
                 @"\PoolServer\bin\Debug\PoolServer.exe.config";
             PathToPollServer = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName +
                 @"\PoolServer\bin\Debug\PoolServer.exe";
+
+            string executionDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            if (!File.Exists(PathToPollServerCfg))
+            {
+                PathToPollServerCfg = executionDir + @"\PoolServer.exe.config";
+                PathToPollServer = executionDir + @"\PoolServer.exe";
+            }
 
             OpenFileDialog fd = new OpenFileDialog();
             if (!File.Exists(PathToPollServerCfg))
@@ -53,7 +63,7 @@ namespace PollServerCfg
                 {
                     FileInfo fi = new FileInfo(fd.FileName);
                     PathToPollServerCfg = fd.FileName;
-                    PathToPollServer = fi.FullName + @"\PoolServer.exe";
+                    PathToPollServer = fi.DirectoryName + @"\PoolServer.exe";
                 }
                 else
                 {
@@ -157,7 +167,10 @@ namespace PollServerCfg
             Application.Exit();
         }
 
+        private void groupBox2_Enter(object sender, EventArgs e)
+        {
 
+        }
     }
 
 

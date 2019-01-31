@@ -3,11 +3,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
+using System.Reflection;
+
 namespace PollingLibraries.LibLogger
 {
     public class Logger
     {
-        public Logger() { }
+
+        static string baseDirectory = "logs";
+        static string executionDir = "";
+
+        public Logger() {
+            executionDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        }
+
+        static string getFullBaseDirectory()
+        {
+            return executionDir + "\\" + baseDirectory;
+        }
 
         struct SenderInfo
         {
@@ -29,7 +42,6 @@ namespace PollingLibraries.LibLogger
 
         public static volatile bool bRestrict = false;
 
-        static string baseDirectory = "logs";
         public const string DIR_LOGS_MAIN = "main";
         public const string DIR_LOGS_METERS = "meters";
         public const string DIR_LOGS_PORTS = "ports";
@@ -42,17 +54,20 @@ namespace PollingLibraries.LibLogger
 
         bool byThread = false;
 
+
         public static string BaseDirectory
         {
-            get { return baseDirectory; }
+            get {
+                return getFullBaseDirectory();
+            }
         }
 
         public void Initialize(string workDirName = "", bool byThread = false, params string[] titlesToPrintArr)
         {
             if (workDirName != String.Empty)
-                workDirectory = baseDirectory + "\\" + workDirName;
+                workDirectory = getFullBaseDirectory() + "\\" + workDirName;
             else
-                workDirectory = baseDirectory;
+                workDirectory = getFullBaseDirectory();
 
             this.titlesToPrintArr = titlesToPrintArr;
             Directory.CreateDirectory(workDirectory);
@@ -93,7 +108,7 @@ namespace PollingLibraries.LibLogger
 
             StreamWriter sw = null;
             string resMsg = String.Format("{0}: {1}", DateTime.Now.ToString(), msg);
-            sw = new StreamWriter(baseDirectory + @"\" + DateTime.Now.Date.ToShortDateString().Replace(".", "_") + "_" + FNAM_LOGGER_LOG, true, Encoding.Default);
+            sw = new StreamWriter(getFullBaseDirectory() + @"\" + DateTime.Now.Date.ToShortDateString().Replace(".", "_") + "_" + FNAM_LOGGER_LOG, true, Encoding.Default);
             sw.WriteLine(resMsg);
             sw.Close();
 
@@ -163,7 +178,7 @@ namespace PollingLibraries.LibLogger
 
         public static void DeleteLogs()
         {
-            string[] logDirs = Directory.GetDirectories(baseDirectory);
+            string[] logDirs = Directory.GetDirectories(getFullBaseDirectory());
 
             //удалим папки, которые старше N дней
             foreach (string logsSubDirName in logDirs)
@@ -182,7 +197,7 @@ namespace PollingLibraries.LibLogger
             }
 
             //удалим все файлы базовой дирректории, которые старше N дней
-            string[] logFiles = Directory.GetFiles(baseDirectory);
+            string[] logFiles = Directory.GetFiles(getFullBaseDirectory());
             foreach (string logFileName in logFiles)
             {
                 FileInfo fInfo = new FileInfo(logFileName);
