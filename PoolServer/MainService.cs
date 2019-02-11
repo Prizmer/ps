@@ -25,7 +25,7 @@ using Drivers.ElfApatorDriver;
 using Drivers.UMDriver;
 using Drivers.Mercury23XDriver;
 using Drivers.Karat30XDriver;
-
+using Drivers.KaratDanfosDriver;
 
 
 namespace Prizmer.PoolServer
@@ -2472,6 +2472,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     case "pulsar_hvs": meter = new PulsarDriver(); break;
                     case "pulsar_gvs": meter = new PulsarDriver(); break;
                     case "karat_23X": meter = new Karat30XDriver(); break;
+                    case "karat_danfos": meter = new KaratDanfosDriver(); break;
                 }
 
                 if (meter == null) goto NetxMeter;
