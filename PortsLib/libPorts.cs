@@ -332,35 +332,37 @@ namespace PollingLibraries.LibPorts
 
             return "192.168.0.1";
         }
-        bool GetLocalEndPointIp(ref IPAddress localEndpointIp)
-        {
-            string strIpConfig = "";
-            try
-            {
-                object tmp = loadedAppSettings.GetValues("localEndPointIp");
-                if (tmp != null)
-                    strIpConfig = ((string[])tmp)[0];
-                //WriteToLog("GetLocalEndPointIp: IP прочитанный из конфигурации: " + strIpConfig);
-            }
-            catch (Exception ex)
-            {
-                WriteToLog("GetLocalEndPointIp: " + ex.ToString());
-            }
 
-            bool parsingResult = false;
-            if (strIpConfig.Length > 0)
-                parsingResult = IPAddress.TryParse(strIpConfig, out localEndpointIp);
+        // DEPRECATED
+        //bool GetLocalEndPointIp(ref IPAddress localEndpointIp)
+        //{
+        //    string strIpConfig = "";
+        //    try
+        //    {
+        //        object tmp = loadedAppSettings.GetValues("localEndPointIp");
+        //        if (tmp != null)
+        //            strIpConfig = ((string[])tmp)[0];
+        //        //WriteToLog("GetLocalEndPointIp: IP прочитанный из конфигурации: " + strIpConfig);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        WriteToLog("GetLocalEndPointIp: " + ex.ToString());
+        //    }
 
-            if (parsingResult)
-            {
-                return true;
-            }
-            else
-            {
-                strIpConfig = GetLocalIPAddress();
-                return parsingResult = IPAddress.TryParse(strIpConfig, out localEndpointIp);
-            }
-        }
+        //    bool parsingResult = false;
+        //    if (strIpConfig.Length > 0)
+        //        parsingResult = IPAddress.TryParse(strIpConfig, out localEndpointIp);
+
+        //    if (parsingResult)
+        //    {
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        strIpConfig = GetLocalIPAddress();
+        //        return parsingResult = IPAddress.TryParse(strIpConfig, out localEndpointIp);
+        //    }
+        //}
 
         bool GetLocalEndPointIpByRemote(string remoteAddrWithoutPort, ref IPAddress localEndpointIp)
         {
