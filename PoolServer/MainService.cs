@@ -2457,6 +2457,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     case "tem4": meter = new tem104(); break;
                     case "tem106": meter = new tem106(); break;
                     case "set4tm_03": meter = new set4tm_03(); break;
+                    case "set4tm": meter = new set4tm_03(); break;
                     case "spg76212": meter = new spg76212(); break;
                     case "teplouchet1": meter = new teplouchet1(); break;
                     case "m200": meter = new Mercury200(); break;
@@ -2658,7 +2659,7 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 if (bStopServer) goto CloseThreadPoint;
                 if (POLLING_ACTIVE && DM_POLL_HALFANHOUR && pollingParams.b_poll_halfanhour)
                 {
-                    if (typemeter.driver_name == "set4tm_03")
+                    if (typemeter.driver_name == "set4tm_03" || typemeter.driver_name == "set4tm")
                     {
                         int status = pollHalfsSet4M230(pmPrms);
                         if (status == 1) goto CloseThreadPoint;
@@ -2741,7 +2742,16 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                         {
                             if (pollingEnded != null)
                             {
-                                m_vport.Close();
+                                if (m_vport != null)
+                                {
+                                    m_vport.Close();
+                                }
+                                else
+                                {
+                                    WriteToLog("Все счетчики перебраны, но объект порта так и не был создан. Возможно в машине состояний нет дрйвера "
+                                        + typemeter.driver_name);
+                                }
+
                                 pollingEnded(this, myEventArgs);
                                 bStopServer = true;
 
