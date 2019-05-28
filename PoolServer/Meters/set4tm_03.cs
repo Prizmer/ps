@@ -227,24 +227,22 @@ namespace Prizmer.Meters
         
         public void Init(uint address, string pass, VirtualPort data_vport)
         {
-            bool password_type_hex = false;
+            //bool password_type_hex = false;
             this.m_address = address;
-
-            
 
             if (m_password.Length >= pass.Length)
             {
                 for (int j = 0; j < pass.Length; j++)
                 {
-                    if (password_type_hex)
-                    {
+                    //if (password_type_hex)
+                    //{
+                    //    m_password[j] = Convert.ToByte(pass[j]);
+                    //    m_password[j] -= 0x30;
+                    //}
+                    //else
+                    //{
                         m_password[j] = Convert.ToByte(pass[j]);
-                        m_password[j] -= 0x30;
-                    }
-                    else
-                    {
-                        m_password[j] = Convert.ToByte(pass[j]);
-                    }
+                    //}
                 }
             }
 
@@ -256,8 +254,6 @@ namespace Prizmer.Meters
             */
 
             m_vport = data_vport;
-
-            //m_log_file_name += this.GetType() + "_" + m_address.ToString();
         }
 
         public void SetTypesForRead(List<byte> types)
@@ -364,27 +360,36 @@ namespace Prizmer.Meters
         /// <param name="size"></param>
         private void MakeCommand(byte[] cmnd, ref ushort size)
         {
+            List<byte> tmpCmd = new List<byte>();
+
             m_length_cmd = 0;
 
             // Добавление сетевого адреса прибора в начало посылки
-            m_cmd[m_length_cmd++] = (byte)m_address;
+            tmpCmd.Add((byte)m_address);
+            //m_cmd[m_length_cmd++] = (byte)m_address;
 
             // Добавление данных в посылку
-            for (int i = 0; i < size; i++)
-            {
-                m_cmd[m_length_cmd++] = cmnd[i];
-            }
+            byte[] cmdStrict = new byte[size];
+            Array.Copy(cmnd, 0, cmdStrict, 0, size);
+            tmpCmd.AddRange(cmdStrict);
+            //for (int i = 0; i < size; i++)
+            //{
+            //    m_cmd[m_length_cmd++] = cmnd[i];
+            //}
 
             // Вычисляем CRC
-            CalcCRC(m_cmd, Convert.ToUInt16(size + 1));
+            CalcCRC(tmpCmd.ToArray(), Convert.ToUInt16(size + 1));
 
             // Добавляем контрольную сумму к команде
-            for (int i = 0; i < 2; i++)
-            {
-                m_cmd[m_length_cmd++] = m_crc[i];
-            }
+            tmpCmd.AddRange(m_crc);
+            //for (int i = 0; i < 2; i++)
+            //{
+            //    m_cmd[m_length_cmd++] = m_crc[i];
+            //}
 
             size += 3;
+
+            m_cmd = tmpCmd.ToArray();
         }
 
         /// <summary>

@@ -51,8 +51,9 @@
   <PropertyGroup>
     <ApplicationIcon>Resources\64ico.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup>
-    <NoWin32Manifest>true</NoWin32Manifest>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ElfApatorDriver">
@@ -158,6 +159,7 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="app.manifest" />
     <None Include="Batches\editConfigInstaller.bat">
       <SubType>Component</SubType>
     </None>

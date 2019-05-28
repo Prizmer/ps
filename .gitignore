@@ -1,5 +1,6 @@
 *.log
 /PoolServer/bin/Debug/PoolServer.exe.config
+/PoolServer/bin/Debug/*.pdb
 obj
 obj/*
 Release

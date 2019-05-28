@@ -42,252 +42,6 @@ namespace Drivers.LibMeter
         }
     }
 
-
-        /// <summary>
-        /// Общие категории считываемых данных
-        /// </summary>
-        public enum CommonCategory
-        {
-            /// <summary>
-            /// Текущие значения
-            /// </summary>
-            Current = 1,
-            /// <summary>
-            /// Значения на начало месяца
-            /// </summary>
-            Monthly = 2,
-            /// <summary>
-            /// Внутридневные значения
-            /// </summary>
-            Inday = 3,
-            /// <summary>
-            /// Значения на начало суток
-            /// </summary>
-            Daily = 4
-        };
-
-
-        public enum SlicePeriod
-        {
-            HalfAnHour = 30,
-            Hour = 60
-        };
-
-
-        public struct RecordPowerSlice
-        {
-            public float APlus;
-            public float AMinus;
-            public float RPlus;
-            public float RMinus;
-            public byte status;
-            public byte period;
-            public DateTime date_time;
-        };
-
-        /// <summary>
-        /// Содержащий набор полей, достаточный для описание среза данных
-        /// любого из приборов.
-        /// </summary>
-        public class SliceUniversal2
-        {
-            private float[] valuesFloatArr;
-            public uint address;
-            public uint channel;
-            public uint id;
-            public bool Status;
-            public DateTime Date;
-
-
-            private const int VAL_NUMB = 8;
-
-            public SliceUniversal2()
-            {
-                valuesFloatArr = new float[VAL_NUMB];
-                for (int i = 0; i < VAL_NUMB; i++)
-                    valuesFloatArr[i] = 0;
-
-                Status = false;
-            }
-
-            public bool AddValue(uint position, float val)
-            {
-                if (position < VAL_NUMB)
-                {
-                    valuesFloatArr[position] = val;
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            public bool GetValue(uint position, ref float val)
-            {
-                if (position < VAL_NUMB)
-                {
-                    val = valuesFloatArr[position];
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-
-            }
-
-            public int FloatValuesCount
-            {
-                get { return VAL_NUMB; }
-            }
-
-        };
-
-        /// <summary>
-        /// Содержит группу параметров с одинаковой временной меткой (срез)
-        /// </summary>
-        public class SliceDescriptor
-        {
-            List<uint> identificators = new List<uint>();
-            List<uint> addresses = new List<uint>();
-            List<uint> channels = new List<uint>();
-
-            List<float> values = new List<float>();
-            List<bool> statuses = new List<bool>();
-
-            SlicePeriod period = SlicePeriod.HalfAnHour;
-            public SlicePeriod Period
-            {
-                get { return this.period; }
-            }
-
-            DateTime date = new DateTime();
-            public DateTime Date
-            {
-                get { return date; }
-            }
-            public SliceDescriptor(DateTime date)
-            {
-                this.date = date;
-            }
-
-            int value_counter = 0;
-            public int ValuesCount
-            {
-                get { return value_counter; }
-            }
-
-            public int AddValueDescriptor(uint id, uint addr, uint channel, SlicePeriod period)
-            {
-                addresses.Add(addr);
-                identificators.Add(id);
-                channels.Add(channel);
-
-                values.Add(0);
-                statuses.Add(false);
-
-                this.period = period;
-
-                return value_counter++;
-            }
-
-            public bool InsertValue(uint index, float val, bool status)
-            {
-                if (index < value_counter)
-                {
-                    values[(int)index] = val;
-                    statuses[(int)index] = status;
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            public List<uint> GetAddressList()
-            {
-                List<uint> tmp = new List<uint>();
-                tmp.AddRange(addresses);
-                return tmp;
-            }
-
-            public bool GetValueDescriptor(uint index,
-                ref uint id, ref uint addr, ref uint channel, ref SlicePeriod period)
-            {
-                if (index < value_counter)
-                {
-                    id = identificators[(int)index];
-                    addr = addresses[(int)index];
-                    channel = channels[(int)index];
-                    period = this.period;
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            public bool GetValueId(uint index, ref uint id)
-            {
-                if (index < value_counter)
-                {
-                    id = identificators[(int)index];
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            public bool GetValue(uint index,
-                ref float value, ref bool status)
-            {
-                if (index < value_counter)
-                {
-                    value = values[(int)index];
-                    status = statuses[(int)index];
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            public bool GetValueChannel(uint index, ref uint channel)
-            {
-                if (index < value_counter)
-                {
-                    channel = channels[(int)index];
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-
-
-        };
-
-    /// <summary>
-    /// Описывает типовое архивное значение
-    /// </summary>
-    public struct ArchiveValue
-    {
-        public int id;
-        public DateTime dt;
-        public float energy;
-        public float volume;
-        public int timeOn;
-        public int timeErr;
-    };
-
     /// <summary>
     /// Интерфейс драйвера устройства учёта энергоресурсов
     /// </summary>
@@ -402,4 +156,247 @@ namespace Drivers.LibMeter
         void WriteToLog(string str, bool doWrite = true);
 
     }
+
+
+    /// <summary>
+    /// Общие категории считываемых данных
+    /// </summary>
+    public enum CommonCategory
+    {
+        /// <summary>
+        /// Текущие значения
+        /// </summary>
+        Current = 1,
+        /// <summary>
+        /// Значения на начало месяца
+        /// </summary>
+        Monthly = 2,
+        /// <summary>
+        /// Внутридневные значения
+        /// </summary>
+        Inday = 3,
+        /// <summary>
+        /// Значения на начало суток
+        /// </summary>
+        Daily = 4
+    };
+
+    public enum SlicePeriod
+    {
+        HalfAnHour = 30,
+        Hour = 60
+    };
+
+    public struct RecordPowerSlice
+    {
+        public float APlus;
+        public float AMinus;
+        public float RPlus;
+        public float RMinus;
+        public byte status;
+        public byte period;
+        public DateTime date_time;
+    };
+
+    /// <summary>
+    /// Содержащий набор полей, достаточный для описание среза данных
+    /// любого из приборов.
+    /// </summary>
+    public class SliceUniversal2
+    {
+        private float[] valuesFloatArr;
+        public uint address;
+        public uint channel;
+        public uint id;
+        public bool Status;
+        public DateTime Date;
+
+
+        private const int VAL_NUMB = 8;
+
+        public SliceUniversal2()
+        {
+            valuesFloatArr = new float[VAL_NUMB];
+            for (int i = 0; i < VAL_NUMB; i++)
+                valuesFloatArr[i] = 0;
+
+            Status = false;
+        }
+
+        public bool AddValue(uint position, float val)
+        {
+            if (position < VAL_NUMB)
+            {
+                valuesFloatArr[position] = val;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool GetValue(uint position, ref float val)
+        {
+            if (position < VAL_NUMB)
+            {
+                val = valuesFloatArr[position];
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
+        public int FloatValuesCount
+        {
+            get { return VAL_NUMB; }
+        }
+
+    };
+
+    /// <summary>
+    /// Содержит группу параметров с одинаковой временной меткой (срез)
+    /// </summary>
+    public class SliceDescriptor
+    {
+        List<uint> identificators = new List<uint>();
+        List<uint> addresses = new List<uint>();
+        List<uint> channels = new List<uint>();
+
+        List<float> values = new List<float>();
+        List<bool> statuses = new List<bool>();
+
+        SlicePeriod period = SlicePeriod.HalfAnHour;
+        public SlicePeriod Period
+        {
+            get { return this.period; }
+        }
+
+        DateTime date = new DateTime();
+        public DateTime Date
+        {
+            get { return date; }
+        }
+        public SliceDescriptor(DateTime date)
+        {
+            this.date = date;
+        }
+
+        int value_counter = 0;
+        public int ValuesCount
+        {
+            get { return value_counter; }
+        }
+
+        public int AddValueDescriptor(uint id, uint addr, uint channel, SlicePeriod period)
+        {
+            addresses.Add(addr);
+            identificators.Add(id);
+            channels.Add(channel);
+
+            values.Add(0);
+            statuses.Add(false);
+
+            this.period = period;
+
+            return value_counter++;
+        }
+
+        public bool InsertValue(uint index, float val, bool status)
+        {
+            if (index < value_counter)
+            {
+                values[(int)index] = val;
+                statuses[(int)index] = status;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public List<uint> GetAddressList()
+        {
+            List<uint> tmp = new List<uint>();
+            tmp.AddRange(addresses);
+            return tmp;
+        }
+
+        public bool GetValueDescriptor(uint index,
+            ref uint id, ref uint addr, ref uint channel, ref SlicePeriod period)
+        {
+            if (index < value_counter)
+            {
+                id = identificators[(int)index];
+                addr = addresses[(int)index];
+                channel = channels[(int)index];
+                period = this.period;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool GetValueId(uint index, ref uint id)
+        {
+            if (index < value_counter)
+            {
+                id = identificators[(int)index];
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool GetValue(uint index,
+            ref float value, ref bool status)
+        {
+            if (index < value_counter)
+            {
+                value = values[(int)index];
+                status = statuses[(int)index];
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool GetValueChannel(uint index, ref uint channel)
+        {
+            if (index < value_counter)
+            {
+                channel = channels[(int)index];
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    };
+
+    /// <summary>
+    /// Описывает типовое архивное значение
+    /// </summary>
+    public struct ArchiveValue
+    {
+        public int id;
+        public DateTime dt;
+        public float energy;
+        public float volume;
+        public int timeOn;
+        public int timeErr;
+    };
+
+
 }

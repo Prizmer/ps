@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Net.NetworkInformation;
 using System.Windows.Forms;
 using System.Collections.Specialized;
+using System.Configuration;
 
 using PollingLibraries.LibLogger;
 
@@ -165,6 +166,8 @@ namespace PollingLibraries.LibPorts
 
             if (loadedAppSettings != null)
                 this.loadedAppSettings = loadedAppSettings;
+            else
+                this.loadedAppSettings = ConfigurationSettings.AppSettings;
 
             ReInitialize();
         }
@@ -207,7 +210,6 @@ namespace PollingLibraries.LibPorts
                 byte[] ipAddrLocalArr = { 192, 168, 0, 1 };
                 ipLocalAddr = new IPAddress(ipAddrLocalArr);
 
-                // bool bRes = GetLocalEndPointIp(ref ipLocalAddr);
                 bool bRes = GetLocalEndPointIpByRemote(m_address, ref ipLocalAddr);
 
                 ipLocalEndpoint = new IPEndPoint(ipLocalAddr, GetFreeTcpPort());
@@ -227,12 +229,10 @@ namespace PollingLibraries.LibPorts
 
                     sender.Bind(ipLocalEndpoint);
 
-                    //old version of connection 
-                    //sender.Connect(remoteEndPoint);
 
                     // Connect using a timeout (5 seconds)
                     IAsyncResult result = sender.BeginConnect(remoteEndPoint, null, null);
-                    bool success = result.AsyncWaitHandle.WaitOne(2000, true);
+                    bool success = result.AsyncWaitHandle.WaitOne(3000, true);
 
                     if (sender.Connected)
                     {
@@ -243,6 +243,8 @@ namespace PollingLibraries.LibPorts
                     {
                         WriteToLog("ReInitialize: не удалось установить соединение между " + 
                             ipLocalEndpoint.ToString() + " и " + remoteEndPoint.ToString()) ;
+
+                        
                         return false;
                     }
                 }
@@ -333,59 +335,47 @@ namespace PollingLibraries.LibPorts
             return "192.168.0.1";
         }
 
-        // DEPRECATED
-        //bool GetLocalEndPointIp(ref IPAddress localEndpointIp)
-        //{
-        //    string strIpConfig = "";
-        //    try
-        //    {
-        //        object tmp = loadedAppSettings.GetValues("localEndPointIp");
-        //        if (tmp != null)
-        //            strIpConfig = ((string[])tmp)[0];
-        //        //WriteToLog("GetLocalEndPointIp: IP прочитанный из конфигурации: " + strIpConfig);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        WriteToLog("GetLocalEndPointIp: " + ex.ToString());
-        //    }
-
-        //    bool parsingResult = false;
-        //    if (strIpConfig.Length > 0)
-        //        parsingResult = IPAddress.TryParse(strIpConfig, out localEndpointIp);
-
-        //    if (parsingResult)
-        //    {
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        strIpConfig = GetLocalIPAddress();
-        //        return parsingResult = IPAddress.TryParse(strIpConfig, out localEndpointIp);
-        //    }
-        //}
-
         bool GetLocalEndPointIpByRemote(string remoteAddrWithoutPort, ref IPAddress localEndpointIp)
         {
             string resultLocalIp = "";
 
             var host = Dns.GetHostEntry(Dns.GetHostName());
             string[] remoteIpGroups = remoteAddrWithoutPort.Split('.');
-            string ipStart = "";
+            string ipStart = "", ipStart2 = "";
             string infoAvailiablePorts = "";
-            
+
+
             foreach (var ip in host.AddressList)
-            {       
+            {
+                infoAvailiablePorts += ip.ToString() + "; ";
+            }
+
+
+            for (int idx = 0; idx < host.AddressList.Length; idx++)
+            {
+                var ip = host.AddressList[idx];
+
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    infoAvailiablePorts += ip.ToString() + "; ";
-                    if (resultLocalIp == "")
+                    // возьмем сеть и подсеть у целевого адреса и выберем доступный
+                    if (remoteIpGroups.Length > 1)
                     {
-                        // возьмем сеть и подсеть у целевого адреса и выберем доступный
-                        if (remoteIpGroups.Length > 1)
-                            ipStart = remoteIpGroups[0] + "." + remoteIpGroups[1];
+                        ipStart = remoteIpGroups[0] + "." + remoteIpGroups[1];
+                        ipStart2 = remoteIpGroups[0];
+                    } else
+                    {
+                        WriteToLog("GetLocalEndPointIpByRemote: проверьте ip адрес удаленного узла: " + remoteAddrWithoutPort.ToString());
+                        break;
+                    }
 
-                        if (ip.ToString().StartsWith(ipStart))
-                            resultLocalIp = ip.ToString();
+                    if (ip.ToString().StartsWith(ipStart))
+                    {
+                        resultLocalIp = ip.ToString();
+                        break;
+                    }
+                    else if (ip.ToString().StartsWith(ipStart2))
+                    {
+                        resultLocalIp = ip.ToString();
                     }
                 }
             }
@@ -394,20 +384,23 @@ namespace PollingLibraries.LibPorts
             if (resultLocalIp == "")
             {
                 WriteToLog("GetLocalEndPointIpByRemote: не удалось выбрать ip из доступных в системе...");
-                WriteToLog("GetLocalEndPointIpByRemote: искали по " + ipStart + "; доступные порты: " + infoAvailiablePorts + "; целевой адрес: " + remoteAddrWithoutPort);
+                WriteToLog("GetLocalEndPointIpByRemote: искали по " + ipStart + " и по " + ipStart2 +  "; доступные порты: " + infoAvailiablePorts + "; целевой адрес: " + remoteAddrWithoutPort);
+                
                 // попробуем взять из конфига
                 try
                 {
                     object tmp = loadedAppSettings.GetValues("localEndPointIp");
                     if (tmp != null)
                         resultLocalIp = ((string[])tmp)[0];
-                    //WriteToLog("GetLocalEndPointIp: IP прочитанный из конфигурации: " + strIpConfig);
+
+                    WriteToLog("GetLocalEndPointIpByRemote: IP прочитанный из конфигурации: " + resultLocalIp);
                 }
                 catch (Exception ex)
                 {
-                    WriteToLog("GetLocalEndPointIpByRemote: " + ex.ToString());
+                    WriteToLog("GetLocalEndPointIpByRemote: ошибка чтения конфигурации" + ex.ToString());
                 }
             }
+
 
             bool parsingResult = false;
             if (resultLocalIp.Length > 0)
@@ -415,6 +408,7 @@ namespace PollingLibraries.LibPorts
 
             if (parsingResult)
             {
+                WriteToLog("GetLocalEndPointIpByRemote: выбран локальный узел: " + parsingResult.ToString());
                 return true;
             }
             else
@@ -525,20 +519,31 @@ namespace PollingLibraries.LibPorts
                 dtCreated = DateTime.Now;
 
                 ReInitialize();
-                // WriteToLog("WriteReadData: открыт новый сокет после сна: " + sender.LocalEndPoint.ToString());
+                WriteToLog("WriteReadData: открыт новый сокет после сна: " + sender.LocalEndPoint.ToString());
             }
 
+            int attemptsMax = 3;
             try
             {
-                //2 попытки соединения или чтения данных
-                for (int i = 0; i < 2; i++)
+                // 3 попытки соединения или чтения данных
+                for (int i = 0; i < attemptsMax; i++)
                 {
-                    WriteToLog("Attempt: " + i);
+                    WriteToLog("");
+                    WriteToLog("WriteReadData, попытка: " + i);
+                    WriteToLog("WriteReadData, локальный узел: " + sender.LocalEndPoint.ToString());
                     readBytesList.Clear();
                     if (sender.Connected)
                     {
                         // Send the data through the socket.
-                        sender.Send(out_buffer, 0, out_length, SocketFlags.None);
+                        try
+                        {
+                            sender.Send(out_buffer, 0, out_length, SocketFlags.None);
+                        }
+                        catch (Exception ex)
+                        {
+                            WriteToLog("WriteReadData, send exception: " + ex.Message);
+                            continue;
+                        }
 
                         WriteToLog("<< Written data: " + BitConverter.ToString(out_buffer) + "\n");
 
@@ -581,8 +586,6 @@ namespace PollingLibraries.LibPorts
 
                         string tmpResStr = BitConverter.ToString(readBytesList.ToArray());
                         WriteToLog(">> Totaly received: " + tmpResStr + "\n");
-                        //  if (tmpResStr.Length < 4)
-                        // WriteToLog("received data: " + tmpResStr);
 
                         bool bManageRes = false;
                         try
@@ -611,11 +614,17 @@ namespace PollingLibraries.LibPorts
                             Thread.Sleep(100);
                     }
                     else
-                    {
-                        if (i == 0)
+                    {                       
+                        if (i < attemptsMax - 1)
+                        {
+                            WriteToLog("WriteReadData, нет подключения к удаленому узлу с узла, реинициализация: " + sender.LocalEndPoint.ToString());
                             ReInitialize();
+                        }
                         else
-                            WriteToLog("WriteReadData: 2 попытки приема/передачи безуспешны");
+                        {
+                            WriteToLog("WriteReadData: " + attemptsMax + " попытки приема/передачи безуспешны");
+                        }
+
                     }
                 }
             }
