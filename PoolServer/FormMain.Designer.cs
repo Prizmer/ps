@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.cbEachPort = new System.Windows.Forms.CheckBox();
             this.comboBox3 = new System.Windows.Forms.ComboBox();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
@@ -63,7 +64,6 @@
             this.pbPreloader = new System.Windows.Forms.PictureBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tsLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.cbEachPort = new System.Windows.Forms.CheckBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -103,6 +103,17 @@
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Дочитка показаний";
+            // 
+            // cbEachPort
+            // 
+            this.cbEachPort.AutoSize = true;
+            this.cbEachPort.Location = new System.Drawing.Point(357, 206);
+            this.cbEachPort.Name = "cbEachPort";
+            this.cbEachPort.Size = new System.Drawing.Size(18, 17);
+            this.cbEachPort.TabIndex = 18;
+            this.toolTip1.SetToolTip(this.cbEachPort, "Опрос по всем портам");
+            this.cbEachPort.UseVisualStyleBackColor = true;
+            this.cbEachPort.CheckedChanged += new System.EventHandler(this.cbEachPort_CheckedChanged);
             // 
             // comboBox3
             // 
@@ -403,7 +414,7 @@
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(395, 101);
+            this.pictureBox1.Size = new System.Drawing.Size(397, 101);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
@@ -427,7 +438,7 @@
             this.statusStrip1.Location = new System.Drawing.Point(0, 453);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(395, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(397, 22);
             this.statusStrip1.TabIndex = 19;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -436,23 +447,12 @@
             this.tsLabel1.Name = "tsLabel1";
             this.tsLabel1.Size = new System.Drawing.Size(0, 17);
             // 
-            // cbEachPort
-            // 
-            this.cbEachPort.AutoSize = true;
-            this.cbEachPort.Location = new System.Drawing.Point(357, 206);
-            this.cbEachPort.Name = "cbEachPort";
-            this.cbEachPort.Size = new System.Drawing.Size(18, 17);
-            this.cbEachPort.TabIndex = 18;
-            this.toolTip1.SetToolTip(this.cbEachPort, "Опрос по всем портам");
-            this.cbEachPort.UseVisualStyleBackColor = true;
-            this.cbEachPort.CheckedChanged += new System.EventHandler(this.cbEachPort_CheckedChanged);
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(395, 475);
+            this.ClientSize = new System.Drawing.Size(397, 475);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.pbPreloader);
             this.Controls.Add(this.cbServerStarted);
