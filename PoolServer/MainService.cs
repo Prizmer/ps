@@ -2659,12 +2659,14 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                 if (bStopServer) goto CloseThreadPoint;
                 if (POLLING_ACTIVE && DM_POLL_HALFANHOUR && pollingParams.b_poll_halfanhour)
                 {
-                    if (typemeter.driver_name == "set4tm_03" || typemeter.driver_name == "set4tm")
-                    {
-                        int status = pollHalfsSet4M230(pmPrms);
-                        if (status == 1) goto CloseThreadPoint;
-                    }
-                    else if (typemeter.driver_name == "m230")
+                    //if (typemeter.driver_name == "set4tm_03" || typemeter.driver_name == "set4tm")
+                    //{
+                    //    int status = pollHalfsSet4M230(pmPrms);
+                    //    if (status == 1) goto CloseThreadPoint;
+                    //}
+                    //else 
+                    
+                    if (typemeter.driver_name == "m230")
                     {
                         //дочитка за вчера
                         DateTime dtCur = DateTime.Now;
