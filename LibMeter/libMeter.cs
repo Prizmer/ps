@@ -398,5 +398,65 @@ namespace Drivers.LibMeter
         public int timeErr;
     };
 
+    public static class CommonMeters
+    {
+
+        public static byte DEC2HEX(byte value)
+        {
+            return Convert.ToByte((value >> 4) * 10 + (value & 0xF));
+        }
+
+        public static byte HEX2DEC(byte value)
+        {
+            return Convert.ToByte(((value / 10) << 4) + (value % 10));
+        }
+
+
+        public static byte[] InverseBytesOrder(byte[] source, uint start_pos, int bytes_count)
+        {
+            byte[] right_order_bytes = new byte[bytes_count];
+
+            for (int i = 0; i < bytes_count; i++)
+            {
+                right_order_bytes[i] = source[start_pos - i];
+            }
+
+            return right_order_bytes;
+        }
+
+
+        public static byte[] IntToBCD(int input)
+        {
+            byte[] bcd = new byte[]
+            {
+                (byte)(input>> 8),
+                (byte)(input& 0x00FF)
+            };
+
+            return bcd;
+        }
+
+        public static byte[] ByteToBCD(int input)
+        {
+            byte[] bcd = new byte[]
+            {
+                (byte)(input>> 8),
+                (byte)(input& 0x00FF)
+            };
+
+            return bcd;
+        }
+
+        public static byte BCDToByte(byte bcds)
+        {
+            byte result = 0;
+
+            result = Convert.ToByte(10 * (byte)(bcds >> 4));
+            result += Convert.ToByte(bcds & 0xF);
+
+            return result;
+        }
+
+    }
 
 }

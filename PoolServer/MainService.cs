@@ -19,6 +19,7 @@ using Prizmer.Meters;
 using PollingLibraries.LibLogger;
 using PollingLibraries.LibPorts;
 
+using Drivers;
 using Drivers.LibMeter;
 using Drivers.PulsarDriver;
 using Drivers.ElfApatorDriver;
@@ -26,6 +27,8 @@ using Drivers.UMDriver;
 using Drivers.Mercury23XDriver;
 using Drivers.Karat30XDriver;
 using Drivers.KaratDanfosDriver;
+
+
 
 
 namespace Prizmer.PoolServer
@@ -2456,8 +2459,8 @@ DateTime.Now.ToShortDateString() + "): " + valInDbCntToCurTime);
                     case "pulsar16": meter = new pulsar16(); break;
                     case "tem4": meter = new tem104(); break;
                     case "tem106": meter = new tem106(); break;
-                    case "set4tm_03": meter = new set4tm_03(); break;
-                    case "set4tm": meter = new set4tm_03(); break;
+                    case "set4tm_03": meter = new SET4tmDriver(); break;
+                    case "set4tm": meter = new SET4tmDriver(); break;
                     case "spg76212": meter = new spg76212(); break;
                     case "teplouchet1": meter = new teplouchet1(); break;
                     case "m200": meter = new Mercury200(); break;

@@ -84,6 +84,9 @@
     <Reference Include="PulsarDriver">
       <HintPath>..\..\testUtils\tu_pulsarm\PulsarDriver\bin\Debug\PulsarDriver.dll</HintPath>
     </Reference>
+    <Reference Include="SETDriver">
+      <HintPath>..\..\testUtils\tu_set\SetDriver\bin\Debug\SETDriver.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -128,7 +131,6 @@
     <Compile Include="Meters\Pulsar10.cs" />
     <Compile Include="Meters\Pulsar16.cs" />
     <Compile Include="Meters\sayaniKombik.cs" />
-    <Compile Include="Meters\set4tm_03.cs" />
     <Compile Include="Meters\spg76212.cs" />
     <Compile Include="Meters\TEM104_3.cs" />
     <Compile Include="Meters\teplouchet1.cs" />

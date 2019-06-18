@@ -254,10 +254,10 @@ namespace Prizmer.Meters
 
                         if (ReadValuesFromAddress(TypesCommands.tc512K, 4, address_buffer, answer_bytes))
                         {
-                            ihour = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 0]);
-                            iday = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 1]);
-                            imonth = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 2]);
-                            iyear = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 3]) + 2000;
+                            ihour = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 0]);
+                            iday = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 1]);
+                            imonth = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 2]);
+                            iyear = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 3]) + 2000;
 
                             // проверка на совпадение прочитанной даты с искомой
                             if (iday == day && imonth == month && iyear == year)
@@ -284,10 +284,10 @@ namespace Prizmer.Meters
                             {
                                 already_read_first_address = true;
 
-                                ihour = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 0]);
-                                iday = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 1]);
-                                imonth = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 2]);
-                                iyear = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 3]) + 2000;
+                                ihour = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 0]);
+                                iday = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 1]);
+                                imonth = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 2]);
+                                iyear = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 3]) + 2000;
                                 
                                 date_first_readed = new DateTime(iyear, imonth, iday);
 
@@ -330,10 +330,10 @@ namespace Prizmer.Meters
                             
                             if (ReadValuesFromAddress(TypesCommands.tc512K, 4, address_buffer, answer_bytes))
                             {
-                                ihour = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 0]);
-                                iday = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 1]);
-                                imonth = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 2]);
-                                iyear = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 3]) + 2000;
+                                ihour = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 0]);
+                                iday = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 1]);
+                                imonth = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 2]);
+                                iyear = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 3]) + 2000;
 
                                 date.day = iday;
                                 date.month = imonth;
@@ -394,10 +394,10 @@ namespace Prizmer.Meters
                                             //WriteToLog("Address=" + address_buffer[0].ToString("x") + "|" + address_buffer[1].ToString("x") + "|" + address_buffer[2].ToString("x") + "|" + address_buffer[3].ToString("x"));
                                             if (ReadValuesFromAddress(TypesCommands.tc512K, 4, address_buffer, answer_bytes))
                                             {
-                                                ihour = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 0]);
-                                                iday = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 1]);
-                                                imonth = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 2]);
-                                                iyear = (int)Meters.CommonMeters.BCDToByte(answer_bytes[m_header_length + 3]) + 2000;
+                                                ihour = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 0]);
+                                                iday = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 1]);
+                                                imonth = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 2]);
+                                                iyear = (int)CommonMeters.BCDToByte(answer_bytes[m_header_length + 3]) + 2000;
 
                                                 date.day = iday;
                                                 date.month = imonth;

@@ -562,15 +562,20 @@ namespace Prizmer.PoolServer
             this.frmAnalizator.Focus();
         }
 
-        private void ctxMenuShowLogsDir_Click(object sender, EventArgs e)
+        private void OpenLogsFolder()
         {
             string exeLocation = @Logger.BaseDirectory;
             Process.Start("explorer.exe", exeLocation);
         }
 
+        private void ctxMenuShowLogsDir_Click(object sender, EventArgs e)
+        {
+            OpenLogsFolder();
+        }
+
         private void ctxMenuDeleteLogs_Click(object sender, EventArgs e)
         {
-            Logger.DeleteLogs();
+            Logger.DeleteLogsSimple();
         }
 
         private void timerLogsDeletion_Tick(object sender, EventArgs e)
@@ -599,6 +604,21 @@ namespace Prizmer.PoolServer
             {
                 this.comboBox3.Enabled = true;
             }
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Control | Keys.L))
+            {
+                OpenLogsFolder();
+                return true;
+            }
+            else if (keyData == (Keys.Control | Keys.D))
+            {
+                Logger.DeleteLogsSimple();
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
         }
     }
 

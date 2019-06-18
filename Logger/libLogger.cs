@@ -207,5 +207,22 @@ namespace PollingLibraries.LibLogger
                     fInfo.Delete();
             }
         }
+
+        public static void DeleteLogsSimple()
+        {
+            string[] logDirs = Directory.GetDirectories(getFullBaseDirectory());      
+
+            foreach (string logsSubDirName in logDirs)
+            {
+                try
+                {
+                    Directory.Delete(logsSubDirName, true);
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+        }
     }
 }

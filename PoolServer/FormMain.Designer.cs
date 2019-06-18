@@ -402,6 +402,7 @@
             // ctxMenuDeleteLogs
             // 
             this.ctxMenuDeleteLogs.Name = "ctxMenuDeleteLogs";
+            this.ctxMenuDeleteLogs.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
             this.ctxMenuDeleteLogs.Size = new System.Drawing.Size(255, 26);
             this.ctxMenuDeleteLogs.Text = "Стереть логи";
             this.ctxMenuDeleteLogs.Click += new System.EventHandler(this.ctxMenuDeleteLogs_Click);
@@ -459,6 +460,7 @@
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.Name = "FormMain";
