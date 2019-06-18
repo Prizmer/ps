@@ -142,10 +142,14 @@ namespace PollingLibraries.LibPorts
         private bool updateComPortSettingFromGUI(ref ComPortSettings comPortSettings)
         {
             if (comboBoxComPorts.SelectedIndex > -1)
+            {
                 comPortSettings.name = comboBoxComPorts.Items[comboBoxComPorts.SelectedIndex].ToString();
+                comPortSettings.name = comPortSettings.name.Replace("COM", "");
+            }
             else
+            {
                 return false;
-
+            }
 
             comPortSettings.read_timeout = (ushort)numericUpDownComReadTimeout.Value;
             comPortSettings.write_timeout = (ushort)numericUpDownComWriteTimeout.Value;
@@ -194,6 +198,7 @@ namespace PollingLibraries.LibPorts
                     {
                         msg = "Порт не создан. Некорректные свойства COM.";
                         updateStatus(msg, true);
+                        logger.LogError(msg);
                         SettingsApplied?.Invoke(this, new EventArgsSettingsApplied(_virtualPort, msg));
                         return false;
                     }
@@ -205,6 +210,7 @@ namespace PollingLibraries.LibPorts
                     {
                         msg = "Порт не создан. Некорректные свойства TCP/IP.";
                         updateStatus(msg, true);
+                        logger.LogError(msg);
                         SettingsApplied?.Invoke(this, new EventArgsSettingsApplied(_virtualPort, msg));
                         return false;
                     }
@@ -388,6 +394,44 @@ namespace PollingLibraries.LibPorts
         {
             CheckBox cb = (CheckBox)sender;
             GSM = cb.Checked;
+        }
+
+        private void btnClosePort_Click(object sender, EventArgs e)
+        {
+            string msg = "Порт закрыт ";
+            if (_virtualPort != null)
+            {
+                object oVp = _virtualPort.GetPortObject();
+
+
+                // на будущее для более осознанного закрытия
+                if (typeof(SerialPort).IsAssignableFrom(oVp.GetType()))
+                {
+                    SerialPort p = (SerialPort)oVp;
+                    //_virtualPort.Close();
+                }
+                else if (typeof(TcpipPort).IsAssignableFrom(oVp.GetType()))
+                {
+                    TcpipPort p = (TcpipPort)oVp;
+                    //_virtualPort.Close();
+                }
+
+
+                _virtualPort.Close();
+
+                msg += _virtualPort.GetName();
+
+                updateStatus(msg);
+            }
+            else
+            {
+                msg = "Порт не создан";
+                logger.LogError(msg);
+                updateStatus(msg, true);
+            }
+
+
+
         }
     }
 

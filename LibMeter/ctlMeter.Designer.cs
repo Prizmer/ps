@@ -81,7 +81,7 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox1.Size = new System.Drawing.Size(784, 255);
+            this.groupBox1.Size = new System.Drawing.Size(884, 255);
             this.groupBox1.TabIndex = 50;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Интерфейс драйвера";
@@ -92,7 +92,7 @@
             this.gbAuxilary.Controls.Add(this.tbMeterPassword);
             this.gbAuxilary.Location = new System.Drawing.Point(10, 166);
             this.gbAuxilary.Name = "gbAuxilary";
-            this.gbAuxilary.Size = new System.Drawing.Size(765, 79);
+            this.gbAuxilary.Size = new System.Drawing.Size(868, 79);
             this.gbAuxilary.TabIndex = 79;
             this.gbAuxilary.TabStop = false;
             this.gbAuxilary.Text = "Дополнительно";
@@ -114,6 +114,7 @@
             this.tbMeterPassword.Size = new System.Drawing.Size(136, 22);
             this.tbMeterPassword.TabIndex = 51;
             this.tbMeterPassword.Text = "111111";
+            this.tbMeterPassword.Leave += new System.EventHandler(this.tbMeterPassword_Leave);
             // 
             // panelDailyMonthly
             // 
@@ -178,7 +179,7 @@
             this.rtbLog.Location = new System.Drawing.Point(492, 14);
             this.rtbLog.Name = "rtbLog";
             this.rtbLog.ReadOnly = true;
-            this.rtbLog.Size = new System.Drawing.Size(283, 146);
+            this.rtbLog.Size = new System.Drawing.Size(386, 146);
             this.rtbLog.TabIndex = 77;
             this.rtbLog.Text = "";
             this.rtbLog.DoubleClick += new System.EventHandler(this.rtbLog_DoubleClick);
@@ -366,7 +367,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.groupBox1);
             this.Name = "ctlMeters";
-            this.Size = new System.Drawing.Size(796, 268);
+            this.Size = new System.Drawing.Size(896, 268);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.gbAuxilary.ResumeLayout(false);

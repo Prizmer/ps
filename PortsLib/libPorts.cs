@@ -692,12 +692,15 @@ namespace PollingLibraries.LibPorts
         {
             _cps = cps;
 
+            if (_cps.name.IndexOf("COM") > -1)
+                _cps.name.Replace("COM", "");
+
             comLogger = new Logger();
             comLogger.Initialize(Logger.DIR_LOGS_PORTS, false, "COM" + cps.name);
 
-            comLogger.LogInfo("This is test msg");
-
-            comLogger.LogInfo("_cps: " + _cps.gsm_on);
+            // comLogger.LogInfo("Constructer 1, with ComPortSettings");
+            if (_cps.gsm_on)
+                comLogger.LogInfo("_cps, gsm_on: " + _cps.gsm_on);
 
             //если не передано настроек, создадим рандомный порт
             if (cps.name == "")
@@ -736,6 +739,8 @@ namespace PollingLibraries.LibPorts
 
         public ComPort(SerialPort sp, byte attempts, ushort read_timeout, ushort write_timeout)
         {
+            comLogger.LogWarn("Old constructor with 4 args");
+
             comLogger = new Logger();
             comLogger.Initialize(Logger.DIR_LOGS_PORTS, false, "COM" + sp.PortName);
 
@@ -895,9 +900,19 @@ namespace PollingLibraries.LibPorts
 
         public int WriteReadData(FindPacketSignature func, byte[] out_buffer, ref byte[] in_buffer, int out_length, int target_in_length, uint pos_count_data_size = 0, uint size_data = 0, uint header_size = 0)
         {
+
+            int att = 0;
+
+            LBL_WRD_COM_START:
+
             isIdle = false;
-            if (!OpenPort()) return 0;
-     
+            if (!OpenPort())
+            {
+                Close();
+                Thread.Sleep(1000);
+                if (!OpenPort())
+                    return 0;
+            }
             if (_cps.gsm_on && !isConnectedToAt && !isTryingToPerformATConnect && !isTryingToPerformATDisconnect)
             {
                 isTryingToPerformATConnect = true;
@@ -921,11 +936,24 @@ namespace PollingLibraries.LibPorts
             string infStrPort = String.Format("PortInfo: NAME: {0}; Parity: {1}; DTR: {2}; STOP: {3}; BITES: {4}; RTS: {5};", 
                 serialPort.PortName.ToString(), serialPort.Parity, serialPort.DtrEnable.ToString(), serialPort.StopBits, serialPort.DataBits, serialPort.RtsEnable.ToString());
             string infStrArg = String.Format("WriteReadDataArg: out_length (properCMDLength): {0};", out_length);
-            WriteToLog("START with:" + Environment.NewLine + infStrCustom + Environment.NewLine + infStrPort + 
-                Environment.NewLine + infStrArg);
+            //WriteToLog("START with:" + Environment.NewLine + infStrCustom + Environment.NewLine + infStrPort + 
+            //    Environment.NewLine + infStrArg);
 
 
-            serialPort.Write(out_buffer, 0, out_buffer.Length);
+            try
+            {
+                serialPort.Write(out_buffer, 0, out_buffer.Length);
+            } catch (Exception ex)
+            {
+                WriteToLog("WriteReadData: serialPort.Write exception: " +  ex.Message);
+                if (att == 0)
+                {
+                    att++;
+                    goto LBL_WRD_COM_START;
+                }
+
+            }
+
             WriteToLog("<< Written data: " + BitConverter.ToString(out_buffer) + "\n");
 
             //Thread.Sleep(10);
@@ -1011,8 +1039,6 @@ namespace PollingLibraries.LibPorts
         {
             if (serialPort != null)
             {
-  
-
                 if (!serialPort.IsOpen)
                 {
                     try
@@ -1022,17 +1048,18 @@ namespace PollingLibraries.LibPorts
                     }
                     catch (Exception ex)
                     {
+                        WriteToLog("Can't open serial port: " + ex.Message);
                         return false;
                     }
 
                     try
                     { 
-                    serialPort.DiscardOutBuffer();
-                    serialPort.DiscardInBuffer();
+                        serialPort.DiscardOutBuffer();
+                        serialPort.DiscardInBuffer();
                     }
                     catch (Exception ex)
                     {
-
+                        WriteToLog("Can't discard serial buffers: " + ex.Message);
                     }
 
                     if (serialPort.IsOpen)
@@ -1052,13 +1079,18 @@ namespace PollingLibraries.LibPorts
                         serialPort.DiscardOutBuffer();
                         serialPort.DiscardInBuffer();
 
-                    }catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
-
+                        WriteToLog("Port is already opened, but can't discard serial buffers: " + ex.Message);
                     }
 
                     return true;
                 }
+            }
+            else
+            {
+                WriteToLog("Serial port object in not initialized...");
             }
 
             return false;
@@ -1098,12 +1130,28 @@ namespace PollingLibraries.LibPorts
                 if (_cps.gsm_on)
                 {
                     idleThreadOnGo = false;
-                    DisconnectFromAt();
+
+                    try
+                    {
+                        DisconnectFromAt();
+                    } catch (Exception ex)
+                    {
+                        WriteToLog("Close: DisconnectFromAt exception: " + ex.Message);
+                    }
+
                     Thread.Sleep(1000);
                 }
 
                 idleThreadOnGo = false;
-                serialPort.Close();
+
+                try
+                {
+                    serialPort.Close();
+                }
+                catch (Exception ex)
+                {
+                    WriteToLog("Close: serialPort.Close() exception: " + ex.Message);
+                }
             }
         }
 

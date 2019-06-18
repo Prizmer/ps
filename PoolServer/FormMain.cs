@@ -52,7 +52,7 @@ namespace Prizmer.PoolServer
            // byte[] cmdHang = ASCIIEncoding.ASCII.GetBytes(at_cmd_hang);
             
 
-            const string SO_VERSION = "v. 0.20.5";
+            const string SO_VERSION = "v. 0.21.0";
             this.Text += " - " + SO_VERSION;
 
             try
@@ -355,6 +355,8 @@ namespace Prizmer.PoolServer
             ThreadsAreClosing = false;
 
             bReadyToExit = false;
+
+            string statusText = "";
             
             if (e.success)
             {
@@ -378,12 +380,17 @@ namespace Prizmer.PoolServer
                     else
                     {
                         this.currentPortIndex = 0;
-                        MessageBox.Show("Опрос по всем портам завершен!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        statusText = "Опрос по всем портам завершен!";
+                        tsLabel1.Text = statusText;
+                        //MessageBox.Show("Опрос по всем портам завершен!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Опрос завершен", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    statusText = "Опрос завершен!";
+                    tsLabel1.Text = statusText;
+                    //MessageBox.Show("Опрос завершен", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             else

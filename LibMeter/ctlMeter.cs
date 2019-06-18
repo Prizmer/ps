@@ -105,7 +105,7 @@ namespace Drivers.LibMeter
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         [Description("Сетевой адрес прибора"), Category("Custom")]
-        public string AddressMeter
+        public uint AddressMeter
         {
             get
             {
@@ -114,7 +114,7 @@ namespace Drivers.LibMeter
             set
             {
                 _settings.AddressMeter = value;
-                tbMeterAddress.Text = _settings.AddressMeter;
+                tbMeterAddress.Text = _settings.AddressMeter.ToString();
             }
         }
 
@@ -172,13 +172,16 @@ namespace Drivers.LibMeter
             _meter = meter;
             _vp = vp;
 
-            ushort addr = (ushort)_settings.AddressParam;
-            ushort tarif = (ushort)_settings.ChannelParam;
-            string pass = _settings.PasswordMeter == null ? "" : _settings.PasswordMeter;
+            uint addr = 1;
+            if (!uint.TryParse(tbMeterAddress.Text, out addr))
+                appendToLog("Не корректный сетевой адрес");
+
+            string pass = tbMeterPassword.Text;
 
             _meter.Init(addr, pass, _vp);
-
         }
+
+
 
         public event EventHandler<EventArgsValue> ValueIsReady;
 
@@ -186,7 +189,7 @@ namespace Drivers.LibMeter
 
         private void appendToLog(string msg)
         {
-            rtbLog.Text += "\n" + DateTime.Now.ToShortTimeString() + ": " + msg;
+            rtbLog.Text += "\n" + DateTime.Now.ToString("HH:mm:ss.fff" + ": " + msg);
         }
 
 
@@ -322,6 +325,12 @@ namespace Drivers.LibMeter
         {
             rtbLog.Clear();
         }
+
+        private void tbMeterPassword_Leave(object sender, EventArgs e)
+        {
+            if (_meter != null)
+                _meter.Init(_settings.AddressMeter, tbMeterPassword.Text, _vp);
+        }
     }
 
     public struct CtlSettings
@@ -333,7 +342,7 @@ namespace Drivers.LibMeter
         public bool EnableDaily;
         public bool EnableMonthly;
 
-        public string AddressMeter;
+        public uint AddressMeter;
         public string PasswordMeter;
 
         public int AddressParam;

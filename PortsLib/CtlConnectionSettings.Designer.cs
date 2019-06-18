@@ -28,7 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.lblStatus = new System.Windows.Forms.Label();
             this.gbComProp = new System.Windows.Forms.GroupBox();
             this.tbComConfig = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -48,7 +50,8 @@
             this.comboBoxComPorts = new System.Windows.Forms.ComboBox();
             this.textBoxPort = new System.Windows.Forms.TextBox();
             this.textBoxIp = new System.Windows.Forms.TextBox();
-            this.lblStatus = new System.Windows.Forms.Label();
+            this.btnClosePort = new System.Windows.Forms.Button();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox1.SuspendLayout();
             this.gbComProp.SuspendLayout();
             this.panelCOMGSM.SuspendLayout();
@@ -58,6 +61,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.btnClosePort);
             this.groupBox1.Controls.Add(this.lblStatus);
             this.groupBox1.Controls.Add(this.gbComProp);
             this.groupBox1.Controls.Add(this.btnApplyConnectionSettings);
@@ -78,6 +82,16 @@
             this.groupBox1.TabIndex = 87;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Подключение";
+            // 
+            // lblStatus
+            // 
+            this.lblStatus.AutoSize = true;
+            this.lblStatus.ForeColor = System.Drawing.Color.DarkGreen;
+            this.lblStatus.Location = new System.Drawing.Point(12, 367);
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(28, 17);
+            this.lblStatus.TabIndex = 101;
+            this.lblStatus.Text = "OK";
             // 
             // gbComProp
             // 
@@ -147,9 +161,10 @@
             // 
             this.btnApplyConnectionSettings.Location = new System.Drawing.Point(15, 319);
             this.btnApplyConnectionSettings.Name = "btnApplyConnectionSettings";
-            this.btnApplyConnectionSettings.Size = new System.Drawing.Size(251, 35);
+            this.btnApplyConnectionSettings.Size = new System.Drawing.Size(155, 35);
             this.btnApplyConnectionSettings.TabIndex = 98;
             this.btnApplyConnectionSettings.Text = "Применить";
+            this.toolTip1.SetToolTip(this.btnApplyConnectionSettings, "Применить настройки без открытия порта. Порт управляется драйвером.");
             this.btnApplyConnectionSettings.UseVisualStyleBackColor = true;
             this.btnApplyConnectionSettings.Click += new System.EventHandler(this.btnApplyConnectionSettings_Click);
             // 
@@ -299,15 +314,16 @@
             this.textBoxIp.Size = new System.Drawing.Size(99, 22);
             this.textBoxIp.TabIndex = 87;
             // 
-            // lblStatus
+            // btnClosePort
             // 
-            this.lblStatus.AutoSize = true;
-            this.lblStatus.ForeColor = System.Drawing.Color.DarkGreen;
-            this.lblStatus.Location = new System.Drawing.Point(12, 367);
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(28, 17);
-            this.lblStatus.TabIndex = 101;
-            this.lblStatus.Text = "OK";
+            this.btnClosePort.Location = new System.Drawing.Point(176, 319);
+            this.btnClosePort.Name = "btnClosePort";
+            this.btnClosePort.Size = new System.Drawing.Size(87, 35);
+            this.btnClosePort.TabIndex = 102;
+            this.btnClosePort.Text = "Закрыть";
+            this.toolTip1.SetToolTip(this.btnClosePort, "Принудительное закрытие порта");
+            this.btnClosePort.UseVisualStyleBackColor = true;
+            this.btnClosePort.Click += new System.EventHandler(this.btnClosePort_Click);
             // 
             // CtlConnectionSettings
             // 
@@ -353,5 +369,7 @@
         private System.Windows.Forms.ComboBox comboBoxComPorts;
         private System.Windows.Forms.TextBox textBoxPort;
         private System.Windows.Forms.TextBox textBoxIp;
+        private System.Windows.Forms.Button btnClosePort;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
