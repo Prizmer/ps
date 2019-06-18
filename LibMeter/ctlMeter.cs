@@ -224,8 +224,8 @@ namespace Drivers.LibMeter
             if (!openChannel())
                 return false;
 
-            ushort addr = (ushort)_settings.AddressParam;
-            ushort tarif = (ushort)_settings.ChannelParam;
+            ushort addr = (ushort)numParamAddr.Value;
+            ushort tarif = (ushort)numParamTarif.Value;
 
             switch (prmTypeLbl)
             {
