@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using System.Threading;
+
 using PollingLibraries.LibPorts;
 
 namespace Drivers.LibMeter
@@ -17,6 +19,10 @@ namespace Drivers.LibMeter
         IMeter _meter = null;
         VirtualPort _vp = null;
 
+
+        public event EventHandler<EventArgsValue> ValueIsReady;
+        //public event EventHandler<EventArgs> ChannelOpened;
+
         public ctlMeters()
         {
             InitializeComponent();
@@ -24,6 +30,28 @@ namespace Drivers.LibMeter
             dtpDailyMonthly.Value = DateTime.Now.Date;
             dtpFrom.Value = DateTime.Now.Date.AddDays(-1);
             dtpTo.Value = DateTime.Now.Date;
+
+            HalfsAreReady += (object o, EventArgsValue eav) =>
+            {
+                string msg = "";
+
+                List<RecordPowerSlice> halfsList = new List<RecordPowerSlice>();
+                msg = $"Получено {halfsList.Count} получасовок";
+                appendToLog(msg);
+
+                if (halfsList.Count == 0)
+                    return;
+
+                string res = "";
+                int cnt = 1;
+                foreach (RecordPowerSlice half in halfsList)
+                {
+                    res += $"{cnt}. {half.date_time}: A+ {half.APlus}, A- {half.AMinus}, R+ {half.RPlus}, R- {half.RMinus}, st={half.status}\n";
+                    cnt++;
+                }
+
+                appendToLog(res);
+            };
         }
 
         #region Свойства компонента
@@ -182,14 +210,38 @@ namespace Drivers.LibMeter
         }
 
 
+        private bool _inProcess = false;
+        private bool InProcess
+        {
+            get
+            {
+                return _inProcess;
+            }
+            set
+            {
+                _inProcess = value;
 
-        public event EventHandler<EventArgsValue> ValueIsReady;
+                panelDailyMonthly.Enabled = !value;
+                panelHalfs.Enabled = !value;
+                gbAuxilary.Enabled = !value;
+                panelMain.Enabled = !value;
+
+                pbPreloader.Visible = value;
+            }
+        }
 
 
 
         private void appendToLog(string msg)
         {
-            rtbLog.Text += "\n" + DateTime.Now.ToString("HH:mm:ss.fff" + ": " + msg);
+            Action a = () =>
+            {
+                string prfix = rtbLog.Text != "" ? "\n" : "";
+                rtbLog.Text += prfix + DateTime.Now.ToString("HH:mm:ss.fff" + ": " + msg);
+            };
+
+            this.Invoke(a);
+
         }
 
 
@@ -270,6 +322,60 @@ namespace Drivers.LibMeter
 
             return true;
         }
+
+
+        public event EventHandler<EventArgsValue> HalfsAreReady;
+        private void readParamHalfsAsync()
+        {
+            string msg = "";
+
+            if (HalfsAreReady == null)
+            {
+                msg = "К HalfsAreReady не подключены обработчики";
+                appendToLog(msg);
+                return;
+            }
+
+            this.InProcess = true;
+            msg = "Старт асинхронного чтения получасовок...";
+            appendToLog(msg);
+
+            ThreadStart threadStart = new ThreadStart(() =>
+            {
+                EventArgsValue eav = new EventArgsValue(new List<RecordPowerSlice>(), msg, false);
+                if (!openChannel())
+                {
+                    msg = "Не удалось открыть канал";
+                    Invoke(new Action(() => {
+                        this.InProcess = false;
+                    }));
+                    HalfsAreReady.Invoke(this, eav);
+                    return;
+                }
+
+                string m = "";
+                List<RecordPowerSlice> tmpHalfsList = new List<RecordPowerSlice>();
+                bool res = _meter.ReadPowerSlice(dtpFrom.Value, dtpTo.Value, ref tmpHalfsList, 30);
+                if (!res)
+                {
+                    //m = "ReadPowerSlice вернул false";
+                    m = "ReadPowerSlice вернул false";
+                    appendToLog(m);
+                }
+
+                eav = new EventArgsValue(tmpHalfsList, m, res);
+
+                Invoke(new Action(() => {
+                    this.InProcess = false;
+                }));
+                HalfsAreReady.Invoke(this, eav);
+            });
+
+            Thread evalThread = new Thread(threadStart);
+            evalThread.Start();
+
+            return;
+        }
         
         private bool readInfo(out string info)
         {
@@ -307,6 +413,11 @@ namespace Drivers.LibMeter
             ValueIsReady?.Invoke(sender, evArg);
         }
 
+        private void btnReadHalfs_Click(object sender, EventArgs e)
+        {  
+            readParamHalfsAsync();
+        }
+
         private void btnReadInfo_Click(object sender, EventArgs e)
         {
             string msg = "";
@@ -321,15 +432,22 @@ namespace Drivers.LibMeter
             ValueIsReady?.Invoke(sender, evArg);
         }
 
+
+
         private void rtbLog_DoubleClick(object sender, EventArgs e)
         {
-            rtbLog.Clear();
+
         }
 
         private void tbMeterPassword_Leave(object sender, EventArgs e)
         {
             if (_meter != null)
                 _meter.Init(_settings.AddressMeter, tbMeterPassword.Text, _vp);
+        }
+
+        private void btnClearLog_Click(object sender, EventArgs e)
+        {
+            rtbLog.Clear();
         }
     }
 
@@ -353,20 +471,46 @@ namespace Drivers.LibMeter
     {
         private float _value;
         private string _valueStr;
+        private List<RecordPowerSlice> _valueEnergyHalfsList;
         private string _message;
         private bool _status;
-        private bool _isStringVal;
+        private ValueTypes _valueType;
+
+        public enum ValueTypes
+        {
+            FLOAT,
+            STRING,
+            ENERGY_HALFS
+        }
 
         public dynamic Value
         {
             get
             {
-                if (_isStringVal)
-                    return _valueStr;
-                else
-                    return _value;
+                dynamic v = null;
+                switch (_valueType)
+                {
+                    case ValueTypes.FLOAT:
+                        {
+                            v = _value;
+                            break;
+                        }
+                    case ValueTypes.STRING:
+                        {
+                            v = _valueStr;
+                            break;
+                        }
+                    case ValueTypes.ENERGY_HALFS:
+                        {
+                            v = _valueEnergyHalfsList;
+                            break;
+                        }
+                }
+
+                return v;
             }
         }
+
         public string Message
         {
             get
@@ -381,33 +525,40 @@ namespace Drivers.LibMeter
                 return _status;
             }
         }
-        public bool IsString
-        {
-            get
-            {
-                return _isStringVal;
-            }
-        }
 
         public EventArgsValue(float value, string message, bool status)
         {
-            _isStringVal = false;
+            _valueType = ValueTypes.FLOAT;
 
             this._valueStr = "";
             this._value = value;
+            this._valueEnergyHalfsList = null;
             this._message = message;
             this._status = status;
         }
 
         public EventArgsValue(string value, string message, bool status)
         {
-            _isStringVal = true;
+            _valueType = ValueTypes.STRING;
 
             this._valueStr = value;
             this._value = 0;
+            this._valueEnergyHalfsList = null;
+            this._message = message;
+            this._status = status;
+        }
+
+        public EventArgsValue(List<RecordPowerSlice> values, string message, bool status)
+        {
+            _valueType = ValueTypes.ENERGY_HALFS;
+
+            this._valueStr = "";
+            this._value = 0;
+            this._valueEnergyHalfsList = values;
             this._message = message;
             this._status = status;
         }
 
     }
+
 }
