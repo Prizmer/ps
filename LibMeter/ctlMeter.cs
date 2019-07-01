@@ -35,7 +35,7 @@ namespace Drivers.LibMeter
             {
                 string msg = "";
 
-                List<RecordPowerSlice> halfsList = new List<RecordPowerSlice>();
+                List<RecordPowerSlice> halfsList = eav.Value;
                 msg = $"Получено {halfsList.Count} получасовок";
                 appendToLog(msg);
 

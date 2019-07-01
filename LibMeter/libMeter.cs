@@ -33,7 +33,21 @@ namespace Drivers.LibMeter
             //{ }
 
             if (areLogsRestricted) return;
-            mLogger.Initialize(Logger.DIR_LOGS_METERS, false, m_vport.GetName(), m_address.ToString());
+
+            string portName = "port_name_err";
+            string meterAddr = "meter_addr_err";
+
+            try
+            {
+                portName = m_vport.GetName();
+                meterAddr = m_address.ToString();
+            }
+            catch (Exception)
+            {
+                //
+            }
+
+            mLogger.Initialize(Logger.DIR_LOGS_METERS, false, portName, meterAddr);
 
             if (doWrite)
             {
