@@ -85,7 +85,7 @@
             this.groupBox1.Size = new System.Drawing.Size(916, 255);
             this.groupBox1.TabIndex = 50;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Интерфейс драйвера";
+            this.groupBox1.Text = "(3) Интерфейс драйвера";
             // 
             // pbPreloader
             // 

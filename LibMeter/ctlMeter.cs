@@ -199,21 +199,19 @@ namespace Drivers.LibMeter
             _meter = meter;
             _vp = vp;
 
-            bool initializationSuccess = InitializeDriver();
-            if (initializationSuccess)
+            string msg = "";
+            if (_meter is IMeter2)
             {
-                string msg = "";
-                if (_meter is IMeter)
-                {
-                    _meter2 = (IMeter2)_meter;
-                    msg = "Интерфейс IMeter2 поддерживается, показания с точностью double.";
-                }
-                else
-                {
-                    msg = "Интерфейс IMeter2 НЕ поддерживается, показания с точностью single.";
-                }
-                appendToLog(msg);
+                _meter2 = (IMeter2)_meter;
+                msg = "Интерфейс IMeter2 поддерживается, показания с точностью double.";
             }
+            else
+            {
+                msg = "Интерфейс IMeter2 НЕ поддерживается, показания с точностью single.";
+            }
+            appendToLog(msg);
+
+            bool initializationSuccess = InitializeDriver();
         }
 
         private bool InitializeDriver()
@@ -464,7 +462,7 @@ namespace Drivers.LibMeter
             string prmTypeLbl = btn.Tag.ToString();
             string msg = "";
 
-            float resVal = -1;
+            double resVal = -1;
             bool status = readParam(prmTypeLbl, out resVal);
 
             if (status)
@@ -533,7 +531,7 @@ namespace Drivers.LibMeter
 
     public class EventArgsValue : EventArgs
     {
-        private float _value;
+        private double _value;
         private string _valueStr;
         private List<RecordPowerSlice> _valueEnergyHalfsList;
         private string _message;
@@ -590,7 +588,7 @@ namespace Drivers.LibMeter
             }
         }
 
-        public EventArgsValue(float value, string message, bool status)
+        public EventArgsValue(double value, string message, bool status)
         {
             _valueType = ValueTypes.FLOAT;
 

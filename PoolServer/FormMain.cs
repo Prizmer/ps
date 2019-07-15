@@ -6,9 +6,11 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Threading;
 
 using Prizmer.PoolServer.DataBase;
-using System.Diagnostics;
+
 
 using PollingLibraries.LibLogger;
 
@@ -19,6 +21,7 @@ namespace Prizmer.PoolServer
         public MainService ms = new MainService();
         Analizator frmAnalizator = new Analizator();
         MetersSearchForm DevSearchForm = new MetersSearchForm();
+        Thread threadDeleteLogsOnTime = null;
 
         public FormMain()
         {
@@ -27,6 +30,46 @@ namespace Prizmer.PoolServer
 
             DevSearchForm.msInstance = ms;
             DevSearchForm.pollingStart += DevSearchForm_pollingStart;
+
+            Logger.LogsDeleted += Logger_LogsDeleted;
+            threadDeleteLogsOnTime = new Thread(deleteLogsOnTime);
+
+            // запуск потока удаления логов
+            threadDeleteLogsOnTime.Start();
+        }
+
+        private void deleteLogsOnTime()
+        {
+            int sleepTimeMinutes = 5;
+
+            // время, в которое следует удалить логи
+            DateTime dt1 = new DateTime(DateTime.Now.Date.Ticks);
+            dt1.AddHours(8);
+            DateTime dt2 = new DateTime(DateTime.Now.Date.Ticks);
+            dt2.AddHours(22);
+
+            DateTime dtCur = DateTime.Now;
+
+            TimeSpan ts1 = dtCur - dt1;
+            bool cond1 = ts1.TotalMinutes >= 0 && ts1.TotalMinutes < sleepTimeMinutes;
+
+            TimeSpan ts2 = dtCur - dt2;
+            bool cond2 = ts2.TotalMinutes >= 0 && ts2.TotalMinutes < sleepTimeMinutes;
+
+            if (cond1 || cond2)
+                Logger.DeleteLogs();
+
+            Thread.Sleep(sleepTimeMinutes * 1000);
+        }
+
+        private void Logger_LogsDeleted(object sender, EventArgs e)
+        {
+            // событие асинхронное, при наступлении включаем обратно кнопку удаления
+            this.Invoke((MethodInvoker)(() =>
+                {
+                    ctxMenuDeleteLogs.Enabled = true;
+                }
+            ));
         }
 
         private void DevSearchForm_pollingStart(object sender, MainFormParamsStructure mfPrms)
@@ -564,8 +607,7 @@ namespace Prizmer.PoolServer
 
         private void OpenLogsFolder()
         {
-            string exeLocation = @Logger.BaseDirectory;
-            Process.Start("explorer.exe", exeLocation);
+            Logger.OpenLogsFolder();
         }
 
         private void ctxMenuShowLogsDir_Click(object sender, EventArgs e)
@@ -619,6 +661,12 @@ namespace Prizmer.PoolServer
                 return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void CtxMenuDeleteOldLogs_Click(object sender, EventArgs e)
+        {
+            Logger.DeleteLogs();
+            ctxMenuDeleteLogs.Enabled = false;
         }
     }
 

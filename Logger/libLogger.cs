@@ -4,14 +4,19 @@ using System.IO;
 using System.Text;
 
 using System.Reflection;
+using System.Diagnostics;
+using System.Threading;
 
 namespace PollingLibraries.LibLogger
 {
     public class Logger
     {
-
         static string baseDirectory = "logs";
         static string executionDir = "";
+
+        static Thread threadDeleteLogs = null;
+        static object _lockerDeleteLogs = new object();
+        public static event EventHandler<EventArgs> LogsDeleted;
 
         public Logger() {
             executionDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -47,7 +52,7 @@ namespace PollingLibraries.LibLogger
         public const string DIR_LOGS_PORTS = "ports";
         public const string FNAM_LOGGER_LOG = "loggerErr.log";
 
-        public const int DAYS_TO_STORE_LOGS = 3;
+        public const int DAYS_TO_STORE_LOGS = 7;
 
         string workDirectory = "";
         bool isInitialized = false;
@@ -178,33 +183,85 @@ namespace PollingLibraries.LibLogger
 
         public static void DeleteLogs()
         {
-            string[] logDirs = Directory.GetDirectories(getFullBaseDirectory());
+            threadDeleteLogs = new Thread(deleteLogs);
+            threadDeleteLogs.Start();
+        }
 
-            //удалим папки, которые старше N дней
-            foreach (string logsSubDirName in logDirs)
+
+        private static bool isDirReadyForDeletion(DirectoryInfo dirInfo)
+        {
+            DateTime dirWasCreatedAtDate = dirInfo.CreationTime.Date;
+            TimeSpan ts = DateTime.Now.Date - dirWasCreatedAtDate;
+
+            if (ts.TotalDays > DAYS_TO_STORE_LOGS)
+                return true;
+            else
+                return false;
+        }
+
+        private static void deleteLogs()
+        {
+            lock(_lockerDeleteLogs)
             {
-                string[] dateDirs = Directory.GetDirectories(logsSubDirName);
+                string[] logDirs = Directory.GetDirectories(getFullBaseDirectory());
 
-                foreach (string dateDirName in dateDirs)
+                //удалим папки, которые старше N дней
+                foreach (string logsSubDirName in logDirs)
                 {
-                    DirectoryInfo dirInfo = new DirectoryInfo(dateDirName);
-                    DateTime dirWasCreatedAtDate = dirInfo.CreationTime.Date;
-                    TimeSpan ts = DateTime.Now.Date - dirWasCreatedAtDate;
+                    string[] dateDirs = Directory.GetDirectories(logsSubDirName);
+                    DirectoryInfo logsSubDirInfo = new DirectoryInfo(logsSubDirName);
 
-                    if (ts.TotalDays > DAYS_TO_STORE_LOGS)
-                        dirInfo.Delete(true);
+                    foreach (string dateDirName in dateDirs)
+                    {
+                        DirectoryInfo dateDirInfo = new DirectoryInfo(dateDirName);
+                        if (isDirReadyForDeletion(dateDirInfo))
+                        { 
+                            try
+                            {
+                                dateDirInfo.Delete(true);
+                            }
+                            catch (Exception ex)
+                            {
+                                // на случай, если файл открыт в блокноте например
+                            }
+                        }
+                    }
+
+                    if (logsSubDirInfo.GetFiles().Length == 0)
+                    {
+                        try
+                        {
+                            logsSubDirInfo.Delete();
+                        }
+                        catch (Exception ex)
+                        {
+                            //
+                        }
+                    }
+
                 }
-            }
 
-            //удалим все файлы базовой дирректории, которые старше N дней
-            string[] logFiles = Directory.GetFiles(getFullBaseDirectory());
-            foreach (string logFileName in logFiles)
-            {
-                FileInfo fInfo = new FileInfo(logFileName);
-                DateTime fileWasCreatedAtDate = fInfo.CreationTime.Date;
-                TimeSpan ts = DateTime.Now.Date - fileWasCreatedAtDate;
-                if (ts.TotalDays > DAYS_TO_STORE_LOGS)
-                    fInfo.Delete();
+                //удалим все файлы базовой дирректории, которые старше N дней
+                string[] logFiles = Directory.GetFiles(getFullBaseDirectory());
+                foreach (string logFileName in logFiles)
+                {
+                    FileInfo fInfo = new FileInfo(logFileName);
+                    DateTime fileWasCreatedAtDate = fInfo.CreationTime.Date;
+                    TimeSpan ts = DateTime.Now.Date - fileWasCreatedAtDate;
+                    if (ts.TotalDays > DAYS_TO_STORE_LOGS)
+                    {
+                        try
+                        {
+                            fInfo.Delete();
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                }
+
+                LogsDeleted?.Invoke(new object(), new EventArgs());
             }
         }
 
@@ -223,6 +280,12 @@ namespace PollingLibraries.LibLogger
 
                 }
             }
+        }
+
+        public static void OpenLogsFolder()
+        {
+            string exeLocation = @Logger.BaseDirectory;
+            Process.Start("explorer.exe", exeLocation);
         }
     }
 }

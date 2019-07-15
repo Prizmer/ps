@@ -30,6 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.btnClosePort = new System.Windows.Forms.Button();
             this.lblStatus = new System.Windows.Forms.Label();
             this.gbComProp = new System.Windows.Forms.GroupBox();
             this.tbComConfig = new System.Windows.Forms.TextBox();
@@ -50,7 +51,6 @@
             this.comboBoxComPorts = new System.Windows.Forms.ComboBox();
             this.textBoxPort = new System.Windows.Forms.TextBox();
             this.textBoxIp = new System.Windows.Forms.TextBox();
-            this.btnClosePort = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox1.SuspendLayout();
             this.gbComProp.SuspendLayout();
@@ -81,7 +81,18 @@
             this.groupBox1.Size = new System.Drawing.Size(285, 390);
             this.groupBox1.TabIndex = 87;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Подключение";
+            this.groupBox1.Text = "(2) Подключение";
+            // 
+            // btnClosePort
+            // 
+            this.btnClosePort.Location = new System.Drawing.Point(176, 319);
+            this.btnClosePort.Name = "btnClosePort";
+            this.btnClosePort.Size = new System.Drawing.Size(87, 35);
+            this.btnClosePort.TabIndex = 102;
+            this.btnClosePort.Text = "Закрыть";
+            this.toolTip1.SetToolTip(this.btnClosePort, "Принудительное закрытие порта");
+            this.btnClosePort.UseVisualStyleBackColor = true;
+            this.btnClosePort.Click += new System.EventHandler(this.btnClosePort_Click);
             // 
             // lblStatus
             // 
@@ -313,17 +324,6 @@
             this.textBoxIp.Name = "textBoxIp";
             this.textBoxIp.Size = new System.Drawing.Size(99, 22);
             this.textBoxIp.TabIndex = 87;
-            // 
-            // btnClosePort
-            // 
-            this.btnClosePort.Location = new System.Drawing.Point(176, 319);
-            this.btnClosePort.Name = "btnClosePort";
-            this.btnClosePort.Size = new System.Drawing.Size(87, 35);
-            this.btnClosePort.TabIndex = 102;
-            this.btnClosePort.Text = "Закрыть";
-            this.toolTip1.SetToolTip(this.btnClosePort, "Принудительное закрытие порта");
-            this.btnClosePort.UseVisualStyleBackColor = true;
-            this.btnClosePort.Click += new System.EventHandler(this.btnClosePort_Click);
             // 
             // CtlConnectionSettings
             // 

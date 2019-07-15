@@ -65,6 +65,7 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tsLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.ctxMenuDeleteOldLogs = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -357,9 +358,10 @@
             this.DeviceSearchMenuItem,
             this.toolStripMenuItem1,
             this.ctxMenuShowLogsDir,
-            this.ctxMenuDeleteLogs});
+            this.ctxMenuDeleteLogs,
+            this.ctxMenuDeleteOldLogs});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(256, 140);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(256, 194);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening_1);
             // 
             // ctxMenuAnalizator
@@ -446,7 +448,14 @@
             // tsLabel1
             // 
             this.tsLabel1.Name = "tsLabel1";
-            this.tsLabel1.Size = new System.Drawing.Size(0, 17);
+            this.tsLabel1.Size = new System.Drawing.Size(0, 16);
+            // 
+            // ctxMenuDeleteOldLogs
+            // 
+            this.ctxMenuDeleteOldLogs.Name = "ctxMenuDeleteOldLogs";
+            this.ctxMenuDeleteOldLogs.Size = new System.Drawing.Size(255, 26);
+            this.ctxMenuDeleteOldLogs.Text = "Стереть старые логи";
+            this.ctxMenuDeleteOldLogs.Click += new System.EventHandler(this.CtxMenuDeleteOldLogs_Click);
             // 
             // FormMain
             // 
@@ -517,6 +526,7 @@
         private System.Windows.Forms.ToolStripMenuItem DeviceSearchMenuItem;
         private System.Windows.Forms.CheckBox cbEachPort;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.ToolStripMenuItem ctxMenuDeleteOldLogs;
     }
 }
 
