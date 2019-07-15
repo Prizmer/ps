@@ -69,7 +69,7 @@ namespace Prizmer.PoolServer.DataBase
     public struct Value
     {
         public DateTime dt;
-        public float value;
+        public double value;
         public Boolean status;
         public UInt32 id_taken_params;
     }

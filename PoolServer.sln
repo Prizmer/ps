@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29025.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoolServer", "PoolServer\PoolServer.csproj", "{A0EB6FE0-0A9D-47F6-A3D1-0FA82BFFA921}"
 EndProject
@@ -12,8 +12,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibLogger", "Logger\LibLogger.csproj", "{D20D8ACB-AD07-4E7F-A99E-47F4113B32EA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibMeter", "LibMeter\LibMeter.csproj", "{F0106CA4-43DE-4017-956B-0842AD89F90E}"
-EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{42014329-B5F7-4515-B5E9-B3CE560E8068}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,12 +79,6 @@ Global
 		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Release|x86.ActiveCfg = Release|Any CPU
 		{F0106CA4-43DE-4017-956B-0842AD89F90E}.Release|x86.Build.0 = Release|Any CPU
-		{42014329-B5F7-4515-B5E9-B3CE560E8068}.Debug|Any CPU.ActiveCfg = Debug
-		{42014329-B5F7-4515-B5E9-B3CE560E8068}.Debug|Mixed Platforms.ActiveCfg = Debug
-		{42014329-B5F7-4515-B5E9-B3CE560E8068}.Debug|x86.ActiveCfg = Debug
-		{42014329-B5F7-4515-B5E9-B3CE560E8068}.Release|Any CPU.ActiveCfg = Release
-		{42014329-B5F7-4515-B5E9-B3CE560E8068}.Release|Mixed Platforms.ActiveCfg = Release
-		{42014329-B5F7-4515-B5E9-B3CE560E8068}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

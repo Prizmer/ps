@@ -396,7 +396,7 @@ namespace PollingLibraries.LibPorts
             GSM = cb.Checked;
         }
 
-        private void btnClosePort_Click(object sender, EventArgs e)
+        public void ClosePortForce()
         {
             string msg = "Порт закрыт ";
             if (_virtualPort != null)
@@ -429,9 +429,11 @@ namespace PollingLibraries.LibPorts
                 logger.LogError(msg);
                 updateStatus(msg, true);
             }
+        }
 
-
-
+        private void btnClosePort_Click(object sender, EventArgs e)
+        {
+            ClosePortForce();
         }
     }
 

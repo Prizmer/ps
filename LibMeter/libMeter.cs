@@ -171,6 +171,17 @@ namespace Drivers.LibMeter
 
     }
 
+    /// <summary>
+    /// Интерфейс драйвера устройства учёта энергоресурсов
+    /// </summary>
+    public interface IMeter2
+    {
+        bool ReadCurrentValues(ushort param, ushort tarif, ref double recordValue);
+
+        bool ReadMonthlyValues(DateTime dt, ushort param, ushort tarif, ref double recordValue);
+
+        bool ReadDailyValues(DateTime dt, ushort param, ushort tarif, ref double recordValue);
+    }
 
     /// <summary>
     /// Общие категории считываемых данных

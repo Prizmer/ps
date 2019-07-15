@@ -15,13 +15,14 @@ namespace Drivers.LibMeter
 {
     public partial class ctlMeters : UserControl
     {
-        CtlSettings _settings = new CtlSettings();
-        IMeter _meter = null;
-        VirtualPort _vp = null;
-
+        private CtlSettings _settings = new CtlSettings();
+        private IMeter _meter = null;
+        private IMeter2 _meter2 = null;
+        private VirtualPort _vp = null;
 
         public event EventHandler<EventArgsValue> ValueIsReady;
-        //public event EventHandler<EventArgs> ChannelOpened;
+        public event EventHandler<EventArgsValue> HalfsAreReady;
+
 
         public ctlMeters()
         {
@@ -191,14 +192,37 @@ namespace Drivers.LibMeter
             }
         }
 
-
-
         #endregion
 
-        public void InitializeMeter(IMeter meter, VirtualPort vp)
+        public void Initialize(IMeter meter, VirtualPort vp)
         {
             _meter = meter;
             _vp = vp;
+
+            bool initializationSuccess = InitializeDriver();
+            if (initializationSuccess)
+            {
+                string msg = "";
+                if (_meter is IMeter)
+                {
+                    _meter2 = (IMeter2)_meter;
+                    msg = "Интерфейс IMeter2 поддерживается, показания с точностью double.";
+                }
+                else
+                {
+                    msg = "Интерфейс IMeter2 НЕ поддерживается, показания с точностью single.";
+                }
+                appendToLog(msg);
+            }
+        }
+
+        private bool InitializeDriver()
+        {
+            if (_meter == null || _vp == null)
+            {
+                appendToLog("Невозможно проиницилизировать драйвер, т.к. компоненту ctlMeters не заданы _meter и _vp. Вызовите сначала метод Initialize");
+                return false;
+            }
 
             uint addr = 1;
             if (!uint.TryParse(tbMeterAddress.Text, out addr))
@@ -207,56 +231,31 @@ namespace Drivers.LibMeter
             string pass = tbMeterPassword.Text;
 
             _meter.Init(addr, pass, _vp);
+
+            return true;
         }
-
-
-        private bool _inProcess = false;
-        private bool InProcess
+        public IMeter GetInitializedDriver()
+        {
+            if (InitializeDriver())
+                return _meter;
+            else
+                return null;
+        }
+        public VirtualPort VirtualPort
         {
             get
             {
-                return _inProcess;
+                return _vp;
             }
-            set
-            {
-                _inProcess = value;
-
-                panelDailyMonthly.Enabled = !value;
-                panelHalfs.Enabled = !value;
-                gbAuxilary.Enabled = !value;
-                panelMain.Enabled = !value;
-
-                pbPreloader.Visible = value;
-            }
-        }
-
-
-
-        private void appendToLog(string msg)
-        {
-            Action a = () =>
-            {
-                string prfix = rtbLog.Text != "" ? "\n" : "";
-                rtbLog.Text += prfix + DateTime.Now.ToString("HH:mm:ss.fff" + ": " + msg);
-            };
-
-            this.Invoke(a);
-
         }
 
 
         private bool openChannel()
         {
             string msg = "";
-            if (_meter == null || _vp == null)
-            {
-                msg = "Компонент не проинициализирован _meter, _vp";
-                appendToLog(msg);
-                return false;
-            }
 
             // на случай если изменились адрес, тариф или пароль
-            InitializeMeter(_meter, _vp);
+            InitializeDriver();
 
             bool resOpenChannel = _meter.OpenLinkCanal();
             if (!resOpenChannel)
@@ -268,10 +267,11 @@ namespace Drivers.LibMeter
             return true;
         }
 
-        private bool readParam(string prmTypeLbl, out float val)
+        private bool readParam(string prmTypeLbl, out double val)
         {
             val = -1;
             string msg = "";
+            const string msgNewInterfaceAnnotation = "Точность double";
 
             if (!openChannel())
                 return false;
@@ -279,11 +279,25 @@ namespace Drivers.LibMeter
             ushort addr = (ushort)numParamAddr.Value;
             ushort tarif = (ushort)numParamTarif.Value;
 
+            bool bReadResult = false;
+            float tmpFloat = -1f;
+
             switch (prmTypeLbl)
             {
                 case "curr":
                     {
-                        if (!_meter.ReadCurrentValues(addr, tarif, ref val))
+                        if (_meter2 != null)
+                        {
+                            bReadResult = _meter2.ReadCurrentValues(addr, tarif, ref val) ;
+                            appendToLog(msgNewInterfaceAnnotation);
+                        }
+                        else
+                        {
+                            bReadResult = _meter.ReadCurrentValues(addr, tarif, ref tmpFloat);
+                            val = tmpFloat;
+                        }
+
+                        if (!bReadResult)
                         {
                             msg = "ReadCurrentValues вернул false";
                             appendToLog(msg);
@@ -294,7 +308,18 @@ namespace Drivers.LibMeter
                     }
                 case "day":
                     {
-                        if (!_meter.ReadDailyValues(dtpDailyMonthly.Value.Date, addr, tarif, ref val))
+                        if (_meter2 != null)
+                        {
+                            bReadResult = _meter2.ReadDailyValues(dtpDailyMonthly.Value.Date, addr, tarif, ref val);
+                            appendToLog(msgNewInterfaceAnnotation);
+                        }
+                        else
+                        {
+                            bReadResult = _meter.ReadDailyValues(dtpDailyMonthly.Value.Date, addr, tarif, ref tmpFloat);
+                            val = tmpFloat;
+                        }
+
+                        if (!bReadResult)
                         {
                             msg = "ReadDailyValues вернул false";
                             appendToLog(msg);
@@ -305,7 +330,18 @@ namespace Drivers.LibMeter
                     }
                 case "month":
                     {
-                        if (!_meter.ReadMonthlyValues(dtpDailyMonthly.Value.Date, addr, tarif, ref val))
+                        if (_meter2 != null)
+                        {
+                            bReadResult = _meter2.ReadMonthlyValues(dtpDailyMonthly.Value.Date, addr, tarif, ref val);
+                            appendToLog(msgNewInterfaceAnnotation);
+                        }
+                        else
+                        {
+                            bReadResult = _meter.ReadMonthlyValues(dtpDailyMonthly.Value.Date, addr, tarif, ref tmpFloat);
+                            val = tmpFloat;
+                        }
+
+                        if (!bReadResult)
                         {
                             msg = "ReadMonthlyValues вернул false";
                             appendToLog(msg);
@@ -323,8 +359,6 @@ namespace Drivers.LibMeter
             return true;
         }
 
-
-        public event EventHandler<EventArgsValue> HalfsAreReady;
         private void readParamHalfsAsync()
         {
             string msg = "";
@@ -389,6 +423,41 @@ namespace Drivers.LibMeter
             return resSerial;
         }
 
+
+        private bool _inProcess = false;
+        private bool InProcess
+        {
+            get
+            {
+                return _inProcess;
+            }
+            set
+            {
+                _inProcess = value;
+
+                panelDailyMonthly.Enabled = !value;
+                panelHalfs.Enabled = !value;
+                gbAuxilary.Enabled = !value;
+                panelMain.Enabled = !value;
+
+                pbPreloader.Visible = value;
+            }
+        }
+
+        private void appendToLog(string msg)
+        {
+            Action a = () =>
+            {
+                string prfix = rtbLog.Text != "" ? "\n" : "";
+                rtbLog.Text += prfix + DateTime.Now.ToString("HH:mm:ss.fff") + ": " + msg;
+            };
+
+            this.Invoke(a);
+
+        }
+
+        #region Обработчики контролов
+
         private void btnReadParam_Click(object sender, EventArgs e)
         {
             Button btn = (Button)sender;
@@ -432,13 +501,6 @@ namespace Drivers.LibMeter
             ValueIsReady?.Invoke(sender, evArg);
         }
 
-
-
-        private void rtbLog_DoubleClick(object sender, EventArgs e)
-        {
-
-        }
-
         private void tbMeterPassword_Leave(object sender, EventArgs e)
         {
             if (_meter != null)
@@ -449,6 +511,8 @@ namespace Drivers.LibMeter
         {
             rtbLog.Clear();
         }
+
+        #endregion
     }
 
     public struct CtlSettings
