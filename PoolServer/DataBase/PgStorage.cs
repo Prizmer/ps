@@ -459,7 +459,10 @@ namespace Prizmer.PoolServer.DataBase
                       types_params.type = "+ paramType + @" AND 
                       types_meters.guid = '" + driverGuid.ToString() + "';";
 
+            loggerStorage.LogInfo("GetMetersByTcpIPGUIDAndParams:q=" + query);
+
             List<Object> list = GetRecordsFromReader(query, RetrieveMeter);
+            loggerStorage.LogInfo("GetMetersByTcpIPGUIDAndParams:l=" + list.Count);
 
             Meter[] result = new Meter[list.Count];
 
@@ -467,6 +470,8 @@ namespace Prizmer.PoolServer.DataBase
             {
                 result[i] = (Meter)list[i];
             }
+
+            loggerStorage.LogInfo("GetMetersByTcpIPGUIDAndParams:r=" + result.Length);
 
             list.Clear();
 

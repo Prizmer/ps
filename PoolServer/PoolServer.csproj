@@ -136,6 +136,7 @@
     <Compile Include="Meters\teplouchet1.cs" />
     <Compile Include="Meters\TEM106.cs" />
     <Compile Include="Meters\mercury234.cs" />
+    <Compile Include="PollMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
