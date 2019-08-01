@@ -387,7 +387,9 @@ namespace Drivers.LibMeter
 
                 string m = "";
                 List<RecordPowerSlice> tmpHalfsList = new List<RecordPowerSlice>();
-                bool res = _meter.ReadPowerSlice(dtpFrom.Value, dtpTo.Value, ref tmpHalfsList, 30);
+
+                DateTime date_to = new DateTime(dtpTo.Value.Year, dtpTo.Value.Month, dtpTo.Value.Day, 23, 31, 0);
+                bool res = _meter.ReadPowerSlice(dtpFrom.Value, date_to, ref tmpHalfsList, 30);
                 if (!res)
                 {
                     //m = "ReadPowerSlice вернул false";
