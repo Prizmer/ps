@@ -916,10 +916,9 @@ namespace Prizmer.PoolServer
 
                 //***************************************| Значения АРХИВНЫЕ (3) |***************************************  
 
-                // TODO: refactor, убрать все архивные, оставить только последний блок
-                // архивные - пережиток прошлого, уже не используются
+                // Архивные используются только при работе с Elf, не нужно убирать совсем, или выполнить рефакторинг
 
-                //if (bStopServer) goto CloseThreadPoint;
+                if (bStopServer) goto CloseThreadPoint;
                 //if (false && POLLING_ACTIVE && DM_POLL_ARCHIVE && pollingParams.b_poll_archive)
                 //{
                 //    pollArchivesOld(pmPrms);
@@ -928,14 +927,22 @@ namespace Prizmer.PoolServer
                 //{
                 //    pollArchivesNewActual(pmPrms);
                 //}
-                //if (POLLING_ACTIVE && DM_POLL_ARCHIVE && pollingParams.b_poll_archive)
-                //{
-                //    const bool bPollArchiveAsDaily = true;
-                //    PollingResultStatus status = pollDaily(pmPrms, DateTime.Now, bPollArchiveAsDaily);
-                //    string statusStr = helper.GetEnumKeyAsString(resultEnumType, status);
-                //    pmPrms.logger.LogInfo("Прочитал СУТОЧНЫЕ (бывш. АРХИВНЫЕ) со статусом: " + statusStr);
-                //    if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
-                //}
+                if (POLLING_ACTIVE && DM_POLL_ARCHIVE && pollingParams.b_poll_archive)
+                {
+                    const bool bPollArchiveAsDaily = true;
+                    PollingResultStatus status = PollingResultStatus.UNDEFINED;
+                    bool delayCondition = pollingParams.daily_monthly_delay_minutes > 0 && DateTime.Now.Minute < pollingParams.daily_monthly_delay_minutes;
+
+                    if (!delayCondition)
+                        status = pollMethods.pollDaily(pmPrms, DateTime.Now, bPollArchiveAsDaily);
+                    else
+                        status = PollingResultStatus.DELAYED_BY_TIMEOUT;
+
+                    string statusStr = helper.GetEnumKeyAsString(resultEnumType, status);
+
+                    pmPrms.logger.LogInfo("Прочитал СУТОЧНЫЕ (бывш. АРХИВНЫЕ) со статусом: " + statusStr);
+                    if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
+                }
 
                 //***************************************| Значения ПОЛУЧАСОВЫЕ (4) |***************************************  
                 if (bStopServer) goto CloseThreadPoint;

@@ -52,7 +52,7 @@ namespace PollingLibraries.LibLogger
         public const string DIR_LOGS_PORTS = "ports";
         public const string FNAM_LOGGER_LOG = "loggerErr.log";
 
-        public const int DAYS_TO_STORE_LOGS = 7;
+        public const int DAYS_TO_STORE_LOGS = 5;
 
         string workDirectory = "";
         bool isInitialized = false;
@@ -193,7 +193,7 @@ namespace PollingLibraries.LibLogger
             DateTime dirWasCreatedAtDate = dirInfo.CreationTime.Date;
             TimeSpan ts = DateTime.Now.Date - dirWasCreatedAtDate;
 
-            if (ts.TotalDays > DAYS_TO_STORE_LOGS)
+            if (ts.TotalDays >= DAYS_TO_STORE_LOGS)
                 return true;
             else
                 return false;
