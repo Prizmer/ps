@@ -942,7 +942,8 @@ namespace PollingLibraries.LibPorts
 
             try
             {
-                serialPort.Write(out_buffer, 0, out_buffer.Length);
+                int outDataLength = ((out_length > -1) ? out_length : out_buffer.Length);
+                serialPort.Write(out_buffer, 0, outDataLength);
             } catch (Exception ex)
             {
                 WriteToLog("WriteReadData: serialPort.Write exception: " +  ex.Message);
