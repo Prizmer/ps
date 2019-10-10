@@ -27,8 +27,7 @@ using Drivers.UMDriver;
 using Drivers.Mercury23XDriver;
 using Drivers.Karat30XDriver;
 using Drivers.KaratDanfosDriver;
-
-
+using Drivers.Mercury200Driver;
 
 
 namespace Prizmer.PoolServer
@@ -728,7 +727,7 @@ namespace Prizmer.PoolServer
                     case "set4tm": meter = new SET4tmDriver(); break;
                     case "spg76212": meter = new spg76212(); break;
                     case "teplouchet1": meter = new teplouchet1(); break;
-                    case "m200": meter = new Mercury200(); break;
+                    case "m200": meter = new Mercury200Driver(); break;
                     case "opcretranslator": meter = new OpcRetranslator(); break;
                     case "sayani_kombik": meter = new sayani_kombik(); break;
                     case "m230": meter = new Mercury23XDriver(); break;

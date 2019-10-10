@@ -69,6 +69,9 @@
     <Reference Include="KaratDanfosDriver">
       <HintPath>..\..\testUtils\tu_karatdanfos\Mercury23XDriver\bin\Debug\KaratDanfosDriver.dll</HintPath>
     </Reference>
+    <Reference Include="Mercury200Driver">
+      <HintPath>..\..\testUtils\tu_set\Mercury200Driver\bin\Debug\Mercury200Driver.dll</HintPath>
+    </Reference>
     <Reference Include="Mercury23XDriver">
       <HintPath>..\..\testUtils\tu_mercury23X\Mercury23XDriver\bin\Debug\Mercury23XDriver.dll</HintPath>
     </Reference>
@@ -125,7 +128,6 @@
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
     <Compile Include="MainService.cs" />
-    <Compile Include="Meters\Mercury200.cs" />
     <Compile Include="Meters\mercury230.cs" />
     <Compile Include="Meters\OpcRetranslator.cs" />
     <Compile Include="Meters\Pulsar10.cs" />
