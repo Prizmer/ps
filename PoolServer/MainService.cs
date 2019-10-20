@@ -1079,6 +1079,7 @@ namespace Prizmer.PoolServer
         NO_TAKEN_PARAMS = 2,
         OPEN_LINK_CHANNEL_FAULT = 3,
         DELAYED_BY_TIMEOUT = 4,
+        ALREADY_EXISTS = 5,
 
         SEE_DETAILS_IN_CODE_1 = 10
     }

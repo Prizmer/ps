@@ -44,12 +44,20 @@ namespace Prizmer.PoolServer
         {
             if (bStopServer) return PollingResultStatus.STOP_SERVER_REQUEST;
 
+            Meter mDb = pmPrms.metersbyport[pmPrms.MetersCounter];
+
+            // чтобы не дергать прибор каждый раз если серийник уже прочитан
+            if (mDb.factory_number_readed != String.Empty)
+            {
+                return PollingResultStatus.ALREADY_EXISTS;
+            }
+   
+
             // pmPrms.logger.LogInfo("Чтение серийника открыт");
             string serial_number_with_err = String.Empty;
             if (pmPrms.meter.OpenLinkCanal())
             {
                 // pmPrms.logger.LogInfo("Канал для чтения серийника открыт");
-                Meter mDb = pmPrms.metersbyport[pmPrms.MetersCounter];
                 string isEqual = "";
 
 
