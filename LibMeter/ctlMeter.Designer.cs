@@ -59,6 +59,7 @@
             this.cbAltHalfsMethod = new System.Windows.Forms.CheckBox();
             this.btnReadHalfs = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.cbIgnoreOLC = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbPreloader)).BeginInit();
             this.panelMain.SuspendLayout();
@@ -228,6 +229,7 @@
             // 
             // gbAuxilary
             // 
+            this.gbAuxilary.Controls.Add(this.cbIgnoreOLC);
             this.gbAuxilary.Controls.Add(this.label3);
             this.gbAuxilary.Controls.Add(this.tbMeterPassword);
             this.gbAuxilary.Location = new System.Drawing.Point(10, 166);
@@ -400,6 +402,16 @@
             this.btnReadHalfs.UseVisualStyleBackColor = true;
             this.btnReadHalfs.Click += new System.EventHandler(this.btnReadHalfs_Click);
             // 
+            // cbIgnoreOLC
+            // 
+            this.cbIgnoreOLC.AutoSize = true;
+            this.cbIgnoreOLC.Location = new System.Drawing.Point(162, 41);
+            this.cbIgnoreOLC.Name = "cbIgnoreOLC";
+            this.cbIgnoreOLC.Size = new System.Drawing.Size(164, 21);
+            this.cbIgnoreOLC.TabIndex = 53;
+            this.cbIgnoreOLC.Text = "Не открывать канал";
+            this.cbIgnoreOLC.UseVisualStyleBackColor = true;
+            // 
             // ctlMeters
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -454,5 +466,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox tbMeterAddress;
         private System.Windows.Forms.PictureBox pbPreloader;
+        private System.Windows.Forms.CheckBox cbIgnoreOLC;
     }
 }

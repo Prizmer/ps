@@ -271,8 +271,9 @@ namespace Drivers.LibMeter
             string msg = "";
             const string msgNewInterfaceAnnotation = "Точность double";
 
-            if (!openChannel())
-                return false;
+            if (!cbIgnoreOLC.Checked)
+                if (!openChannel())
+                    return false;
 
             ushort addr = (ushort)numParamAddr.Value;
             ushort tarif = (ushort)numParamTarif.Value;
@@ -375,15 +376,16 @@ namespace Drivers.LibMeter
             ThreadStart threadStart = new ThreadStart(() =>
             {
                 EventArgsValue eav = new EventArgsValue(new List<RecordPowerSlice>(), msg, false);
-                if (!openChannel())
-                {
-                    msg = "Не удалось открыть канал";
-                    Invoke(new Action(() => {
-                        this.InProcess = false;
-                    }));
-                    HalfsAreReady.Invoke(this, eav);
-                    return;
-                }
+                if (!cbIgnoreOLC.Checked)
+                    if (!openChannel())
+                    {
+                        msg = "Не удалось открыть канал";
+                        Invoke(new Action(() => {
+                            this.InProcess = false;
+                        }));
+                        HalfsAreReady.Invoke(this, eav);
+                        return;
+                    }
 
                 string m = "";
                 List<RecordPowerSlice> tmpHalfsList = new List<RecordPowerSlice>();
@@ -414,9 +416,9 @@ namespace Drivers.LibMeter
         private bool readInfo(out string info)
         {
             info = "Ошибка";
-
-            if (!openChannel())
-                return false;
+            if (!cbIgnoreOLC.Checked)
+                if (!openChannel())
+                    return false;
 
             bool resSerial = _meter.ReadSerialNumber(ref info);
  
@@ -456,6 +458,13 @@ namespace Drivers.LibMeter
 
         }
 
+        private string formatValueLikeBeforeDB(double val)
+        {
+            const string DOUBLE_STRING_FORMATER = "0.#######";
+            // float не может точно представить значение, а decimal может
+            return (Math.Round((decimal)val, 4)).ToString(DOUBLE_STRING_FORMATER);
+        }
+
         #region Обработчики контролов
 
         private void btnReadParam_Click(object sender, EventArgs e)
@@ -469,7 +478,7 @@ namespace Drivers.LibMeter
 
             if (status)
             {
-                msg = prmTypeLbl + " = " + resVal + ";";
+                msg = prmTypeLbl + " = " + formatValueLikeBeforeDB(resVal) + ";";
                 appendToLog(msg);
             }
             else

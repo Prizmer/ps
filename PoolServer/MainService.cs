@@ -28,7 +28,7 @@ using Drivers.Mercury23XDriver;
 using Drivers.Karat30XDriver;
 using Drivers.KaratDanfosDriver;
 using Drivers.Mercury200Driver;
-
+using Drivers.SonoSelectDanfosDriver;
 
 namespace Prizmer.PoolServer
 {
@@ -741,6 +741,7 @@ namespace Prizmer.PoolServer
                     case "pulsar_gvs": meter = new PulsarDriver(); break;
                     case "karat_23X": meter = new Karat30XDriver(); break;
                     case "karat_danfos": meter = new KaratDanfosDriver(); break;
+                    case "sono_danfos": meter = new SonoSelectDanfosDriver(); break;
                 }
 
                 if (meter == null) goto NetxMeter;
