@@ -271,6 +271,11 @@ namespace Prizmer.PoolServer
         {
 
         }
+
+        private void toolTip1_Popup(object sender, PopupEventArgs e)
+        {
+
+        }
     }
 
     public class SearchFormData

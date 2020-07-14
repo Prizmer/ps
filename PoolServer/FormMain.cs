@@ -95,11 +95,13 @@ namespace Prizmer.PoolServer
            // byte[] cmdHang = ASCIIEncoding.ASCII.GetBytes(at_cmd_hang);
             
 
-            const string SO_VERSION = "v. 0.31.8";
+            const string SO_VERSION = "v. 0.32.0";
             this.Text += " - " + SO_VERSION;
 
             try
             {
+                this.Text += String.Format(" - {0}", ms.GetConnectionDBName);
+
                 connectionStr = ms.GetConnectionString();
 
                 //groupBox1 settings

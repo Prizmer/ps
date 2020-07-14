@@ -29,6 +29,7 @@ using Drivers.Karat30XDriver;
 using Drivers.KaratDanfosDriver;
 using Drivers.Mercury200Driver;
 using Drivers.SonoSelectDanfosDriver;
+using System.Text.RegularExpressions;
 
 namespace Prizmer.PoolServer
 {
@@ -63,8 +64,21 @@ namespace Prizmer.PoolServer
         string ConnectionString = "Server=localhost;Port=5432;User Id=postgres;Password=1;Database=prizmer;";
         public string GetConnectionString()
         {
-            //WriteToLog("test");
             return ConnectionString;
+        }
+        public string GetConnectionDBName
+        {
+            get
+            {
+                Regex regex = new Regex("database = (.*);", RegexOptions.IgnoreCase);
+                Match match = regex.Match(this.ConnectionString);
+                if (match.Success)
+                {
+                    return match.Groups[0].Value;
+                }
+
+                return "No database";
+            }
         }
 
         struct PollingParams
@@ -965,6 +979,13 @@ namespace Prizmer.PoolServer
                         if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
 
                         status = pollMethods.pollHalfsAutomatically(pmPrms);
+                        if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
+                    }
+                    else if (typemeter.driver_name == "set4tm_03" || typemeter.driver_name == "set4tm")
+                    {
+                        DateTime dt_cur = DateTime.Now;
+                        DateTime date_from = new DateTime(dt_cur.Year, dt_cur.Month, dt_cur.Day, 0, 0, 0);
+                        PollingResultStatus status = pollMethods.pollHalfsForDate(pmPrms, date_from);
                         if (status == PollingResultStatus.STOP_SERVER_REQUEST) goto CloseThreadPoint;
                     }
                     else

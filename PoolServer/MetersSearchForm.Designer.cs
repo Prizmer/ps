@@ -34,6 +34,9 @@
             this.SerialNumBox = new System.Windows.Forms.TextBox();
             this.meterInfoTextBox = new System.Windows.Forms.RichTextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.linkDeleteData = new System.Windows.Forms.LinkLabel();
+            this.tbSelectedMeter = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
             this.btnRead = new System.Windows.Forms.Button();
             this.btnCopyPrmsToBuffer = new System.Windows.Forms.Button();
@@ -49,9 +52,6 @@
             this.dt_install = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dt_last_read = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.time_delay_current = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tbSelectedMeter = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.linkDeleteData = new System.Windows.Forms.LinkLabel();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MetersGrid)).BeginInit();
             this.SuspendLayout();
@@ -59,26 +59,29 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 12);
+            this.label1.Location = new System.Drawing.Point(7, 10);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(124, 17);
+            this.label1.Size = new System.Drawing.Size(96, 13);
             this.label1.TabIndex = 1;
             this.label1.Text = "Серийный номер:";
             // 
             // SerialNumBox
             // 
-            this.SerialNumBox.Location = new System.Drawing.Point(139, 9);
+            this.SerialNumBox.Location = new System.Drawing.Point(104, 7);
+            this.SerialNumBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.SerialNumBox.Name = "SerialNumBox";
-            this.SerialNumBox.Size = new System.Drawing.Size(219, 22);
+            this.SerialNumBox.Size = new System.Drawing.Size(165, 20);
             this.SerialNumBox.TabIndex = 2;
             this.SerialNumBox.TextChanged += new System.EventHandler(this.SerialNumBox_TextChanged);
             // 
             // meterInfoTextBox
             // 
-            this.meterInfoTextBox.Location = new System.Drawing.Point(548, 348);
+            this.meterInfoTextBox.Location = new System.Drawing.Point(411, 283);
+            this.meterInfoTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.meterInfoTextBox.Name = "meterInfoTextBox";
             this.meterInfoTextBox.ReadOnly = true;
-            this.meterInfoTextBox.Size = new System.Drawing.Size(327, 251);
+            this.meterInfoTextBox.Size = new System.Drawing.Size(246, 205);
             this.meterInfoTextBox.TabIndex = 7;
             this.meterInfoTextBox.Text = "";
             // 
@@ -92,20 +95,56 @@
             this.groupBox1.Controls.Add(this.btnCopyPrmsToBuffer);
             this.groupBox1.Controls.Add(this.cbReadAllParams);
             this.groupBox1.Controls.Add(this.lbParams);
-            this.groupBox1.Location = new System.Drawing.Point(14, 357);
+            this.groupBox1.Location = new System.Drawing.Point(10, 290);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(528, 277);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.groupBox1.Size = new System.Drawing.Size(396, 225);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Управление";
             // 
+            // linkDeleteData
+            // 
+            this.linkDeleteData.ActiveLinkColor = System.Drawing.Color.Blue;
+            this.linkDeleteData.AutoSize = true;
+            this.linkDeleteData.Location = new System.Drawing.Point(262, 42);
+            this.linkDeleteData.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.linkDeleteData.Name = "linkDeleteData";
+            this.linkDeleteData.Size = new System.Drawing.Size(73, 13);
+            this.linkDeleteData.TabIndex = 13;
+            this.linkDeleteData.TabStop = true;
+            this.linkDeleteData.Text = "Очистить БД";
+            this.toolTip1.SetToolTip(this.linkDeleteData, "Удалятся значения выбранных парамеров за выбранную дату");
+            this.linkDeleteData.Visible = false;
+            this.linkDeleteData.VisitedLinkColor = System.Drawing.Color.Blue;
+            this.linkDeleteData.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkDeleteData_LinkClicked);
+            // 
+            // tbSelectedMeter
+            // 
+            this.tbSelectedMeter.Location = new System.Drawing.Point(56, 17);
+            this.tbSelectedMeter.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tbSelectedMeter.Name = "tbSelectedMeter";
+            this.tbSelectedMeter.ReadOnly = true;
+            this.tbSelectedMeter.Size = new System.Drawing.Size(158, 20);
+            this.tbSelectedMeter.TabIndex = 12;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(4, 20);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(49, 13);
+            this.label2.TabIndex = 11;
+            this.label2.Text = "Выбран:";
+            // 
             // dateTimePicker1
             // 
             this.dateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dateTimePicker1.Location = new System.Drawing.Point(301, 21);
-            this.dateTimePicker1.Margin = new System.Windows.Forms.Padding(4);
+            this.dateTimePicker1.Location = new System.Drawing.Point(226, 17);
             this.dateTimePicker1.Name = "dateTimePicker1";
-            this.dateTimePicker1.Size = new System.Drawing.Size(144, 22);
+            this.dateTimePicker1.Size = new System.Drawing.Size(109, 20);
             this.dateTimePicker1.TabIndex = 8;
             this.dateTimePicker1.Value = new System.DateTime(2017, 3, 2, 0, 0, 0, 0);
             // 
@@ -113,9 +152,10 @@
             // 
             this.btnRead.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnRead.BackgroundImage")));
             this.btnRead.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnRead.Location = new System.Drawing.Point(463, 21);
+            this.btnRead.Location = new System.Drawing.Point(347, 17);
+            this.btnRead.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.btnRead.Name = "btnRead";
-            this.btnRead.Size = new System.Drawing.Size(52, 52);
+            this.btnRead.Size = new System.Drawing.Size(39, 42);
             this.btnRead.TabIndex = 5;
             this.toolTip1.SetToolTip(this.btnRead, "Считать параметры");
             this.btnRead.UseVisualStyleBackColor = true;
@@ -125,9 +165,10 @@
             // 
             this.btnCopyPrmsToBuffer.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnCopyPrmsToBuffer.BackgroundImage")));
             this.btnCopyPrmsToBuffer.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnCopyPrmsToBuffer.Location = new System.Drawing.Point(496, 240);
+            this.btnCopyPrmsToBuffer.Location = new System.Drawing.Point(372, 195);
+            this.btnCopyPrmsToBuffer.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.btnCopyPrmsToBuffer.Name = "btnCopyPrmsToBuffer";
-            this.btnCopyPrmsToBuffer.Size = new System.Drawing.Size(26, 27);
+            this.btnCopyPrmsToBuffer.Size = new System.Drawing.Size(20, 22);
             this.btnCopyPrmsToBuffer.TabIndex = 6;
             this.toolTip1.SetToolTip(this.btnCopyPrmsToBuffer, "Копировать список параметров в буфер обмена");
             this.btnCopyPrmsToBuffer.UseVisualStyleBackColor = true;
@@ -136,9 +177,10 @@
             // cbReadAllParams
             // 
             this.cbReadAllParams.AutoSize = true;
-            this.cbReadAllParams.Location = new System.Drawing.Point(9, 52);
+            this.cbReadAllParams.Location = new System.Drawing.Point(7, 42);
+            this.cbReadAllParams.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.cbReadAllParams.Name = "cbReadAllParams";
-            this.cbReadAllParams.Size = new System.Drawing.Size(132, 21);
+            this.cbReadAllParams.Size = new System.Drawing.Size(105, 17);
             this.cbReadAllParams.TabIndex = 4;
             this.cbReadAllParams.Text = "Все параметры";
             this.cbReadAllParams.UseVisualStyleBackColor = true;
@@ -147,13 +189,17 @@
             // lbParams
             // 
             this.lbParams.FormattingEnabled = true;
-            this.lbParams.ItemHeight = 16;
-            this.lbParams.Location = new System.Drawing.Point(9, 82);
+            this.lbParams.Location = new System.Drawing.Point(7, 67);
+            this.lbParams.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.lbParams.Name = "lbParams";
             this.lbParams.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbParams.Size = new System.Drawing.Size(506, 164);
+            this.lbParams.Size = new System.Drawing.Size(380, 134);
             this.lbParams.TabIndex = 3;
             this.lbParams.SelectedIndexChanged += new System.EventHandler(this.lbParams_SelectedIndexChanged);
+            // 
+            // toolTip1
+            // 
+            this.toolTip1.Popup += new System.Windows.Forms.PopupEventHandler(this.toolTip1_Popup);
             // 
             // MetersGrid
             // 
@@ -173,13 +219,14 @@
             this.dt_install,
             this.dt_last_read,
             this.time_delay_current});
-            this.MetersGrid.Location = new System.Drawing.Point(12, 42);
+            this.MetersGrid.Location = new System.Drawing.Point(9, 34);
+            this.MetersGrid.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.MetersGrid.MultiSelect = false;
             this.MetersGrid.Name = "MetersGrid";
             this.MetersGrid.RowHeadersVisible = false;
             this.MetersGrid.RowTemplate.Height = 24;
             this.MetersGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.MetersGrid.Size = new System.Drawing.Size(861, 300);
+            this.MetersGrid.Size = new System.Drawing.Size(646, 244);
             this.MetersGrid.TabIndex = 3;
             this.MetersGrid.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.MetersGrid_CellDoubleClick);
             this.MetersGrid.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.MetersGrid_PreviewKeyDown);
@@ -245,49 +292,18 @@
             this.time_delay_current.Name = "time_delay_current";
             this.time_delay_current.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             // 
-            // tbSelectedMeter
-            // 
-            this.tbSelectedMeter.Location = new System.Drawing.Point(75, 21);
-            this.tbSelectedMeter.Name = "tbSelectedMeter";
-            this.tbSelectedMeter.ReadOnly = true;
-            this.tbSelectedMeter.Size = new System.Drawing.Size(210, 22);
-            this.tbSelectedMeter.TabIndex = 12;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 24);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(63, 17);
-            this.label2.TabIndex = 11;
-            this.label2.Text = "Выбран:";
-            // 
-            // linkDeleteData
-            // 
-            this.linkDeleteData.ActiveLinkColor = System.Drawing.Color.Blue;
-            this.linkDeleteData.AutoSize = true;
-            this.linkDeleteData.Location = new System.Drawing.Point(350, 52);
-            this.linkDeleteData.Name = "linkDeleteData";
-            this.linkDeleteData.Size = new System.Drawing.Size(95, 17);
-            this.linkDeleteData.TabIndex = 13;
-            this.linkDeleteData.TabStop = true;
-            this.linkDeleteData.Text = "Очистить БД";
-            this.toolTip1.SetToolTip(this.linkDeleteData, "Удалятся значения выбранных парамеров за выбранную дату");
-            this.linkDeleteData.Visible = false;
-            this.linkDeleteData.VisitedLinkColor = System.Drawing.Color.Blue;
-            this.linkDeleteData.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkDeleteData_LinkClicked);
-            // 
             // MetersSearchForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(887, 633);
+            this.ClientSize = new System.Drawing.Size(665, 514);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.meterInfoTextBox);
             this.Controls.Add(this.MetersGrid);
             this.Controls.Add(this.SerialNumBox);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "MetersSearchForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Поиск счётчиков";

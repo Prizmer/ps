@@ -60,12 +60,12 @@
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxMenuShowLogsDir = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxMenuDeleteLogs = new System.Windows.Forms.ToolStripMenuItem();
+            this.ctxMenuDeleteOldLogs = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pbPreloader = new System.Windows.Forms.PictureBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tsLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.ctxMenuDeleteOldLogs = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -96,11 +96,9 @@
             this.groupBox1.Controls.Add(this.btnEndReading);
             this.groupBox1.Controls.Add(this.btnStartReading);
             this.groupBox1.Controls.Add(this.comboBox1);
-            this.groupBox1.Location = new System.Drawing.Point(0, 139);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBox1.Location = new System.Drawing.Point(0, 113);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox1.Size = new System.Drawing.Size(388, 304);
+            this.groupBox1.Size = new System.Drawing.Size(291, 247);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Дочитка показаний";
@@ -108,9 +106,10 @@
             // cbEachPort
             // 
             this.cbEachPort.AutoSize = true;
-            this.cbEachPort.Location = new System.Drawing.Point(357, 206);
+            this.cbEachPort.Location = new System.Drawing.Point(268, 167);
+            this.cbEachPort.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.cbEachPort.Name = "cbEachPort";
-            this.cbEachPort.Size = new System.Drawing.Size(18, 17);
+            this.cbEachPort.Size = new System.Drawing.Size(15, 14);
             this.cbEachPort.TabIndex = 18;
             this.toolTip1.SetToolTip(this.cbEachPort, "Опрос по всем портам");
             this.cbEachPort.UseVisualStyleBackColor = true;
@@ -119,20 +118,18 @@
             // comboBox3
             // 
             this.comboBox3.FormattingEnabled = true;
-            this.comboBox3.Location = new System.Drawing.Point(86, 202);
-            this.comboBox3.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox3.Location = new System.Drawing.Point(64, 164);
             this.comboBox3.Name = "comboBox3";
-            this.comboBox3.Size = new System.Drawing.Size(255, 24);
+            this.comboBox3.Size = new System.Drawing.Size(192, 21);
             this.comboBox3.TabIndex = 17;
             this.comboBox3.SelectedIndexChanged += new System.EventHandler(this.comboBox3_SelectedIndexChanged);
             // 
             // linkLabel1
             // 
             this.linkLabel1.AutoSize = true;
-            this.linkLabel1.Location = new System.Drawing.Point(171, 39);
-            this.linkLabel1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.linkLabel1.Location = new System.Drawing.Point(128, 32);
             this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Size = new System.Drawing.Size(49, 17);
+            this.linkLabel1.Size = new System.Drawing.Size(38, 13);
             this.linkLabel1.TabIndex = 16;
             this.linkLabel1.TabStop = true;
             this.linkLabel1.Text = "Ранее";
@@ -147,20 +144,18 @@
             "Месячный",
             "Архивный",
             "Получасовой"});
-            this.comboBox2.Location = new System.Drawing.Point(231, 113);
-            this.comboBox2.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox2.Location = new System.Drawing.Point(173, 92);
             this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(144, 24);
+            this.comboBox2.Size = new System.Drawing.Size(109, 21);
             this.comboBox2.TabIndex = 15;
             this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.comboBox2_SelectedIndexChanged);
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(17, 117);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Location = new System.Drawing.Point(13, 95);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(78, 17);
+            this.label4.Size = new System.Drawing.Size(61, 13);
             this.label4.TabIndex = 14;
             this.label4.Text = "Параметр:";
             // 
@@ -168,10 +163,9 @@
             // 
             this.lblCnt.AutoSize = true;
             this.lblCnt.BackColor = System.Drawing.Color.Transparent;
-            this.lblCnt.Location = new System.Drawing.Point(145, 274);
-            this.lblCnt.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCnt.Location = new System.Drawing.Point(109, 223);
             this.lblCnt.Name = "lblCnt";
-            this.lblCnt.Size = new System.Drawing.Size(16, 17);
+            this.lblCnt.Size = new System.Drawing.Size(13, 13);
             this.lblCnt.TabIndex = 13;
             this.lblCnt.Text = "0";
             // 
@@ -179,19 +173,17 @@
             // 
             this.label5.AutoSize = true;
             this.label5.BackColor = System.Drawing.Color.Transparent;
-            this.label5.Location = new System.Drawing.Point(73, 274);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Location = new System.Drawing.Point(55, 223);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(23, 17);
+            this.label5.Size = new System.Drawing.Size(19, 13);
             this.label5.TabIndex = 4;
             this.label5.Text = "из";
             // 
             // tbPort
             // 
-            this.tbPort.Location = new System.Drawing.Point(257, 176);
-            this.tbPort.Margin = new System.Windows.Forms.Padding(4);
+            this.tbPort.Location = new System.Drawing.Point(193, 143);
             this.tbPort.Name = "tbPort";
-            this.tbPort.Size = new System.Drawing.Size(84, 22);
+            this.tbPort.Size = new System.Drawing.Size(64, 20);
             this.tbPort.TabIndex = 12;
             this.tbPort.Text = "5001";
             // 
@@ -199,19 +191,17 @@
             // 
             this.lblCurCnt.AutoSize = true;
             this.lblCurCnt.BackColor = System.Drawing.Color.Transparent;
-            this.lblCurCnt.Location = new System.Drawing.Point(17, 274);
-            this.lblCurCnt.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCurCnt.Location = new System.Drawing.Point(13, 223);
             this.lblCurCnt.Name = "lblCurCnt";
-            this.lblCurCnt.Size = new System.Drawing.Size(16, 17);
+            this.lblCurCnt.Size = new System.Drawing.Size(13, 13);
             this.lblCurCnt.TabIndex = 3;
             this.lblCurCnt.Text = "0";
             // 
             // tbAddress
             // 
-            this.tbAddress.Location = new System.Drawing.Point(86, 176);
-            this.tbAddress.Margin = new System.Windows.Forms.Padding(4);
+            this.tbAddress.Location = new System.Drawing.Point(64, 143);
             this.tbAddress.Name = "tbAddress";
-            this.tbAddress.Size = new System.Drawing.Size(163, 22);
+            this.tbAddress.Size = new System.Drawing.Size(123, 20);
             this.tbAddress.TabIndex = 11;
             this.tbAddress.Text = "192.168.23.52";
             // 
@@ -219,10 +209,9 @@
             // 
             this.rbTCP.AutoSize = true;
             this.rbTCP.Checked = true;
-            this.rbTCP.Location = new System.Drawing.Point(18, 206);
-            this.rbTCP.Margin = new System.Windows.Forms.Padding(4);
+            this.rbTCP.Location = new System.Drawing.Point(14, 167);
             this.rbTCP.Name = "rbTCP";
-            this.rbTCP.Size = new System.Drawing.Size(56, 21);
+            this.rbTCP.Size = new System.Drawing.Size(46, 17);
             this.rbTCP.TabIndex = 10;
             this.rbTCP.TabStop = true;
             this.rbTCP.Tag = "tcp";
@@ -233,10 +222,9 @@
             // rbCom
             // 
             this.rbCom.AutoSize = true;
-            this.rbCom.Location = new System.Drawing.Point(18, 177);
-            this.rbCom.Margin = new System.Windows.Forms.Padding(4);
+            this.rbCom.Location = new System.Drawing.Point(14, 144);
             this.rbCom.Name = "rbCom";
-            this.rbCom.Size = new System.Drawing.Size(60, 21);
+            this.rbCom.Size = new System.Drawing.Size(49, 17);
             this.rbCom.TabIndex = 9;
             this.rbCom.Tag = "com";
             this.rbCom.Text = "COM";
@@ -245,59 +233,53 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(20, 242);
-            this.progressBar1.Margin = new System.Windows.Forms.Padding(4);
+            this.progressBar1.Location = new System.Drawing.Point(15, 197);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(230, 28);
+            this.progressBar1.Size = new System.Drawing.Size(172, 23);
             this.progressBar1.TabIndex = 8;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(16, 82);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Location = new System.Drawing.Point(12, 67);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(70, 17);
+            this.label3.Size = new System.Drawing.Size(55, 13);
             this.label3.TabIndex = 7;
             this.label3.Text = "Драйвер:";
             // 
             // dateTimePicker2
             // 
             this.dateTimePicker2.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dateTimePicker2.Location = new System.Drawing.Point(231, 53);
-            this.dateTimePicker2.Margin = new System.Windows.Forms.Padding(4);
+            this.dateTimePicker2.Location = new System.Drawing.Point(173, 43);
             this.dateTimePicker2.Name = "dateTimePicker2";
-            this.dateTimePicker2.Size = new System.Drawing.Size(144, 22);
+            this.dateTimePicker2.Size = new System.Drawing.Size(109, 20);
             this.dateTimePicker2.TabIndex = 6;
             this.dateTimePicker2.Value = new System.DateTime(2017, 3, 2, 0, 0, 0, 0);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(16, 53);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Location = new System.Drawing.Point(12, 43);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(53, 17);
+            this.label2.Size = new System.Drawing.Size(41, 13);
             this.label2.TabIndex = 5;
             this.label2.Text = "Конец:";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(16, 23);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(12, 19);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(62, 17);
+            this.label1.Size = new System.Drawing.Size(47, 13);
             this.label1.TabIndex = 4;
             this.label1.Text = "Начало:";
             // 
             // dateTimePicker1
             // 
             this.dateTimePicker1.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dateTimePicker1.Location = new System.Drawing.Point(231, 23);
-            this.dateTimePicker1.Margin = new System.Windows.Forms.Padding(4);
+            this.dateTimePicker1.Location = new System.Drawing.Point(173, 19);
             this.dateTimePicker1.Name = "dateTimePicker1";
-            this.dateTimePicker1.Size = new System.Drawing.Size(144, 22);
+            this.dateTimePicker1.Size = new System.Drawing.Size(109, 20);
             this.dateTimePicker1.TabIndex = 3;
             this.dateTimePicker1.Value = new System.DateTime(2017, 3, 2, 0, 0, 0, 0);
             // 
@@ -305,10 +287,9 @@
             // 
             this.btnEndReading.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnEndReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnEndReading.Location = new System.Drawing.Point(340, 240);
-            this.btnEndReading.Margin = new System.Windows.Forms.Padding(4);
+            this.btnEndReading.Location = new System.Drawing.Point(255, 195);
             this.btnEndReading.Name = "btnEndReading";
-            this.btnEndReading.Size = new System.Drawing.Size(33, 30);
+            this.btnEndReading.Size = new System.Drawing.Size(25, 24);
             this.btnEndReading.TabIndex = 2;
             this.btnEndReading.Text = "X";
             this.btnEndReading.UseVisualStyleBackColor = true;
@@ -318,10 +299,9 @@
             // 
             this.btnStartReading.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnStartReading.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnStartReading.Location = new System.Drawing.Point(258, 240);
-            this.btnStartReading.Margin = new System.Windows.Forms.Padding(4);
+            this.btnStartReading.Location = new System.Drawing.Point(194, 195);
             this.btnStartReading.Name = "btnStartReading";
-            this.btnStartReading.Size = new System.Drawing.Size(83, 30);
+            this.btnStartReading.Size = new System.Drawing.Size(62, 24);
             this.btnStartReading.TabIndex = 1;
             this.btnStartReading.Text = "Старт";
             this.btnStartReading.UseVisualStyleBackColor = true;
@@ -330,20 +310,18 @@
             // comboBox1
             // 
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(231, 82);
-            this.comboBox1.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox1.Location = new System.Drawing.Point(173, 67);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(144, 24);
+            this.comboBox1.Size = new System.Drawing.Size(109, 21);
             this.comboBox1.TabIndex = 0;
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // cbServerStarted
             // 
             this.cbServerStarted.AutoSize = true;
-            this.cbServerStarted.Location = new System.Drawing.Point(15, 111);
-            this.cbServerStarted.Margin = new System.Windows.Forms.Padding(4);
+            this.cbServerStarted.Location = new System.Drawing.Point(11, 90);
             this.cbServerStarted.Name = "cbServerStarted";
-            this.cbServerStarted.Size = new System.Drawing.Size(139, 21);
+            this.cbServerStarted.Size = new System.Drawing.Size(110, 17);
             this.cbServerStarted.TabIndex = 2;
             this.cbServerStarted.Text = "Сервер запущен";
             this.cbServerStarted.UseVisualStyleBackColor = true;
@@ -361,7 +339,7 @@
             this.ctxMenuDeleteLogs,
             this.ctxMenuDeleteOldLogs});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(256, 194);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(217, 166);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening_1);
             // 
             // ctxMenuAnalizator
@@ -369,7 +347,7 @@
             this.ctxMenuAnalizator.Image = ((System.Drawing.Image)(resources.GetObject("ctxMenuAnalizator.Image")));
             this.ctxMenuAnalizator.Name = "ctxMenuAnalizator";
             this.ctxMenuAnalizator.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.ctxMenuAnalizator.Size = new System.Drawing.Size(255, 26);
+            this.ctxMenuAnalizator.Size = new System.Drawing.Size(216, 26);
             this.ctxMenuAnalizator.Text = "Анализатор";
             this.ctxMenuAnalizator.Click += new System.EventHandler(this.ctxMenuAnalizator_Click);
             // 
@@ -377,27 +355,28 @@
             // 
             this.конфигураторToolStripMenuItem.Name = "конфигураторToolStripMenuItem";
             this.конфигураторToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.K)));
-            this.конфигураторToolStripMenuItem.Size = new System.Drawing.Size(255, 26);
+            this.конфигураторToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.конфигураторToolStripMenuItem.Text = "Конфигуратор";
+            this.конфигураторToolStripMenuItem.Visible = false;
             // 
             // DeviceSearchMenuItem
             // 
             this.DeviceSearchMenuItem.Name = "DeviceSearchMenuItem";
             this.DeviceSearchMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.M)));
-            this.DeviceSearchMenuItem.Size = new System.Drawing.Size(255, 26);
+            this.DeviceSearchMenuItem.Size = new System.Drawing.Size(216, 26);
             this.DeviceSearchMenuItem.Text = "Поиск приборов";
             this.DeviceSearchMenuItem.Click += new System.EventHandler(this.DeviceSearchMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(252, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(213, 6);
             // 
             // ctxMenuShowLogsDir
             // 
             this.ctxMenuShowLogsDir.Name = "ctxMenuShowLogsDir";
             this.ctxMenuShowLogsDir.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.L)));
-            this.ctxMenuShowLogsDir.Size = new System.Drawing.Size(255, 26);
+            this.ctxMenuShowLogsDir.Size = new System.Drawing.Size(216, 26);
             this.ctxMenuShowLogsDir.Text = "Открыть логи";
             this.ctxMenuShowLogsDir.Click += new System.EventHandler(this.ctxMenuShowLogsDir_Click);
             // 
@@ -405,9 +384,16 @@
             // 
             this.ctxMenuDeleteLogs.Name = "ctxMenuDeleteLogs";
             this.ctxMenuDeleteLogs.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
-            this.ctxMenuDeleteLogs.Size = new System.Drawing.Size(255, 26);
+            this.ctxMenuDeleteLogs.Size = new System.Drawing.Size(216, 26);
             this.ctxMenuDeleteLogs.Text = "Стереть логи";
             this.ctxMenuDeleteLogs.Click += new System.EventHandler(this.ctxMenuDeleteLogs_Click);
+            // 
+            // ctxMenuDeleteOldLogs
+            // 
+            this.ctxMenuDeleteOldLogs.Name = "ctxMenuDeleteOldLogs";
+            this.ctxMenuDeleteOldLogs.Size = new System.Drawing.Size(216, 26);
+            this.ctxMenuDeleteOldLogs.Text = "Стереть старые логи";
+            this.ctxMenuDeleteOldLogs.Click += new System.EventHandler(this.CtxMenuDeleteOldLogs_Click);
             // 
             // pictureBox1
             // 
@@ -415,9 +401,9 @@
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.pictureBox1.Image = global::PoolServer.Properties.Resources.logo2;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(397, 101);
+            this.pictureBox1.Size = new System.Drawing.Size(298, 82);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
@@ -425,10 +411,9 @@
             // pbPreloader
             // 
             this.pbPreloader.Image = ((System.Drawing.Image)(resources.GetObject("pbPreloader.Image")));
-            this.pbPreloader.Location = new System.Drawing.Point(333, 105);
-            this.pbPreloader.Margin = new System.Windows.Forms.Padding(4);
+            this.pbPreloader.Location = new System.Drawing.Point(250, 85);
             this.pbPreloader.Name = "pbPreloader";
-            this.pbPreloader.Size = new System.Drawing.Size(32, 30);
+            this.pbPreloader.Size = new System.Drawing.Size(24, 24);
             this.pbPreloader.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pbPreloader.TabIndex = 18;
             this.pbPreloader.TabStop = false;
@@ -438,31 +423,23 @@
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 453);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 364);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(397, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(298, 22);
             this.statusStrip1.TabIndex = 19;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // tsLabel1
             // 
             this.tsLabel1.Name = "tsLabel1";
-            this.tsLabel1.Size = new System.Drawing.Size(0, 16);
-            // 
-            // ctxMenuDeleteOldLogs
-            // 
-            this.ctxMenuDeleteOldLogs.Name = "ctxMenuDeleteOldLogs";
-            this.ctxMenuDeleteOldLogs.Size = new System.Drawing.Size(255, 26);
-            this.ctxMenuDeleteOldLogs.Text = "Стереть старые логи";
-            this.ctxMenuDeleteOldLogs.Click += new System.EventHandler(this.CtxMenuDeleteOldLogs_Click);
+            this.tsLabel1.Size = new System.Drawing.Size(0, 17);
             // 
             // FormMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(397, 475);
+            this.ClientSize = new System.Drawing.Size(298, 386);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.pbPreloader);
             this.Controls.Add(this.cbServerStarted);
@@ -470,7 +447,6 @@
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.KeyPreview = true;
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.Name = "FormMain";
             this.ShowIcon = false;
