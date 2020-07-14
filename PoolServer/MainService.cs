@@ -70,11 +70,11 @@ namespace Prizmer.PoolServer
         {
             get
             {
-                Regex regex = new Regex("database = (.*);", RegexOptions.IgnoreCase);
+                Regex regex = new Regex("database=([^;]*)", RegexOptions.IgnoreCase);
                 Match match = regex.Match(this.ConnectionString);
                 if (match.Success)
                 {
-                    return match.Groups[0].Value;
+                    return match.Groups[1].Value;
                 }
 
                 return "No database";

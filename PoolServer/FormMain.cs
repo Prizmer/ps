@@ -101,7 +101,14 @@ namespace Prizmer.PoolServer
             try
             {
                 this.Text += String.Format(" - {0}", ms.GetConnectionDBName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
 
+            try
+            {
                 connectionStr = ms.GetConnectionString();
 
                 //groupBox1 settings
