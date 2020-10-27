@@ -749,13 +749,21 @@ namespace Prizmer.PoolServer
                     case "m230_stable": meter = new m230(); break;
                     case "um40rtu" : meter = new UMRTU40Driver(); break;
                     case "elf108": meter = new ElfApatorDriver(); break;
-                    case "PulsarM": meter = new PulsarDriver(); break;
-                    case "pulsar_teplo": meter = new PulsarDriver(); break;
-                    case "pulsar_hvs": meter = new PulsarDriver(); break;
-                    case "pulsar_gvs": meter = new PulsarDriver(); break;
+
                     case "karat_23X": meter = new Karat30XDriver(); break;
                     case "karat_danfos": meter = new KaratDanfosDriver(); break;
                     case "sono_danfos": meter = new SonoSelectDanfosDriver(); break;
+
+                    case "pulsar_voda": meter = new PulsarDriver(PulsarMeterTypes.voda_v11); break;
+
+                   // case "pulsar_hvs": meter = new PulsarDriver(); break;
+                   // case "pulsar_gvs": meter = new PulsarDriver(); break;
+                   // case "PulsarM": meter = new PulsarDriver(); break;
+
+                    case "pulsar_voda_rs485": meter = new PulsarDriver(PulsarMeterTypes.voda_rs485); break;
+
+                    case "pulsar_teplo": meter = new PulsarDriver(PulsarMeterTypes.kompaktniy_teplo_v3); break;
+
                 }
 
                 if (meter == null) goto NetxMeter;

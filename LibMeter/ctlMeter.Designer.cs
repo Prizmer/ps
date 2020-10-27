@@ -43,6 +43,7 @@
             this.tbMeterAddress = new System.Windows.Forms.TextBox();
             this.btnClearLog = new System.Windows.Forms.Button();
             this.gbAuxilary = new System.Windows.Forms.GroupBox();
+            this.cbIgnoreOLC = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.tbMeterPassword = new System.Windows.Forms.TextBox();
             this.panelDailyMonthly = new System.Windows.Forms.Panel();
@@ -59,7 +60,6 @@
             this.cbAltHalfsMethod = new System.Windows.Forms.CheckBox();
             this.btnReadHalfs = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.cbIgnoreOLC = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbPreloader)).BeginInit();
             this.panelMain.SuspendLayout();
@@ -79,23 +79,24 @@
             this.groupBox1.Controls.Add(this.panelDailyMonthly);
             this.groupBox1.Controls.Add(this.rtbLog);
             this.groupBox1.Controls.Add(this.panelHalfs);
-            this.groupBox1.Location = new System.Drawing.Point(3, 2);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox1.Location = new System.Drawing.Point(6, 4);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(6, 4, 6, 4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox1.Size = new System.Drawing.Size(916, 255);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(6, 4, 6, 4);
+            this.groupBox1.Size = new System.Drawing.Size(1832, 494);
             this.groupBox1.TabIndex = 50;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "(3) Интерфейс драйвера";
+            this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
             // 
             // pbPreloader
             // 
             this.pbPreloader.ErrorImage = null;
             this.pbPreloader.Image = ((System.Drawing.Image)(resources.GetObject("pbPreloader.Image")));
-            this.pbPreloader.Location = new System.Drawing.Point(654, 124);
-            this.pbPreloader.Margin = new System.Windows.Forms.Padding(4);
+            this.pbPreloader.Location = new System.Drawing.Point(1308, 240);
+            this.pbPreloader.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
             this.pbPreloader.Name = "pbPreloader";
-            this.pbPreloader.Size = new System.Drawing.Size(126, 10);
+            this.pbPreloader.Size = new System.Drawing.Size(252, 19);
             this.pbPreloader.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pbPreloader.TabIndex = 82;
             this.pbPreloader.TabStop = false;
@@ -111,32 +112,33 @@
             this.panelMain.Controls.Add(this.numParamAddr);
             this.panelMain.Controls.Add(this.label2);
             this.panelMain.Controls.Add(this.tbMeterAddress);
-            this.panelMain.Location = new System.Drawing.Point(6, 19);
+            this.panelMain.Location = new System.Drawing.Point(12, 37);
+            this.panelMain.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.panelMain.Name = "panelMain";
-            this.panelMain.Size = new System.Drawing.Size(480, 53);
+            this.panelMain.Size = new System.Drawing.Size(960, 103);
             this.panelMain.TabIndex = 81;
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(251, 7);
-            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label7.Location = new System.Drawing.Point(502, 14);
+            this.label7.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(52, 17);
+            this.label7.Size = new System.Drawing.Size(103, 32);
             this.label7.TabIndex = 69;
             this.label7.Text = "Тариф";
             // 
             // numParamTarif
             // 
-            this.numParamTarif.Location = new System.Drawing.Point(254, 27);
-            this.numParamTarif.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.numParamTarif.Location = new System.Drawing.Point(508, 52);
+            this.numParamTarif.Margin = new System.Windows.Forms.Padding(6, 4, 6, 4);
             this.numParamTarif.Maximum = new decimal(new int[] {
             64,
             0,
             0,
             0});
             this.numParamTarif.Name = "numParamTarif";
-            this.numParamTarif.Size = new System.Drawing.Size(63, 22);
+            this.numParamTarif.Size = new System.Drawing.Size(126, 38);
             this.numParamTarif.TabIndex = 68;
             this.numParamTarif.Value = new decimal(new int[] {
             64,
@@ -147,10 +149,10 @@
             // btnReadInfo
             // 
             this.btnReadInfo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnReadInfo.Location = new System.Drawing.Point(398, 20);
-            this.btnReadInfo.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnReadInfo.Location = new System.Drawing.Point(796, 39);
+            this.btnReadInfo.Margin = new System.Windows.Forms.Padding(6, 4, 6, 4);
             this.btnReadInfo.Name = "btnReadInfo";
-            this.btnReadInfo.Size = new System.Drawing.Size(72, 28);
+            this.btnReadInfo.Size = new System.Drawing.Size(144, 54);
             this.btnReadInfo.TabIndex = 67;
             this.btnReadInfo.Text = "Инфо";
             this.toolTip1.SetToolTip(this.btnReadInfo, "Информация о приборе");
@@ -160,10 +162,10 @@
             // btnReadCurrent
             // 
             this.btnReadCurrent.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnReadCurrent.Location = new System.Drawing.Point(326, 20);
-            this.btnReadCurrent.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnReadCurrent.Location = new System.Drawing.Point(652, 39);
+            this.btnReadCurrent.Margin = new System.Windows.Forms.Padding(6, 4, 6, 4);
             this.btnReadCurrent.Name = "btnReadCurrent";
-            this.btnReadCurrent.Size = new System.Drawing.Size(66, 28);
+            this.btnReadCurrent.Size = new System.Drawing.Size(132, 54);
             this.btnReadCurrent.TabIndex = 66;
             this.btnReadCurrent.Tag = "curr";
             this.btnReadCurrent.Text = "Т";
@@ -174,24 +176,24 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(170, 7);
-            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label6.Location = new System.Drawing.Point(340, 14);
+            this.label6.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(48, 17);
+            this.label6.Size = new System.Drawing.Size(96, 32);
             this.label6.TabIndex = 65;
             this.label6.Text = "Адрес";
             // 
             // numParamAddr
             // 
-            this.numParamAddr.Location = new System.Drawing.Point(173, 26);
-            this.numParamAddr.Margin = new System.Windows.Forms.Padding(4);
+            this.numParamAddr.Location = new System.Drawing.Point(346, 50);
+            this.numParamAddr.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
             this.numParamAddr.Maximum = new decimal(new int[] {
             256,
             0,
             0,
             0});
             this.numParamAddr.Name = "numParamAddr";
-            this.numParamAddr.Size = new System.Drawing.Size(74, 22);
+            this.numParamAddr.Size = new System.Drawing.Size(148, 38);
             this.numParamAddr.TabIndex = 55;
             this.numParamAddr.Value = new decimal(new int[] {
             9,
@@ -202,26 +204,28 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(2, 7);
+            this.label2.Location = new System.Drawing.Point(4, 14);
+            this.label2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(108, 17);
+            this.label2.Size = new System.Drawing.Size(218, 32);
             this.label2.TabIndex = 51;
             this.label2.Text = "Сетевой номер";
             // 
             // tbMeterAddress
             // 
-            this.tbMeterAddress.Location = new System.Drawing.Point(5, 26);
-            this.tbMeterAddress.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tbMeterAddress.Location = new System.Drawing.Point(10, 50);
+            this.tbMeterAddress.Margin = new System.Windows.Forms.Padding(6, 4, 6, 4);
             this.tbMeterAddress.Name = "tbMeterAddress";
-            this.tbMeterAddress.Size = new System.Drawing.Size(149, 22);
+            this.tbMeterAddress.Size = new System.Drawing.Size(294, 38);
             this.tbMeterAddress.TabIndex = 50;
             this.tbMeterAddress.Text = "248";
             // 
             // btnClearLog
             // 
-            this.btnClearLog.Location = new System.Drawing.Point(885, 19);
+            this.btnClearLog.Location = new System.Drawing.Point(1770, 37);
+            this.btnClearLog.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.btnClearLog.Name = "btnClearLog";
-            this.btnClearLog.Size = new System.Drawing.Size(20, 28);
+            this.btnClearLog.Size = new System.Drawing.Size(40, 54);
             this.btnClearLog.TabIndex = 80;
             this.btnClearLog.Text = "x";
             this.btnClearLog.UseVisualStyleBackColor = true;
@@ -232,30 +236,44 @@
             this.gbAuxilary.Controls.Add(this.cbIgnoreOLC);
             this.gbAuxilary.Controls.Add(this.label3);
             this.gbAuxilary.Controls.Add(this.tbMeterPassword);
-            this.gbAuxilary.Location = new System.Drawing.Point(10, 166);
+            this.gbAuxilary.Location = new System.Drawing.Point(20, 322);
+            this.gbAuxilary.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.gbAuxilary.Name = "gbAuxilary";
-            this.gbAuxilary.Size = new System.Drawing.Size(466, 79);
+            this.gbAuxilary.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.gbAuxilary.Size = new System.Drawing.Size(932, 153);
             this.gbAuxilary.TabIndex = 79;
             this.gbAuxilary.TabStop = false;
             this.gbAuxilary.Text = "Дополнительно";
             // 
+            // cbIgnoreOLC
+            // 
+            this.cbIgnoreOLC.AutoSize = true;
+            this.cbIgnoreOLC.Location = new System.Drawing.Point(324, 79);
+            this.cbIgnoreOLC.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.cbIgnoreOLC.Name = "cbIgnoreOLC";
+            this.cbIgnoreOLC.Size = new System.Drawing.Size(319, 36);
+            this.cbIgnoreOLC.TabIndex = 53;
+            this.cbIgnoreOLC.Text = "Не открывать канал";
+            this.cbIgnoreOLC.UseVisualStyleBackColor = true;
+            // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(11, 22);
+            this.label3.Location = new System.Drawing.Point(22, 43);
+            this.label3.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(57, 17);
+            this.label3.Size = new System.Drawing.Size(114, 32);
             this.label3.TabIndex = 52;
             this.label3.Text = "Пароль";
             // 
             // tbMeterPassword
             // 
-            this.tbMeterPassword.Location = new System.Drawing.Point(14, 41);
-            this.tbMeterPassword.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tbMeterPassword.Location = new System.Drawing.Point(28, 79);
+            this.tbMeterPassword.Margin = new System.Windows.Forms.Padding(6, 4, 6, 4);
             this.tbMeterPassword.Name = "tbMeterPassword";
-            this.tbMeterPassword.Size = new System.Drawing.Size(136, 22);
+            this.tbMeterPassword.Size = new System.Drawing.Size(268, 38);
             this.tbMeterPassword.TabIndex = 51;
-            this.tbMeterPassword.Text = "111111";
+            this.tbMeterPassword.Text = "ftp;admin;admin;1234";
             this.tbMeterPassword.Leave += new System.EventHandler(this.tbMeterPassword_Leave);
             // 
             // panelDailyMonthly
@@ -264,18 +282,19 @@
             this.panelDailyMonthly.Controls.Add(this.btnReadDaily);
             this.panelDailyMonthly.Controls.Add(this.label1);
             this.panelDailyMonthly.Controls.Add(this.dtpDailyMonthly);
-            this.panelDailyMonthly.Location = new System.Drawing.Point(6, 69);
+            this.panelDailyMonthly.Location = new System.Drawing.Point(12, 134);
+            this.panelDailyMonthly.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.panelDailyMonthly.Name = "panelDailyMonthly";
-            this.panelDailyMonthly.Size = new System.Drawing.Size(167, 91);
+            this.panelDailyMonthly.Size = new System.Drawing.Size(334, 176);
             this.panelDailyMonthly.TabIndex = 78;
             // 
             // btnReadMonthly
             // 
             this.btnReadMonthly.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnReadMonthly.Location = new System.Drawing.Point(81, 55);
-            this.btnReadMonthly.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnReadMonthly.Location = new System.Drawing.Point(162, 107);
+            this.btnReadMonthly.Margin = new System.Windows.Forms.Padding(6, 4, 6, 4);
             this.btnReadMonthly.Name = "btnReadMonthly";
-            this.btnReadMonthly.Size = new System.Drawing.Size(73, 28);
+            this.btnReadMonthly.Size = new System.Drawing.Size(146, 54);
             this.btnReadMonthly.TabIndex = 79;
             this.btnReadMonthly.Tag = "month";
             this.btnReadMonthly.Text = "M";
@@ -286,10 +305,10 @@
             // btnReadDaily
             // 
             this.btnReadDaily.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnReadDaily.Location = new System.Drawing.Point(5, 55);
-            this.btnReadDaily.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnReadDaily.Location = new System.Drawing.Point(10, 107);
+            this.btnReadDaily.Margin = new System.Windows.Forms.Padding(6, 4, 6, 4);
             this.btnReadDaily.Name = "btnReadDaily";
-            this.btnReadDaily.Size = new System.Drawing.Size(72, 28);
+            this.btnReadDaily.Size = new System.Drawing.Size(144, 54);
             this.btnReadDaily.TabIndex = 78;
             this.btnReadDaily.Tag = "day";
             this.btnReadDaily.Text = "С";
@@ -300,28 +319,29 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(1, 6);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(2, 12);
+            this.label1.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(145, 17);
+            this.label1.Size = new System.Drawing.Size(288, 32);
             this.label1.TabIndex = 77;
             this.label1.Text = "Суточные/Месячные";
             // 
             // dtpDailyMonthly
             // 
-            this.dtpDailyMonthly.Location = new System.Drawing.Point(5, 27);
-            this.dtpDailyMonthly.Margin = new System.Windows.Forms.Padding(4);
+            this.dtpDailyMonthly.Location = new System.Drawing.Point(10, 52);
+            this.dtpDailyMonthly.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
             this.dtpDailyMonthly.Name = "dtpDailyMonthly";
-            this.dtpDailyMonthly.Size = new System.Drawing.Size(149, 22);
+            this.dtpDailyMonthly.Size = new System.Drawing.Size(294, 38);
             this.dtpDailyMonthly.TabIndex = 76;
             this.dtpDailyMonthly.Value = new System.DateTime(2017, 10, 30, 0, 0, 0, 0);
             // 
             // rtbLog
             // 
-            this.rtbLog.Location = new System.Drawing.Point(492, 14);
+            this.rtbLog.Location = new System.Drawing.Point(984, 27);
+            this.rtbLog.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.rtbLog.Name = "rtbLog";
             this.rtbLog.ReadOnly = true;
-            this.rtbLog.Size = new System.Drawing.Size(418, 231);
+            this.rtbLog.Size = new System.Drawing.Size(832, 444);
             this.rtbLog.TabIndex = 77;
             this.rtbLog.Text = "";
             // 
@@ -333,46 +353,47 @@
             this.panelHalfs.Controls.Add(this.dtpFrom);
             this.panelHalfs.Controls.Add(this.cbAltHalfsMethod);
             this.panelHalfs.Controls.Add(this.btnReadHalfs);
-            this.panelHalfs.Location = new System.Drawing.Point(172, 69);
+            this.panelHalfs.Location = new System.Drawing.Point(344, 134);
+            this.panelHalfs.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.panelHalfs.Name = "panelHalfs";
-            this.panelHalfs.Size = new System.Drawing.Size(314, 91);
+            this.panelHalfs.Size = new System.Drawing.Size(628, 176);
             this.panelHalfs.TabIndex = 76;
             // 
             // dtpTo
             // 
-            this.dtpTo.Location = new System.Drawing.Point(160, 27);
-            this.dtpTo.Margin = new System.Windows.Forms.Padding(4);
+            this.dtpTo.Location = new System.Drawing.Point(320, 52);
+            this.dtpTo.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
             this.dtpTo.Name = "dtpTo";
-            this.dtpTo.Size = new System.Drawing.Size(144, 22);
+            this.dtpTo.Size = new System.Drawing.Size(284, 38);
             this.dtpTo.TabIndex = 77;
             this.dtpTo.Value = new System.DateTime(2017, 10, 30, 23, 30, 0, 0);
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(157, 6);
-            this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label9.Location = new System.Drawing.Point(314, 12);
+            this.label9.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(24, 17);
+            this.label9.Size = new System.Drawing.Size(47, 32);
             this.label9.TabIndex = 76;
             this.label9.Text = "по";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(4, 6);
-            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label8.Location = new System.Drawing.Point(8, 12);
+            this.label8.Margin = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(108, 17);
+            this.label8.Size = new System.Drawing.Size(214, 32);
             this.label8.TabIndex = 75;
             this.label8.Text = "Получасовые с";
             // 
             // dtpFrom
             // 
-            this.dtpFrom.Location = new System.Drawing.Point(7, 27);
-            this.dtpFrom.Margin = new System.Windows.Forms.Padding(4);
+            this.dtpFrom.Location = new System.Drawing.Point(14, 52);
+            this.dtpFrom.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
             this.dtpFrom.Name = "dtpFrom";
-            this.dtpFrom.Size = new System.Drawing.Size(144, 22);
+            this.dtpFrom.Size = new System.Drawing.Size(284, 38);
             this.dtpFrom.TabIndex = 74;
             this.dtpFrom.Value = new System.DateTime(2017, 10, 30, 0, 0, 0, 0);
             // 
@@ -380,10 +401,10 @@
             // 
             this.cbAltHalfsMethod.AutoSize = true;
             this.cbAltHalfsMethod.Enabled = false;
-            this.cbAltHalfsMethod.Location = new System.Drawing.Point(7, 62);
-            this.cbAltHalfsMethod.Margin = new System.Windows.Forms.Padding(4);
+            this.cbAltHalfsMethod.Location = new System.Drawing.Point(14, 120);
+            this.cbAltHalfsMethod.Margin = new System.Windows.Forms.Padding(8, 8, 8, 8);
             this.cbAltHalfsMethod.Name = "cbAltHalfsMethod";
-            this.cbAltHalfsMethod.Size = new System.Drawing.Size(124, 21);
+            this.cbAltHalfsMethod.Size = new System.Drawing.Size(242, 36);
             this.cbAltHalfsMethod.TabIndex = 73;
             this.cbAltHalfsMethod.Text = "Старый метод";
             this.cbAltHalfsMethod.UseVisualStyleBackColor = true;
@@ -392,33 +413,24 @@
             // btnReadHalfs
             // 
             this.btnReadHalfs.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnReadHalfs.Location = new System.Drawing.Point(232, 55);
-            this.btnReadHalfs.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnReadHalfs.Location = new System.Drawing.Point(464, 107);
+            this.btnReadHalfs.Margin = new System.Windows.Forms.Padding(6, 4, 6, 4);
             this.btnReadHalfs.Name = "btnReadHalfs";
-            this.btnReadHalfs.Size = new System.Drawing.Size(72, 28);
+            this.btnReadHalfs.Size = new System.Drawing.Size(144, 54);
             this.btnReadHalfs.TabIndex = 72;
             this.btnReadHalfs.Text = "ПЧ";
             this.toolTip1.SetToolTip(this.btnReadHalfs, "Чтение получасовых значений");
             this.btnReadHalfs.UseVisualStyleBackColor = true;
             this.btnReadHalfs.Click += new System.EventHandler(this.btnReadHalfs_Click);
             // 
-            // cbIgnoreOLC
-            // 
-            this.cbIgnoreOLC.AutoSize = true;
-            this.cbIgnoreOLC.Location = new System.Drawing.Point(162, 41);
-            this.cbIgnoreOLC.Name = "cbIgnoreOLC";
-            this.cbIgnoreOLC.Size = new System.Drawing.Size(164, 21);
-            this.cbIgnoreOLC.TabIndex = 53;
-            this.cbIgnoreOLC.Text = "Не открывать канал";
-            this.cbIgnoreOLC.UseVisualStyleBackColor = true;
-            // 
             // ctlMeters
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(16F, 31F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.groupBox1);
+            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.Name = "ctlMeters";
-            this.Size = new System.Drawing.Size(922, 268);
+            this.Size = new System.Drawing.Size(1844, 519);
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pbPreloader)).EndInit();
             this.panelMain.ResumeLayout(false);

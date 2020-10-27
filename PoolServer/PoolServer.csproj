@@ -87,8 +87,9 @@
     <Reference Include="Npgsql.Provider">
       <HintPath>dll\Npgsql.Provider.dll</HintPath>
     </Reference>
-    <Reference Include="PulsarDriver">
-      <HintPath>..\..\testUtils\tu_pulsarm\PulsarDriver\bin\Debug\PulsarDriver.dll</HintPath>
+    <Reference Include="PulsarDriver, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\prizmer_test\PrizmerTest\bin\Debug\PulsarDriver.dll</HintPath>
     </Reference>
     <Reference Include="SETDriver">
       <HintPath>..\..\testUtils\tu_set\SetDriver\bin\Debug\SETDriver.dll</HintPath>

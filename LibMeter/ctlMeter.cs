@@ -228,7 +228,14 @@ namespace Drivers.LibMeter
 
             string pass = tbMeterPassword.Text;
 
-            _meter.Init(addr, pass, _vp);
+            try
+            {
+                _meter.Init(addr, pass, _vp);
+            } catch (Exception e)
+            {
+                appendToLog(e.Message);
+            }
+  
 
             return true;
         }
@@ -522,6 +529,11 @@ namespace Drivers.LibMeter
         }
 
         #endregion
+
+        private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
+        }
     }
 
     public struct CtlSettings
