@@ -268,7 +268,10 @@ namespace PollingLibraries.LibPorts
             string tmpValStr = "";
             try
             {
-                tmpValStr = loadedAppSettings.GetValues("tcpPortLiveMinutes")[0];
+                if (loadedAppSettings.GetValues("tcpPortLiveMinutes") != null)
+                    tmpValStr = loadedAppSettings.GetValues("tcpPortLiveMinutes")[0];
+                else
+                    return false;
             }
             catch (Exception ex)
             {

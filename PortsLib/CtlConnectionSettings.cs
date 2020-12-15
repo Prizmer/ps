@@ -13,6 +13,7 @@ using System.Drawing;
 using System.IO.Ports;
 using PollingLibraries.LibLogger;
 using PollingLibraries.LibPorts;
+using System.IO;
 
 
 namespace PollingLibraries.LibPorts
@@ -42,7 +43,7 @@ namespace PollingLibraries.LibPorts
         {
             refreshSerialPortComboBox();
             updateComPortSettingFromConfig(ref this._comSettings);
-
+            updateTCPSettings();
 
             t1.Interval = 3000;
             t1.Tick += (object ts, EventArgs te) =>
@@ -51,7 +52,6 @@ namespace PollingLibraries.LibPorts
                 t1.Stop();
             };
             updateStatus("OK");
-
         }
 
         private void updateStatus(string msg, bool error = false)
@@ -137,6 +137,23 @@ namespace PollingLibraries.LibPorts
                 tbComConfig.Text = "Ошибка";
                 logger.LogError("Во время чтения параметров из файла конфигурации произошла ошибка: " + ex.Message.ToString());
             }
+
+        }
+
+        private void updateTCPSettings()
+        {
+            string fileName = AppDomain.CurrentDomain.BaseDirectory + "tcpconfig.txt";
+            if (File.Exists(fileName))
+            {
+                try
+                {
+                    string ipConfig = File.ReadAllText(fileName).Trim();
+                    string[] ipParts = ipConfig.Split(':');
+                    textBoxIp.Text = ipParts[0];
+                    textBoxPort.Text = ipParts[1];
+                } catch (Exception ex) {}
+            }
+
 
         }
         private bool updateComPortSettingFromGUI(ref ComPortSettings comPortSettings)

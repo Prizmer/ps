@@ -29,7 +29,9 @@ using Drivers.Karat30XDriver;
 using Drivers.KaratDanfosDriver;
 using Drivers.Mercury200Driver;
 using Drivers.SonoSelectDanfosDriver;
+using Drivers.TEM106Driver;
 using System.Text.RegularExpressions;
+using Drivers.STKWaterDriver;
 
 namespace Prizmer.PoolServer
 {
@@ -735,8 +737,10 @@ namespace Prizmer.PoolServer
                 {
                     case "pulsar10": meter = new pulsar10(); break;
                     case "pulsar16": meter = new pulsar16(); break;
-                    case "tem4": meter = new tem104(); break;
-                    case "tem106": meter = new tem106(); break;
+                        // TODO: на время отладки
+                        //case "tem4": meter = new tem104(); break;
+                    case "tem106": meter = new TEM106Driver(); break;
+                    case "tem4": meter = new TEM106Driver(); break;
                     case "set4tm_03": meter = new SET4tmDriver(); break;
                     case "set4tm": meter = new SET4tmDriver(); break;
                     case "spg76212": meter = new spg76212(); break;
@@ -755,14 +759,15 @@ namespace Prizmer.PoolServer
                     case "sono_danfos": meter = new SonoSelectDanfosDriver(); break;
 
                     case "pulsar_voda": meter = new PulsarDriver(PulsarMeterTypes.voda_v11); break;
-
-                   // case "pulsar_hvs": meter = new PulsarDriver(); break;
-                   // case "pulsar_gvs": meter = new PulsarDriver(); break;
-                   // case "PulsarM": meter = new PulsarDriver(); break;
+   
+                    // case "pulsar_hvs": meter = new PulsarDriver(); break;
+                    // case "pulsar_gvs": meter = new PulsarDriver(); break;
+                    // case "PulsarM": meter = new PulsarDriver(); break;
 
                     case "pulsar_voda_rs485": meter = new PulsarDriver(PulsarMeterTypes.voda_rs485); break;
 
                     case "pulsar_teplo": meter = new PulsarDriver(PulsarMeterTypes.kompaktniy_teplo_v3); break;
+                    case "stk_water": meter = new STKWaterDriver(); break;
 
                 }
 
