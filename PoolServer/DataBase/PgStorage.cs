@@ -438,7 +438,8 @@ namespace Prizmer.PoolServer.DataBase
 
         public Meter[] GetMetersByTcpIPGUIDAndParams(Guid guid_tcpip, int paramType, Guid driverGuid)
         {
-           string query = @"SELECT DISTINCT ON (factory_number_manual) *
+            // запрос коорый испольовался длительное время
+           string query2 = @"SELECT DISTINCT ON (factory_number_manual) *
                     FROM 
                       public.meters, 
                       public.tcpip_settings, 
@@ -457,6 +458,28 @@ namespace Prizmer.PoolServer.DataBase
                       taken_params.guid_meters = meters.guid AND
                       tcpip_settings.guid = '" + guid_tcpip.ToString() + @"' AND
                       types_params.type = "+ paramType + @" AND 
+                      types_meters.guid = '" + driverGuid.ToString() + "';";
+
+            // Запрос от Лены дает больше приборов при некоторых конфигурациях базы
+            string query = @"
+                    select  DISTINCT ON (factory_number_manual) *
+                    FROM 
+                      public.meters, 
+                      public.tcpip_settings, 
+                      public.link_meters_tcpip_settings, 
+                      public.types_meters, 
+                      public.taken_params, 
+                      public.params, 
+                      public.types_params
+                    WHERE 
+                      link_meters_tcpip_settings.guid_meters = meters.guid AND
+                      link_meters_tcpip_settings.guid_tcpip_settings = tcpip_settings.guid AND
+                      meters.guid_types_meters = types_meters.guid AND
+                      taken_params.guid_meters = meters.guid AND
+                      taken_params.guid_params = params.guid AND
+                      params.guid_types_params = types_params.guid AND
+                      tcpip_settings.guid = '" + guid_tcpip.ToString() + @"' AND
+                      types_params.type = " + paramType + @" AND 
                       types_meters.guid = '" + driverGuid.ToString() + "';";
 
             loggerStorage.LogInfo("GetMetersByTcpIPGUIDAndParams:q=" + query);
