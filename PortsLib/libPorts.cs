@@ -344,7 +344,7 @@ namespace PollingLibraries.LibPorts
 
             var host = Dns.GetHostEntry(Dns.GetHostName());
             string[] remoteIpGroups = remoteAddrWithoutPort.Split('.');
-            string ipStart = "", ipStart2 = "";
+            string ipStart = "", ipStart2 = "", ipStart3 = "";
             string infoAvailiablePorts = "";
 
 
@@ -361,8 +361,9 @@ namespace PollingLibraries.LibPorts
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                 {
                     // возьмем сеть и подсеть у целевого адреса и выберем доступный
-                    if (remoteIpGroups.Length > 1)
+                    if (remoteIpGroups.Length > 2)
                     {
+                        ipStart3 = remoteIpGroups[0] + "." + remoteIpGroups[1] + "." + remoteIpGroups[2];
                         ipStart = remoteIpGroups[0] + "." + remoteIpGroups[1];
                         ipStart2 = remoteIpGroups[0];
                     } else
@@ -371,7 +372,12 @@ namespace PollingLibraries.LibPorts
                         break;
                     }
 
-                    if (ip.ToString().StartsWith(ipStart))
+                    if (ip.ToString().StartsWith(ipStart3))
+                    {
+                        resultLocalIp = ip.ToString();
+                        break;
+                    }
+                    else if (ip.ToString().StartsWith(ipStart))
                     {
                         resultLocalIp = ip.ToString();
                         break;
