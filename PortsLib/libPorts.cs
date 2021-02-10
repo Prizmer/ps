@@ -342,49 +342,58 @@ namespace PollingLibraries.LibPorts
         {
             string resultLocalIp = "";
 
+            if (loadedAppSettings.GetValues("hardCodeLocalIp") != null &&
+                loadedAppSettings.GetValues("localEndPointIp") != null)
+            {
+                if (loadedAppSettings.GetValues("hardCodeLocalIp")[0] == "true")
+                {
+                    resultLocalIp = loadedAppSettings.GetValues("localEndPointIp")[0];
+                }
+            }
+
+
             var host = Dns.GetHostEntry(Dns.GetHostName());
             string[] remoteIpGroups = remoteAddrWithoutPort.Split('.');
             string ipStart = "", ipStart2 = "", ipStart3 = "";
             string infoAvailiablePorts = "";
 
-
-            foreach (var ip in host.AddressList)
+            // если не хардкод
+            if (resultLocalIp == "")
             {
-                infoAvailiablePorts += ip.ToString() + "; ";
-            }
 
-
-            for (int idx = 0; idx < host.AddressList.Length; idx++)
-            {
-                var ip = host.AddressList[idx];
-
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                foreach (var ip in host.AddressList)
                 {
-                    // возьмем сеть и подсеть у целевого адреса и выберем доступный
-                    if (remoteIpGroups.Length > 2)
-                    {
-                        ipStart3 = remoteIpGroups[0] + "." + remoteIpGroups[1] + "." + remoteIpGroups[2];
-                        ipStart = remoteIpGroups[0] + "." + remoteIpGroups[1];
-                        ipStart2 = remoteIpGroups[0];
-                    } else
-                    {
-                        WriteToLog("GetLocalEndPointIpByRemote: проверьте ip адрес удаленного узла: " + remoteAddrWithoutPort.ToString());
-                        break;
-                    }
+                    infoAvailiablePorts += ip.ToString() + "; ";
+                }
 
-                    if (ip.ToString().StartsWith(ipStart3))
+
+                for (int idx = 0; idx < host.AddressList.Length; idx++)
+                {
+                    var ip = host.AddressList[idx];
+
+                    if (ip.AddressFamily == AddressFamily.InterNetwork)
                     {
-                        resultLocalIp = ip.ToString();
-                        break;
-                    }
-                    else if (ip.ToString().StartsWith(ipStart))
-                    {
-                        resultLocalIp = ip.ToString();
-                        break;
-                    }
-                    else if (ip.ToString().StartsWith(ipStart2))
-                    {
-                        resultLocalIp = ip.ToString();
+                        // возьмем сеть и подсеть у целевого адреса и выберем доступный
+                        if (remoteIpGroups.Length > 1)
+                        {
+                            ipStart = remoteIpGroups[0] + "." + remoteIpGroups[1];
+                            ipStart2 = remoteIpGroups[0];
+                        }
+                        else
+                        {
+                            WriteToLog("GetLocalEndPointIpByRemote: проверьте ip адрес удаленного узла: " + remoteAddrWithoutPort.ToString());
+                            break;
+                        }
+
+                        if (ip.ToString().StartsWith(ipStart))
+                        {
+                            resultLocalIp = ip.ToString();
+                            break;
+                        }
+                        else if (ip.ToString().StartsWith(ipStart2))
+                        {
+                            resultLocalIp = ip.ToString();
+                        }
                     }
                 }
             }
