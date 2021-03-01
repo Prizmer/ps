@@ -32,6 +32,7 @@ using Drivers.SonoSelectDanfosDriver;
 using Drivers.TEM106Driver;
 using System.Text.RegularExpressions;
 using Drivers.STKWaterDriver;
+using Drivers.STKHeatDriver;
 
 namespace Prizmer.PoolServer
 {
@@ -768,6 +769,7 @@ namespace Prizmer.PoolServer
 
                     case "pulsar_teplo": meter = new PulsarDriver(PulsarMeterTypes.kompaktniy_teplo_v3); break;
                     case "stk_water": meter = new STKWaterDriver(); break;
+                    case "stk_heat": meter = new STKHeatDriver(); break;
 
                 }
 

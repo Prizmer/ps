@@ -69,6 +69,10 @@
     <Reference Include="KaratDanfosDriver">
       <HintPath>..\..\testUtils\tu_karatdanfos\Mercury23XDriver\bin\Debug\KaratDanfosDriver.dll</HintPath>
     </Reference>
+    <Reference Include="LibCRC, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\calc_crc\LibCRC\bin\Debug\LibCRC.dll</HintPath>
+    </Reference>
     <Reference Include="LibMBus">
       <HintPath>..\..\testUtils\tu_set\SonoSelectDanfosDriver\bin\Debug\LibMBus.dll</HintPath>
     </Reference>
@@ -96,6 +100,9 @@
     </Reference>
     <Reference Include="SonoSelectDanfosDriver">
       <HintPath>..\..\testUtils\tu_set\SonoSelectDanfosDriver\bin\Debug\SonoSelectDanfosDriver.dll</HintPath>
+    </Reference>
+    <Reference Include="STKHeatDriver">
+      <HintPath>..\..\prizmer_test\STKHeatDriver\bin\Debug\STKHeatDriver.dll</HintPath>
     </Reference>
     <Reference Include="STKWaterDriver">
       <HintPath>..\..\prizmer_test\PrizmerTest\bin\Debug\STKWaterDriver.dll</HintPath>
