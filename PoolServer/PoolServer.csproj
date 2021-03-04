@@ -73,8 +73,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\calc_crc\LibCRC\bin\Debug\LibCRC.dll</HintPath>
     </Reference>
-    <Reference Include="LibMBus">
-      <HintPath>..\..\testUtils\tu_set\SonoSelectDanfosDriver\bin\Debug\LibMBus.dll</HintPath>
+    <Reference Include="LibMBus, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\prizmer_test\LibMBus\bin\Debug\LibMBus.dll</HintPath>
     </Reference>
     <Reference Include="Mercury200Driver">
       <HintPath>..\..\testUtils\tu_set\Mercury200Driver\bin\Debug\Mercury200Driver.dll</HintPath>
